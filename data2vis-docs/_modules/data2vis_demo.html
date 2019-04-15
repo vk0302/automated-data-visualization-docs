@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>data2vis_demo &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for data2vis_demo</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: data2vis_demo.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2019\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    Main file to:\n</span>
+<span class="sd">        - host server\n</span>
+<span class="sd">        - load trained model\n</span>
+<span class="sd">        - wait for queries\n</span>
+<span class="sd">        - run inference queries\n</span>
+<span class="sd">        - translate vega-lite specs to highcharts\n</span>
+<span class="sd">        - return generated specifications\n</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#! /usr/bin/env python</span>
+<span class="c1"># C</span>
+
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pydoc</span> <span class="kn">import</span> <span class="n">locate</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">string_types</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">data_utils</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">gfile</span>
+<span class="kn">from</span> <span class="nn">flask_cors</span> <span class="kn">import</span> <span class="n">CORS</span><span class="p">,</span> <span class="n">cross_origin</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">hc_parser</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">_maybe_load_yaml</span><span class="p">,</span> <span class="n">_deep_merge_dict</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">input_pipeline</span>
+<span class="kn">from</span> <span class="nn">seq2seq.inference</span> <span class="kn">import</span> <span class="n">create_inference_graph</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">training_utils</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">json.decoder</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">JSONDecodeError</span> <span class="o">=</span> <span class="ne">ValueError</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,)</span>
+<span class="n">cors</span> <span class="o">=</span> <span class="n">CORS</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;CORS_HEADERS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Content-Type&#39;</span>
+
+<div class="viewcode-block" id="ensure_str"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.ensure_str">[docs]</a><span class="k">def</span> <span class="nf">ensure_str</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Convert input string to utf-8 encoded string</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (string): Input string</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: s - utf-8 encoded string</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+<span class="k">def</span> <span class="nf">_handle_attention</span><span class="p">(</span><span class="n">attention_scores</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Callback function to save the attention scores of inference tasks</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        attention_scores (seq2seq object): Attention scores of inference task</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; Saved attention scores&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_save_prediction_to_dict</span><span class="p">(</span><span class="n">output_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Callback function to create a global variable of the output string generated by the inference tasks</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output_string (string): The output string generated by the inference task using the trained model</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">decoded_string</span>
+    <span class="n">decoded_string</span> <span class="o">=</span> <span class="n">output_string</span>
+
+<span class="c1"># Function to run inference.</span>
+<div class="viewcode-block" id="run_inference"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.run_inference">[docs]</a><span class="k">def</span> <span class="nf">run_inference</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Runs the inference task using the latest saved checkpoint of the model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: decoded_string - The output string generated by the inference task using the trained model</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">()</span>
+        <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">loaded_checkpoint_path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+            <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">latest_checkpoint</span><span class="p">(</span><span class="n">model_dir_input</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">session_init_op</span><span class="p">(</span><span class="n">_scaffold</span><span class="p">,</span> <span class="n">sess</span><span class="p">):</span>
+            <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Restored model from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span>
+
+        <span class="n">scaffold</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Scaffold</span><span class="p">(</span><span class="n">init_fn</span><span class="o">=</span><span class="n">session_init_op</span><span class="p">)</span>
+        <span class="n">session_creator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">ChiefSessionCreator</span><span class="p">(</span><span class="n">scaffold</span><span class="o">=</span><span class="n">scaffold</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">MonitoredSession</span><span class="p">(</span>
+                <span class="n">session_creator</span><span class="o">=</span><span class="n">session_creator</span><span class="p">,</span> <span class="n">hooks</span><span class="o">=</span><span class="n">hooks</span><span class="p">)</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+            <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([])</span>
+
+        <span class="k">return</span> <span class="n">decoded_string</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="hello"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.hello">[docs]</a><span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Renders the frontend application</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Flask object: Rendered frontend application</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/testdata&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="testdata"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.testdata">[docs]</a><span class="k">def</span> <span class="nf">testdata</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Loads a random test data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: JSONified input data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read csv and return in the same format as below</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data_utils</span><span class="o">.</span><span class="n">load_test_dataset</span><span class="p">())</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/parsedata&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="parsedata"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.parsedata">[docs]</a><span class="k">def</span> <span class="nf">parsedata</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Parses the input data uploaded</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: JSONified input data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data_utils</span><span class="o">.</span><span class="n">parse_csv</span><span class="p">(</span><span class="n">input_data</span><span class="p">))</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/inference&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="inference"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.inference">[docs]</a><span class="k">def</span> <span class="nf">inference</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Runs the inference task on the input data uploaded</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: JSONified inference output (Vega-lite specifications) for the frontend</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+
+    <span class="c1">#global generated_spec, sourcedata</span>
+
+    <span class="c1"># Catch bad JSONDecodeError</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">source_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;sourcedata&quot;</span><span class="p">]))</span>
+    <span class="k">except</span> <span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">response_payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Bad JSON: Unable to decode source JSON.  &quot;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response_payload</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">response_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Empty JSON!!!!.  &quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response_payload</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;input_data_json_file.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">handle</span><span class="p">)</span>
+
+    <span class="c1"># Perform preprocessing - forward normalization on first data sample</span>
+    <span class="n">f_names</span> <span class="o">=</span> <span class="n">data_utils</span><span class="o">.</span><span class="n">generate_field_types</span><span class="p">(</span><span class="n">source_data</span><span class="p">)</span>
+    <span class="n">fnorm_result</span> <span class="o">=</span> <span class="n">data_utils</span><span class="o">.</span><span class="n">forward_norm</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">,</span>
+                                           <span class="n">f_names</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">fnorm_result</span><span class="p">):</span>
+        <span class="n">response_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;JSON decode error  &quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response_payload</span><span class="p">)</span>
+
+    <span class="n">run_inference</span><span class="p">()</span>
+
+    <span class="c1"># Perform post processing - backward normalization</span>
+    <span class="n">decoded_post_array</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">decoded_string</span><span class="p">:</span>
+        <span class="n">decoded_post</span> <span class="o">=</span> <span class="n">data_utils</span><span class="o">.</span><span class="n">backward_norm</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">f_names</span><span class="p">)</span>
+        <span class="n">decoded_post_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoded_post</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;vega_spec_file.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">decoded_post_array</span><span class="p">,</span> <span class="n">handle</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vega_spec</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">decoded_post_array</span><span class="p">)</span>
+        <span class="n">response_payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;vegaspec&quot;</span><span class="p">:</span> <span class="n">vega_spec</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">source_data</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">response_payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Model did not produce a valid vegalite JSON&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vegaspec&quot;</span><span class="p">:</span> <span class="n">decoded_string</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response_payload</span><span class="p">)</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/translate&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="translate"><a class="viewcode-back" href="../data2vis_demo.html#data2vis_demo.translate">[docs]</a><span class="k">def</span> <span class="nf">translate</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Translates the generated Vega-lite specifications to Highcharts</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: JSONified translated output (Highcharts specifications) for the frontend</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;input_data_json_file.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">sourcedata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;vega_spec_file.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">generated_spec</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="n">hc_specs_array</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">spec_to_decode</span> <span class="ow">in</span> <span class="n">generated_spec</span><span class="p">:</span>
+        <span class="c1">#spec_to_decode = json.dumps(row)</span>
+        <span class="n">hc_specs_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hc_parser</span><span class="o">.</span><span class="n">convert_vl_to_hc</span><span class="p">(</span><span class="n">spec_to_decode</span><span class="p">,</span> <span class="n">sourcedata</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">hc_specs_array</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">PARSER</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Generates toy datasets.&quot;</span><span class="p">)</span>
+    <span class="n">PARSER</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--port&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">5016</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specify port number to run demo&quot;</span><span class="p">)</span>
+    <span class="n">PARSER</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--dump_attention&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Dump attention to file&quot;</span><span class="p">)</span>
+    <span class="n">PARSER</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--model_dir&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;models/nmt_bi_1&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specify which directory contains your trained model.&quot;</span><span class="p">)</span>
+    <span class="n">PARSER</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--beam_width&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Beam width&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">ARGS</span> <span class="o">=</span> <span class="n">PARSER</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">destination_file</span> <span class="o">=</span> <span class="s2">&quot;test.txt&quot;</span>
+    <span class="c1"># Setup Input parameters</span>
+    <span class="n">input_pipeline_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;ParallelTextInputPipeline&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;source_delimiter&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;target_delimiter&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;source_files&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">destination_file</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="n">model_dir_input</span> <span class="o">=</span> <span class="n">ARGS</span><span class="o">.</span><span class="n">model_dir</span>
+
+    <span class="n">input_task_list</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;DecodeText&#39;</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;delimiter&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}}]</span>
+
+    <span class="n">dump_attention_task</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;DumpAttention&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;dump_plots&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s1">&#39;output_dir&#39;</span><span class="p">:</span> <span class="s2">&quot;attention_plot&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1"># add dump attention task if we have only a single result.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ARGS</span><span class="o">.</span><span class="n">beam_width</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ARGS</span><span class="o">.</span><span class="n">dump_attention</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">input_task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dump_attention_task</span><span class="p">)</span>
+
+    <span class="c1">#  {&#39;class&#39;: &#39;DumpBeams&#39;, &#39;params&#39;: {&#39;file&#39;: [&#39;out.npz&#39;]}}]</span>
+    <span class="n">model_params</span> <span class="o">=</span> <span class="s2">&quot;{&#39;inference.beam_search.beam_width&#39;: 5}&quot;</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">loaded_checkpoint_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">session_creator</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">hooks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">decoded_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="n">fl_tasks</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">input_task_list</span><span class="p">))</span>
+    <span class="n">fl_input_pipeline</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">input_pipeline_dict</span><span class="p">))</span>
+
+    <span class="c1"># Load saved training options</span>
+    <span class="n">train_options</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">TrainOptions</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_dir_input</span><span class="p">)</span>
+
+    <span class="c1"># Create the model</span>
+    <span class="n">model_cls</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="n">train_options</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span> <span class="ow">or</span> \
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span>
+    <span class="n">model_params</span> <span class="o">=</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_params</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ARGS</span><span class="o">.</span><span class="n">beam_width</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ARGS</span><span class="o">.</span><span class="n">beam_width</span>
+    <span class="n">model_params</span> <span class="o">=</span> <span class="n">_deep_merge_dict</span><span class="p">(</span><span class="n">model_params</span><span class="p">,</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">model_params</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model_cls</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">model_params</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;========model params ==========&quot;</span><span class="p">,</span> <span class="n">model_params</span><span class="p">)</span>
+
+    <span class="c1"># Load inference tasks</span>
+    <span class="k">for</span> <span class="n">tdict</span> <span class="ow">in</span> <span class="n">fl_tasks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;params&quot;</span> <span class="ow">in</span> <span class="n">tdict</span><span class="p">:</span>
+            <span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">task_cls</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]))</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="s2">&quot;DecodeText&quot;</span><span class="p">):</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">task_cls</span><span class="p">(</span>
+                <span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">],</span> <span class="n">callback_func</span><span class="o">=</span><span class="n">_save_prediction_to_dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="s2">&quot;DumpAttention&quot;</span><span class="p">):</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">task_cls</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">],</span> <span class="n">callback_func</span><span class="o">=</span><span class="n">_handle_attention</span><span class="p">)</span>
+
+    <span class="n">hooks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+    <span class="n">input_pipeline_infer</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">make_input_pipeline_from_def</span><span class="p">(</span>
+        <span class="n">fl_input_pipeline</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create the graph used for inference</span>
+    <span class="n">predictions</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_inference_graph</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">input_pipeline</span><span class="o">=</span><span class="n">input_pipeline_infer</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Starting webserver: &quot;</span><span class="p">,</span> <span class="n">ARGS</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;APPLICATION_ROOT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;static&quot;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">ARGS</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">threaded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

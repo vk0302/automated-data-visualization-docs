@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.configurable">seq2seq.configurable module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.global_vars">seq2seq.global_vars module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.graph_module">seq2seq.graph_module module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.graph_utils">seq2seq.graph_utils module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.losses">seq2seq.losses module</a></li>
+<li><a class="reference internal" href="#module-seq2seq">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-package">
+<h1>seq2seq package<a class="headerlink" href="#seq2seq-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.contrib.html">seq2seq.contrib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.contrib.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="seq2seq.contrib.seq2seq.html">seq2seq.contrib.seq2seq package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="seq2seq.contrib.seq2seq.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="seq2seq.contrib.seq2seq.html#module-seq2seq.contrib.seq2seq.decoder">seq2seq.contrib.seq2seq.decoder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="seq2seq.contrib.seq2seq.html#module-seq2seq.contrib.seq2seq.helper">seq2seq.contrib.seq2seq.helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="seq2seq.contrib.seq2seq.html#module-seq2seq.contrib.seq2seq">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.contrib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.contrib.html#module-seq2seq.contrib.experiment">seq2seq.contrib.experiment module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.contrib.html#module-seq2seq.contrib.rnn_cell">seq2seq.contrib.rnn_cell module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.contrib.html#module-seq2seq.contrib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.data.html">seq2seq.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.input_pipeline">seq2seq.data.input_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.parallel_data_provider">seq2seq.data.parallel_data_provider module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.postproc">seq2seq.data.postproc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.sequence_example_decoder">seq2seq.data.sequence_example_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.split_tokens_decoder">seq2seq.data.split_tokens_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data.vocab">seq2seq.data.vocab module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.data.html#module-seq2seq.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.decoders.html">seq2seq.decoders package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders.attention">seq2seq.decoders.attention module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders.attention_decoder">seq2seq.decoders.attention_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders.basic_decoder">seq2seq.decoders.basic_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders.beam_search_decoder">seq2seq.decoders.beam_search_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders.rnn_decoder">seq2seq.decoders.rnn_decoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.decoders.html#module-seq2seq.decoders">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.encoders.html">seq2seq.encoders package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders.conv_encoder">seq2seq.encoders.conv_encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders.encoder">seq2seq.encoders.encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders.image_encoder">seq2seq.encoders.image_encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders.pooling_encoder">seq2seq.encoders.pooling_encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders.rnn_encoder">seq2seq.encoders.rnn_encoder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.encoders.html#module-seq2seq.encoders">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.inference.html">seq2seq.inference package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.inference.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.inference.html#module-seq2seq.inference.beam_search">seq2seq.inference.beam_search module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.inference.html#module-seq2seq.inference.inference">seq2seq.inference.inference module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.inference.html#module-seq2seq.inference">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.metrics.html">seq2seq.metrics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.metrics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.metrics.html#module-seq2seq.metrics.bleu">seq2seq.metrics.bleu module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.metrics.html#module-seq2seq.metrics.metric_specs">seq2seq.metrics.metric_specs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.metrics.html#module-seq2seq.metrics.rouge">seq2seq.metrics.rouge module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.metrics.html#module-seq2seq.metrics">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.models.html">seq2seq.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.attention_seq2seq">seq2seq.models.attention_seq2seq module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.basic_seq2seq">seq2seq.models.basic_seq2seq module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.bridges">seq2seq.models.bridges module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.image2seq">seq2seq.models.image2seq module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.model_base">seq2seq.models.model_base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models.seq2seq_model">seq2seq.models.seq2seq_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.models.html#module-seq2seq.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.tasks.html">seq2seq.tasks package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.decode_text">seq2seq.tasks.decode_text module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.decode_text_og">seq2seq.tasks.decode_text_og module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.dump_attention">seq2seq.tasks.dump_attention module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.dump_attention_og">seq2seq.tasks.dump_attention_og module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.dump_beams">seq2seq.tasks.dump_beams module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks.inference_task">seq2seq.tasks.inference_task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.tasks.html#module-seq2seq.tasks">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.test.html">seq2seq.test package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.attention_test">seq2seq.test.attention_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.beam_search_test">seq2seq.test.beam_search_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.bridges_test">seq2seq.test.bridges_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.conv_encoder_test">seq2seq.test.conv_encoder_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.data_test">seq2seq.test.data_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.decoder_test">seq2seq.test.decoder_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.example_config_test">seq2seq.test.example_config_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.hooks_test">seq2seq.test.hooks_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.input_pipeline_test">seq2seq.test.input_pipeline_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.losses_test">seq2seq.test.losses_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.metrics_test">seq2seq.test.metrics_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.models_test">seq2seq.test.models_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.pipeline_test">seq2seq.test.pipeline_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.pooling_encoder_test">seq2seq.test.pooling_encoder_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.rnn_cell_test">seq2seq.test.rnn_cell_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.rnn_encoder_test">seq2seq.test.rnn_encoder_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.train_utils_test">seq2seq.test.train_utils_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.utils">seq2seq.test.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test.vocab_test">seq2seq.test.vocab_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.test.html#module-seq2seq.test">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seq2seq.training.html">seq2seq.training package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.training.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.training.html#module-seq2seq.training.hooks">seq2seq.training.hooks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.training.html#module-seq2seq.training.utils">seq2seq.training.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seq2seq.training.html#module-seq2seq.training">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.configurable">
+<span id="seq2seq-configurable-module"></span><h2>seq2seq.configurable module<a class="headerlink" href="#module-seq2seq.configurable" title="Permalink to this headline">¶</a></h2>
+<p>Abstract base class for objects that are configurable using
+a parameters dictionary.</p>
+<dl class="class">
+<dt id="seq2seq.configurable.Configurable">
+<em class="property">class </em><code class="descclassname">seq2seq.configurable.</code><code class="descname">Configurable</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/configurable.html#Configurable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.configurable.Configurable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Interface for all classes that are configurable
+via a parameters dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>params</strong> &#8211; A dictionary of parameters.</li>
+<li><strong>mode</strong> &#8211; A value in tf.contrib.learn.ModeKeys</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.configurable.Configurable.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/configurable.html#Configurable.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.configurable.Configurable.default_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of default parameters. The default parameters
+are used to define the expected type of passed parameters. Missing
+parameter values are replaced with the defaults returned by this method.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.configurable.Configurable.mode">
+<code class="descname">mode</code><a class="headerlink" href="#seq2seq.configurable.Configurable.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a value in tf.contrib.learn.ModeKeys.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.configurable.Configurable.params">
+<code class="descname">params</code><a class="headerlink" href="#seq2seq.configurable.Configurable.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of parsed parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.configurable.abstractstaticmethod">
+<em class="property">class </em><code class="descclassname">seq2seq.configurable.</code><code class="descname">abstractstaticmethod</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/configurable.html#abstractstaticmethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.configurable.abstractstaticmethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">staticmethod</span></code></p>
+<p>Decorates a method as abstract and static</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.global_vars">
+<span id="seq2seq-global-vars-module"></span><h2>seq2seq.global_vars module<a class="headerlink" href="#module-seq2seq.global_vars" title="Permalink to this headline">¶</a></h2>
+<p>Collection of global variables.</p>
+</div>
+<div class="section" id="module-seq2seq.graph_module">
+<span id="seq2seq-graph-module-module"></span><h2>seq2seq.graph_module module<a class="headerlink" href="#module-seq2seq.graph_module" title="Permalink to this headline">¶</a></h2>
+<p>All graph components that create Variables should inherit from this
+base class defined in this file.</p>
+<dl class="class">
+<dt id="seq2seq.graph_module.GraphModule">
+<em class="property">class </em><code class="descclassname">seq2seq.graph_module.</code><code class="descname">GraphModule</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/graph_module.html#GraphModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.graph_module.GraphModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Convenience class that makes it easy to share variables.
+Each insance of this class creates its own set of variables, but
+each subsequent execution of an instance will re-use its variables.</p>
+<p>Graph components that define variables should inherit from this class
+and implement their logic in the <cite>_build</cite> method.</p>
+<dl class="method">
+<dt id="seq2seq.graph_module.GraphModule.variable_scope">
+<code class="descname">variable_scope</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/graph_module.html#GraphModule.variable_scope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.graph_module.GraphModule.variable_scope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the proper variable scope for this module.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.graph_utils">
+<span id="seq2seq-graph-utils-module"></span><h2>seq2seq.graph_utils module<a class="headerlink" href="#module-seq2seq.graph_utils" title="Permalink to this headline">¶</a></h2>
+<p>Miscellaneous utility function.</p>
+<dl class="function">
+<dt id="seq2seq.graph_utils.add_dict_to_collection">
+<code class="descclassname">seq2seq.graph_utils.</code><code class="descname">add_dict_to_collection</code><span class="sig-paren">(</span><em>dict_</em>, <em>collection_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/graph_utils.html#add_dict_to_collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.graph_utils.add_dict_to_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a dictionary to a graph collection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dict</strong> &#8211; A dictionary of string keys to tensor values</li>
+<li><strong>collection_name</strong> &#8211; The name of the collection to add the dictionary to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.graph_utils.get_dict_from_collection">
+<code class="descclassname">seq2seq.graph_utils.</code><code class="descname">get_dict_from_collection</code><span class="sig-paren">(</span><em>collection_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/graph_utils.html#get_dict_from_collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.graph_utils.get_dict_from_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary from a graph collection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>collection_name</strong> &#8211; A collection name to read a dictionary from</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary with string keys and tensor values</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.graph_utils.templatemethod">
+<code class="descclassname">seq2seq.graph_utils.</code><code class="descname">templatemethod</code><span class="sig-paren">(</span><em>name_</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/graph_utils.html#templatemethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.graph_utils.templatemethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>This decorator wraps a method with <cite>tf.make_template</cite>. For example,</p>
+<p>&#64;templatemethod
+def my_method():</p>
+<blockquote>
+<div># Create variables</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.losses">
+<span id="seq2seq-losses-module"></span><h2>seq2seq.losses module<a class="headerlink" href="#module-seq2seq.losses" title="Permalink to this headline">¶</a></h2>
+<p>Operations related to calculating sequence losses.</p>
+<dl class="function">
+<dt id="seq2seq.losses.cross_entropy_sequence_loss">
+<code class="descclassname">seq2seq.losses.</code><code class="descname">cross_entropy_sequence_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>targets</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/losses.html#cross_entropy_sequence_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.losses.cross_entropy_sequence_loss" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Calculates the per-example cross-entropy loss for a sequence of logits and</dt>
+<dd>masks out all losses passed the sequence length.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>logits</strong> &#8211; Logits of shape <cite>[T, B, vocab_size]</cite></li>
+<li><strong>targets</strong> &#8211; Target classes of shape <cite>[T, B]</cite></li>
+<li><strong>sequence_length</strong> &#8211; An int32 tensor of shape <cite>[B]</cite> corresponding
+to the length of each input</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tensor of shape [T, B] that contains the loss per example, per time step.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq" title="Permalink to this headline">¶</a></h2>
+<p>seq2seq library base module</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>deepeye_po_demo module &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/deepeye_po_demo.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-deepeye_po_demo">
+<span id="deepeye-po-demo-module"></span><h1>deepeye_po_demo module<a class="headerlink" href="#module-deepeye_po_demo" title="Permalink to this headline">¶</a></h1>
+<p>Filename: deepeye_po_demo.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2018</p>
+<p>Description:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Webserver to load predictions and serve over http endpoints</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="deepeye_po_demo.allowed_file">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">allowed_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#allowed_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.allowed_file" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Validate input data. Allowed file extensions - &#8221;.txt, .csv&#8221;</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Input file name.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if condition satisfied.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.generate_viz">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">generate_viz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#generate_viz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.generate_viz" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Create Visualizations for input data.</p>
+<p class="last">Target url: 0.0.0.0:/5018/generateviz.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Check if process execution succesful.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/json.html#module-json" title="(in Python v3.7)">json</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.hello">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">hello</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#hello"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.hello" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Render main page at every ping/refresh.</p>
+<p class="last">Target url: 0.0.0.0:5018/</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Rendered Template.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.parse_data">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">parse_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#parse_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.parse_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Parse input data to make it application compatible.</p>
+<p class="last">Target url: 0.0.0.0:/5018/parsedata.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Compatible jsonified data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/json.html#module-json" title="(in Python v3.7)">json</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.path_leaf">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">path_leaf</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#path_leaf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.path_leaf" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Find file traverser cursor location.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Path where all relevant files are situated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Current position of traversing through files in the path.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.serve_hc_viz">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">serve_hc_viz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#serve_hc_viz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.serve_hc_viz" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Serve High-chart Visualizations for input data.</p>
+<p class="last">Target url: 0.0.0.0:/5018/serve_hc_viz.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of high charts for visualization.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deepeye_po_demo.upload_data">
+<code class="descclassname">deepeye_po_demo.</code><code class="descname">upload_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepeye_po_demo.html#upload_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepeye_po_demo.upload_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Upload data for graph generation.</p>
+<p class="last">Target url: 0.0.0.0:/5018/uploaddata.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Redirected to rendered page if upload success.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.encoders package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.encoders package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders.conv_encoder">seq2seq.encoders.conv_encoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders.encoder">seq2seq.encoders.encoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders.image_encoder">seq2seq.encoders.image_encoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders.pooling_encoder">seq2seq.encoders.pooling_encoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders.rnn_encoder">seq2seq.encoders.rnn_encoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.encoders">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.encoders.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-encoders-package">
+<h1>seq2seq.encoders package<a class="headerlink" href="#seq2seq-encoders-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.encoders.conv_encoder">
+<span id="seq2seq-encoders-conv-encoder-module"></span><h2>seq2seq.encoders.conv_encoder module<a class="headerlink" href="#module-seq2seq.encoders.conv_encoder" title="Permalink to this headline">¶</a></h2>
+<p>An encoder that pools over embeddings, as described in
+<a class="reference external" href="https://arxiv.org/abs/1611.02344">https://arxiv.org/abs/1611.02344</a>.</p>
+<dl class="class">
+<dt id="seq2seq.encoders.conv_encoder.ConvEncoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.conv_encoder.</code><code class="descname">ConvEncoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='conv_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/conv_encoder.html#ConvEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.conv_encoder.ConvEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>A deep convolutional encoder, as described in
+<a class="reference external" href="https://arxiv.org/abs/1611.02344">https://arxiv.org/abs/1611.02344</a>. The encoder supports optional positions
+embeddings.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">attention_cnn.units: Number of units in <cite>cnn_a</cite>. Same in each layer.
+attention_cnn.kernel_size: Kernel size for <cite>cnn_a</cite>.
+attention_cnn.layers: Number of layers in <cite>cnn_a</cite>.
+embedding_dropout_keep_prob: Dropout keep probability</p>
+<blockquote>
+<div>applied to the embeddings.</div></blockquote>
+<p>output_cnn.units: Number of units in <cite>cnn_c</cite>. Same in each layer.
+output_cnn.kernel_size: Kernel size for <cite>cnn_c</cite>.
+output_cnn.layers: Number of layers in <cite>cnn_c</cite>.
+position_embeddings.enable: If true, add position embeddings to the</p>
+<blockquote>
+<div>inputs before pooling.</div></blockquote>
+<dl class="last docutils">
+<dt>position_embeddings.combiner_fn: Function used to combine the</dt>
+<dd>position embeddings with the inputs. For example, <cite>tensorflow.add</cite>.</dd>
+<dt>position_embeddings.num_positions: Size of the position embedding matrix.</dt>
+<dd>This should be set to the maximum sequence length of the inputs.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.conv_encoder.ConvEncoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/conv_encoder.html#ConvEncoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.conv_encoder.ConvEncoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.conv_encoder.ConvEncoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/conv_encoder.html#ConvEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.conv_encoder.ConvEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.encoders.encoder">
+<span id="seq2seq-encoders-encoder-module"></span><h2>seq2seq.encoders.encoder module<a class="headerlink" href="#module-seq2seq.encoders.encoder" title="Permalink to this headline">¶</a></h2>
+<p>Abstract base class for encoders.</p>
+<dl class="class">
+<dt id="seq2seq.encoders.encoder.Encoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.encoder.</code><code class="descname">Encoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/encoder.html#Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.encoder.Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seq2seq.html#seq2seq.graph_module.GraphModule" title="seq2seq.graph_module.GraphModule"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.graph_module.GraphModule</span></code></a>, <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a></p>
+<p>Abstract encoder class. All encoders should inherit from this.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>params</strong> &#8211; A dictionary of hyperparameters for the encoder.</li>
+<li><strong>name</strong> &#8211; A variable scope for the encoder graph.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.encoders.encoder.Encoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/encoder.html#Encoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.encoder.Encoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes an input sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputs</strong> &#8211; The inputs to encode. A float32 tensor of shape [B, T, ...].</li>
+<li><strong>sequence_length</strong> &#8211; The length of each input. An int32 tensor of shape [T].</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An <cite>EncoderOutput</cite> tuple containing the outputs and final state.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.encoders.encoder.EncoderOutput">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.encoder.</code><code class="descname">EncoderOutput</code><span class="sig-paren">(</span><em>outputs</em>, <em>final_state</em>, <em>attention_values</em>, <em>attention_values_length</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="method">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.__getnewargs__">
+<code class="descname">__getnewargs__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.__getnewargs__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self as a plain tuple.  Used by copy and pickle.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.__new__">
+<em class="property">static </em><code class="descname">__new__</code><span class="sig-paren">(</span><em>_cls</em>, <em>outputs</em>, <em>final_state</em>, <em>attention_values</em>, <em>attention_values_length</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new instance of EncoderOutput(outputs, final_state, attention_values, attention_values_length)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a nicely formatted representation string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.attention_values">
+<code class="descname">attention_values</code><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.attention_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.attention_values_length">
+<code class="descname">attention_values_length</code><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.attention_values_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.final_state">
+<code class="descname">final_state</code><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.final_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.encoders.encoder.EncoderOutput.outputs">
+<code class="descname">outputs</code><a class="headerlink" href="#seq2seq.encoders.encoder.EncoderOutput.outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.encoders.image_encoder">
+<span id="seq2seq-encoders-image-encoder-module"></span><h2>seq2seq.encoders.image_encoder module<a class="headerlink" href="#module-seq2seq.encoders.image_encoder" title="Permalink to this headline">¶</a></h2>
+<p>Image encoder classes</p>
+<dl class="class">
+<dt id="seq2seq.encoders.image_encoder.InceptionV3Encoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.image_encoder.</code><code class="descname">InceptionV3Encoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='image_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/image_encoder.html#InceptionV3Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.image_encoder.InceptionV3Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>A unidirectional RNN encoder. Stacking should be performed as
+part of the cell.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><dl class="first last docutils">
+<dt>resize_height: Resize the image to this height before feeding it</dt>
+<dd>into the convolutional network.</dd>
+<dt>resize_width: Resize the image to this width before feeding it</dt>
+<dd>into the convolutional network.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.image_encoder.InceptionV3Encoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/image_encoder.html#InceptionV3Encoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.image_encoder.InceptionV3Encoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.image_encoder.InceptionV3Encoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/image_encoder.html#InceptionV3Encoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.image_encoder.InceptionV3Encoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.encoders.pooling_encoder">
+<span id="seq2seq-encoders-pooling-encoder-module"></span><h2>seq2seq.encoders.pooling_encoder module<a class="headerlink" href="#module-seq2seq.encoders.pooling_encoder" title="Permalink to this headline">¶</a></h2>
+<p>An encoder that pools over embeddings, as described in
+<a class="reference external" href="https://arxiv.org/abs/1611.02344">https://arxiv.org/abs/1611.02344</a>.</p>
+<dl class="class">
+<dt id="seq2seq.encoders.pooling_encoder.PoolingEncoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.pooling_encoder.</code><code class="descname">PoolingEncoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='pooling_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/pooling_encoder.html#PoolingEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.pooling_encoder.PoolingEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>An encoder that pools over embeddings, as described in
+<a class="reference external" href="https://arxiv.org/abs/1611.02344">https://arxiv.org/abs/1611.02344</a>. The encoder supports optional positions
+embeddings and a configurable pooling window.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">dropout_keep_prob: Dropout keep probability applied to the embeddings.
+pooling_fn: The 1-d pooling function to use, e.g.</p>
+<blockquote>
+<div><cite>tensorflow.layers.average_pooling1d</cite>.</div></blockquote>
+<dl class="last docutils">
+<dt>pool_size: The pooling window, passed as <cite>pool_size</cite> to</dt>
+<dd>the pooling function.</dd>
+<dt>strides: The stride during pooling, passed as <cite>strides</cite></dt>
+<dd>the pooling function.</dd>
+<dt>position_embeddings.enable: If true, add position embeddings to the</dt>
+<dd>inputs before pooling.</dd>
+<dt>position_embeddings.combiner_fn: Function used to combine the</dt>
+<dd>position embeddings with the inputs. For example, <cite>tensorflow.add</cite>.</dd>
+<dt>position_embeddings.num_positions: Size of the position embedding matrix.</dt>
+<dd>This should be set to the maximum sequence length of the inputs.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.pooling_encoder.PoolingEncoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/pooling_encoder.html#PoolingEncoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.pooling_encoder.PoolingEncoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.pooling_encoder.PoolingEncoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/pooling_encoder.html#PoolingEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.pooling_encoder.PoolingEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.encoders.pooling_encoder.position_encoding">
+<code class="descclassname">seq2seq.encoders.pooling_encoder.</code><code class="descname">position_encoding</code><span class="sig-paren">(</span><em>sentence_size</em>, <em>embedding_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/pooling_encoder.html#position_encoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.pooling_encoder.position_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position Encoding described in section 4.1 of
+End-To-End Memory Networks (<a class="reference external" href="https://arxiv.org/abs/1503.08895">https://arxiv.org/abs/1503.08895</a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sentence_size</strong> &#8211; length of the sentence</li>
+<li><strong>embedding_size</strong> &#8211; dimensionality of the embeddings</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A numpy array of shape [sentence_size, embedding_size] containing
+the fixed position encodings for each sentence position.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.encoders.rnn_encoder">
+<span id="seq2seq-encoders-rnn-encoder-module"></span><h2>seq2seq.encoders.rnn_encoder module<a class="headerlink" href="#module-seq2seq.encoders.rnn_encoder" title="Permalink to this headline">¶</a></h2>
+<p>Collection of RNN encoders.</p>
+<dl class="class">
+<dt id="seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.rnn_encoder.</code><code class="descname">BidirectionalRNNEncoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='bidi_rnn_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#BidirectionalRNNEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>A bidirectional RNN encoder. Uses the same cell for both the
+forward and backward RNN. Stacking should be performed as part of
+the cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell</strong> &#8211; An instance of tf.contrib.rnn.RNNCell</li>
+<li><strong>name</strong> &#8211; A name for the encoder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#BidirectionalRNNEncoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em>, <em>sequence_length</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#BidirectionalRNNEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.BidirectionalRNNEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.rnn_encoder.</code><code class="descname">StackBidirectionalRNNEncoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='stacked_bidi_rnn_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#StackBidirectionalRNNEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>A stacked bidirectional RNN encoder. Uses the same cell for both the
+forward and backward RNN. Stacking should be performed as part of
+the cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell</strong> &#8211; An instance of tf.contrib.rnn.RNNCell</li>
+<li><strong>name</strong> &#8211; A name for the encoder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#StackBidirectionalRNNEncoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em>, <em>sequence_length</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#StackBidirectionalRNNEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.StackBidirectionalRNNEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder">
+<em class="property">class </em><code class="descclassname">seq2seq.encoders.rnn_encoder.</code><code class="descname">UnidirectionalRNNEncoder</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='forward_rnn_encoder'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#UnidirectionalRNNEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.encoders.encoder.Encoder" title="seq2seq.encoders.encoder.Encoder"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.encoders.encoder.Encoder</span></code></a></p>
+<p>A unidirectional RNN encoder. Stacking should be performed as
+part of the cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell</strong> &#8211; An instance of tf.contrib.rnn.RNNCell</li>
+<li><strong>name</strong> &#8211; A name for the encoder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#UnidirectionalRNNEncoder.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>inputs</em>, <em>sequence_length</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/encoders/rnn_encoder.html#UnidirectionalRNNEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.encoders.rnn_encoder.UnidirectionalRNNEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.encoders">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.encoders" title="Permalink to this headline">¶</a></h2>
+<p>Collection of encoders</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

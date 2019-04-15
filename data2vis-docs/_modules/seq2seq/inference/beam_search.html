@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.inference.beam_search &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.inference.beam_search</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;In-Graph Beam Search Implementation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">nest</span>  <span class="c1"># pylint: disable=E0611</span>
+
+
+<div class="viewcode-block" id="BeamSearchState"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.BeamSearchState">[docs]</a><span class="k">class</span> <span class="nc">BeamSearchState</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BeamSearchState&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;log_probs&quot;</span><span class="p">,</span> <span class="s2">&quot;finished&quot;</span><span class="p">,</span> <span class="s2">&quot;lengths&quot;</span><span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;State for a single step of beam search.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    log_probs: The current log probabilities of all beams</span>
+<span class="sd">    finished: A boolean vector that specifies which beams are finished</span>
+<span class="sd">    lengths: Lengths of all beams</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BeamSearchStepOutput"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.BeamSearchStepOutput">[docs]</a><span class="k">class</span> <span class="nc">BeamSearchStepOutput</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BeamSearchStepOutput&quot;</span><span class="p">,</span>
+               <span class="p">[</span><span class="s2">&quot;scores&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;beam_parent_ids&quot;</span><span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;Outputs for a single step of beam search.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    scores: Score for each beam, a float32 vector</span>
+<span class="sd">    predicted_ids: predictions for this step step, an int32 vector</span>
+<span class="sd">    beam_parent_ids: an int32 vector containing the beam indices of the</span>
+<span class="sd">      continued beams from the previous step</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BeamSearchConfig"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.BeamSearchConfig">[docs]</a><span class="k">class</span> <span class="nc">BeamSearchConfig</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BeamSearchConfig&quot;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;beam_width&quot;</span><span class="p">,</span> <span class="s2">&quot;vocab_size&quot;</span><span class="p">,</span> <span class="s2">&quot;eos_token&quot;</span><span class="p">,</span> <span class="s2">&quot;length_penalty_weight&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;choose_successors_fn&quot;</span>
+    <span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;Configuration object for beam search.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    beam_width: Number of beams to use, an integer</span>
+<span class="sd">    vocab_size: Output vocabulary size</span>
+<span class="sd">    eos_token: The id of the EOS token, used to mark beams as &quot;done&quot;</span>
+<span class="sd">    length_penalty_weight: Weight for the length penalty factor. 0.0 disables</span>
+<span class="sd">      the penalty.</span>
+<span class="sd">    choose_successors_fn: A function used to choose beam successors based</span>
+<span class="sd">      on their scores. Maps from (scores, config) =&gt; (chosen scores, chosen_ids)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="gather_tree_py"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.gather_tree_py">[docs]</a><span class="k">def</span> <span class="nf">gather_tree_py</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Gathers path through a tree backwards from the leave nodes. Used</span>
+<span class="sd">  to reconstruct beams given their parents.&quot;&quot;&quot;</span>
+  <span class="n">beam_length</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">num_beams</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  <span class="n">res</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+  <span class="k">for</span> <span class="n">beam_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_beams</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">beam_id</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">beam_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)):</span>
+      <span class="n">res</span><span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="n">beam_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="n">parent</span><span class="p">]</span>
+      <span class="n">parent</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="n">parent</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gather_tree"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.gather_tree">[docs]</a><span class="k">def</span> <span class="nf">gather_tree</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tensor version of gather_tree_py&quot;&quot;&quot;</span>
+  <span class="n">res</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span>
+      <span class="n">func</span><span class="o">=</span><span class="n">gather_tree_py</span><span class="p">,</span> <span class="n">inp</span><span class="o">=</span><span class="p">[</span><span class="n">values</span><span class="p">,</span> <span class="n">parents</span><span class="p">],</span> <span class="n">Tout</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="n">res</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="create_initial_beam_state"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.create_initial_beam_state">[docs]</a><span class="k">def</span> <span class="nf">create_initial_beam_state</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Creates an instance of `BeamState` that can be used on the first</span>
+<span class="sd">  call to `beam_step`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    config: A BeamSearchConfig</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    An instance of `BeamState`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">BeamSearchState</span><span class="p">(</span>
+      <span class="n">log_probs</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">]),</span>
+      <span class="n">finished</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+          <span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
+      <span class="n">lengths</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+          <span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="length_penalty"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.length_penalty">[docs]</a><span class="k">def</span> <span class="nf">length_penalty</span><span class="p">(</span><span class="n">sequence_lengths</span><span class="p">,</span> <span class="n">penalty_factor</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculates the length penalty according to</span>
+<span class="sd">  https://arxiv.org/abs/1609.08144</span>
+
+<span class="sd">   Args:</span>
+<span class="sd">    sequence_lengths: The sequence length of all hypotheses, a tensor</span>
+<span class="sd">      of shape [beam_size, vocab_size].</span>
+<span class="sd">    penalty_factor: A scalar that weights the length penalty.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The length penalty factor, a tensor fo shape [beam_size].</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">div</span><span class="p">((</span><span class="mf">5.</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">sequence_lengths</span><span class="p">))</span><span class="o">**</span><span class="n">penalty_factor</span><span class="p">,</span> <span class="p">(</span><span class="mf">5.</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">)</span>
+                <span class="o">**</span><span class="n">penalty_factor</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hyp_score"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.hyp_score">[docs]</a><span class="k">def</span> <span class="nf">hyp_score</span><span class="p">(</span><span class="n">log_probs</span><span class="p">,</span> <span class="n">sequence_lengths</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculates scores for beam search hypotheses.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Calculate the length penality</span>
+  <span class="n">length_penality_</span> <span class="o">=</span> <span class="n">length_penalty</span><span class="p">(</span>
+      <span class="n">sequence_lengths</span><span class="o">=</span><span class="n">sequence_lengths</span><span class="p">,</span>
+      <span class="n">penalty_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">length_penalty_weight</span><span class="p">)</span>
+
+  <span class="n">score</span> <span class="o">=</span> <span class="n">log_probs</span> <span class="o">/</span> <span class="n">length_penality_</span>
+  <span class="k">return</span> <span class="n">score</span></div>
+
+
+<div class="viewcode-block" id="choose_top_k"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.choose_top_k">[docs]</a><span class="k">def</span> <span class="nf">choose_top_k</span><span class="p">(</span><span class="n">scores_flat</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Chooses the top-k beams as successors.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">next_beam_scores</span><span class="p">,</span> <span class="n">word_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">top_k</span><span class="p">(</span><span class="n">scores_flat</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">next_beam_scores</span><span class="p">,</span> <span class="n">word_indices</span></div>
+
+
+<div class="viewcode-block" id="nest_map"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.nest_map">[docs]</a><span class="k">def</span> <span class="nf">nest_map</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">map_fn</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Applies a function to (possibly nested) tuple of tensors.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">nest</span><span class="o">.</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+    <span class="n">inputs_flat</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">y_flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">map_fn</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">inputs_flat</span><span class="p">]</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">y_flat</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">map_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">outputs</span></div>
+
+
+<div class="viewcode-block" id="mask_probs"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.mask_probs">[docs]</a><span class="k">def</span> <span class="nf">mask_probs</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">eos_token</span><span class="p">,</span> <span class="n">finished</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Masks log probabilities such that finished beams</span>
+<span class="sd">  allocate all probability mass to eos. Unfinished beams remain unchanged.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    probs: Log probabiltiies of shape `[beam_width, vocab_size]`</span>
+<span class="sd">    eos_token: An int32 id corresponding to the EOS token to allocate</span>
+<span class="sd">      probability to</span>
+<span class="sd">    finished: A boolean tensor of shape `[beam_width]` that specifies which</span>
+<span class="sd">      elements in the beam are finished already.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tensor of shape `[beam_width, vocab_size]`, where unfinished beams</span>
+<span class="sd">    stay unchanged and finished beams are replaced with a tensor that has all</span>
+<span class="sd">    probability on the EOS token.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">probs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">finished_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">finished</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="c1"># These examples are not finished and we leave them</span>
+  <span class="n">non_finished_examples</span> <span class="o">=</span> <span class="n">finished_mask</span> <span class="o">*</span> <span class="n">probs</span>
+  <span class="c1"># All finished examples are replaced with a vector that has all</span>
+  <span class="c1"># probability on EOS</span>
+  <span class="n">finished_row</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span>
+      <span class="n">eos_token</span><span class="p">,</span>
+      <span class="n">vocab_size</span><span class="p">,</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+      <span class="n">on_value</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+      <span class="n">off_value</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+  <span class="n">finished_examples</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">finished_mask</span><span class="p">)</span> <span class="o">*</span> <span class="n">finished_row</span>
+  <span class="k">return</span> <span class="n">finished_examples</span> <span class="o">+</span> <span class="n">non_finished_examples</span></div>
+
+
+<div class="viewcode-block" id="beam_search_step"><a class="viewcode-back" href="../../../seq2seq.inference.html#seq2seq.inference.beam_search.beam_search_step">[docs]</a><span class="k">def</span> <span class="nf">beam_search_step</span><span class="p">(</span><span class="n">time_</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">beam_state</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Performs a single step of Beam Search Decoding.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    time_: Beam search time step, should start at 0. At time 0 we assume</span>
+<span class="sd">      that all beams are equal and consider only the first beam for</span>
+<span class="sd">      continuations.</span>
+<span class="sd">    logits: Logits at the current time step. A tensor of shape `[B, vocab_size]`</span>
+<span class="sd">    beam_state: Current state of the beam search. An instance of `BeamState`</span>
+<span class="sd">    config: An instance of `BeamSearchConfig`</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A new beam state.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Calculate the current lengths of the predictions</span>
+  <span class="n">prediction_lengths</span> <span class="o">=</span> <span class="n">beam_state</span><span class="o">.</span><span class="n">lengths</span>
+  <span class="n">previously_finished</span> <span class="o">=</span> <span class="n">beam_state</span><span class="o">.</span><span class="n">finished</span>
+
+  <span class="c1"># Calculate the total log probs for the new hypotheses</span>
+  <span class="c1"># Final Shape: [beam_width, vocab_size]</span>
+  <span class="n">probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+  <span class="n">probs</span> <span class="o">=</span> <span class="n">mask_probs</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">eos_token</span><span class="p">,</span> <span class="n">previously_finished</span><span class="p">)</span>
+  <span class="n">total_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">beam_state</span><span class="o">.</span><span class="n">log_probs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">probs</span>
+
+  <span class="c1"># Calculate the continuation lengths</span>
+  <span class="c1"># We add 1 to all continuations that are not EOS and were not</span>
+  <span class="c1"># finished previously</span>
+  <span class="n">lengths_to_add</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">([</span><span class="n">config</span><span class="o">.</span><span class="n">eos_token</span><span class="p">]</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">,</span>
+                              <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">add_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">previously_finished</span><span class="p">))</span>
+  <span class="n">lengths_to_add</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">add_mask</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lengths_to_add</span>
+  <span class="n">new_prediction_lengths</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">prediction_lengths</span><span class="p">,</span>
+                                          <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">lengths_to_add</span>
+
+  <span class="c1"># Calculate the scores for each beam</span>
+  <span class="n">scores</span> <span class="o">=</span> <span class="n">hyp_score</span><span class="p">(</span>
+      <span class="n">log_probs</span><span class="o">=</span><span class="n">total_probs</span><span class="p">,</span>
+      <span class="n">sequence_lengths</span><span class="o">=</span><span class="n">new_prediction_lengths</span><span class="p">,</span>
+      <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+  <span class="n">scores_flat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+  <span class="c1"># During the first time step we only consider the initial beam</span>
+  <span class="n">scores_flat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">time_</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">scores_flat</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+  <span class="c1"># Pick the next beams according to the specified successors function</span>
+  <span class="n">next_beam_scores</span><span class="p">,</span> <span class="n">word_indices</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">choose_successors_fn</span><span class="p">(</span><span class="n">scores_flat</span><span class="p">,</span>
+                                                               <span class="n">config</span><span class="p">)</span>
+  <span class="n">next_beam_scores</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">])</span>
+  <span class="n">word_indices</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">])</span>
+
+  <span class="c1"># Pick out the probs, beam_ids, and states according to the chosen predictions</span>
+  <span class="n">total_probs_flat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">total_probs</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;total_probs_flat&quot;</span><span class="p">)</span>
+  <span class="n">next_beam_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">total_probs_flat</span><span class="p">,</span> <span class="n">word_indices</span><span class="p">)</span>
+  <span class="n">next_beam_probs</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">])</span>
+  <span class="n">next_word_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">word_indices</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">)</span>
+  <span class="n">next_beam_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">word_indices</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">)</span>
+
+  <span class="c1"># Append new ids to current predictions</span>
+  <span class="n">next_finished</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">beam_state</span><span class="o">.</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_beam_ids</span><span class="p">),</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">next_word_ids</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">eos_token</span><span class="p">))</span>
+
+  <span class="c1"># Calculate the length of the next predictions.</span>
+  <span class="c1"># 1. Finished beams remain unchanged</span>
+  <span class="c1"># 2. Beams that are now finished (EOS predicted) remain unchanged</span>
+  <span class="c1"># 3. Beams that are not yet finished have their length increased by 1</span>
+  <span class="n">lengths_to_add</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">next_word_ids</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">eos_token</span><span class="p">))</span>
+  <span class="n">lengths_to_add</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">next_finished</span><span class="p">))</span> <span class="o">*</span> <span class="n">lengths_to_add</span>
+  <span class="n">next_prediction_len</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">beam_state</span><span class="o">.</span><span class="n">lengths</span><span class="p">,</span> <span class="n">next_beam_ids</span><span class="p">)</span>
+  <span class="n">next_prediction_len</span> <span class="o">+=</span> <span class="n">lengths_to_add</span>
+
+  <span class="n">next_state</span> <span class="o">=</span> <span class="n">BeamSearchState</span><span class="p">(</span>
+      <span class="n">log_probs</span><span class="o">=</span><span class="n">next_beam_probs</span><span class="p">,</span>
+      <span class="n">lengths</span><span class="o">=</span><span class="n">next_prediction_len</span><span class="p">,</span>
+      <span class="n">finished</span><span class="o">=</span><span class="n">next_finished</span><span class="p">)</span>
+
+  <span class="n">output</span> <span class="o">=</span> <span class="n">BeamSearchStepOutput</span><span class="p">(</span>
+      <span class="n">scores</span><span class="o">=</span><span class="n">next_beam_scores</span><span class="p">,</span>
+      <span class="n">predicted_ids</span><span class="o">=</span><span class="n">next_word_ids</span><span class="p">,</span>
+      <span class="n">beam_parent_ids</span><span class="o">=</span><span class="n">next_beam_ids</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">next_state</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

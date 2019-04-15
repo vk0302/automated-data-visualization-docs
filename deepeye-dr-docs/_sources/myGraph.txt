@@ -1,0 +1,7 @@
+myGraph module
+==============
+
+.. automodule:: myGraph
+    :members:
+    :undoc-members:
+    :show-inheritance:

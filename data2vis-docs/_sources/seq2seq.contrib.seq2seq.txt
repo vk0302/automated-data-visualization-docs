@@ -1,0 +1,30 @@
+seq2seq.contrib.seq2seq package
+===============================
+
+Submodules
+----------
+
+seq2seq.contrib.seq2seq.decoder module
+--------------------------------------
+
+.. automodule:: seq2seq.contrib.seq2seq.decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.contrib.seq2seq.helper module
+-------------------------------------
+
+.. automodule:: seq2seq.contrib.seq2seq.helper
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.contrib.seq2seq
+    :members:
+    :undoc-members:
+    :show-inheritance:

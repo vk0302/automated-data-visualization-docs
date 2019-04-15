@@ -1,0 +1,62 @@
+seq2seq.models package
+======================
+
+Submodules
+----------
+
+seq2seq.models.attention_seq2seq module
+---------------------------------------
+
+.. automodule:: seq2seq.models.attention_seq2seq
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.models.basic_seq2seq module
+-----------------------------------
+
+.. automodule:: seq2seq.models.basic_seq2seq
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.models.bridges module
+-----------------------------
+
+.. automodule:: seq2seq.models.bridges
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.models.image2seq module
+-------------------------------
+
+.. automodule:: seq2seq.models.image2seq
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.models.model_base module
+--------------------------------
+
+.. automodule:: seq2seq.models.model_base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.models.seq2seq_model module
+-----------------------------------
+
+.. automodule:: seq2seq.models.seq2seq_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.models
+    :members:
+    :undoc-members:
+    :show-inheritance:

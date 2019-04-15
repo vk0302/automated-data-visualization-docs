@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>deepeye_po_demo &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for deepeye_po_demo</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: deepeye_po_demo.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2018\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    - Webserver to load predictions and serve over http endpoints</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">ntpath</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">csv_2_sketch_py3</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pandas.compat</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">werkzeug</span> <span class="kn">import</span> <span class="n">secure_filename</span>
+
+<span class="kn">from</span> <span class="nn">flask_cors</span> <span class="kn">import</span> <span class="n">CORS</span><span class="p">,</span> <span class="n">cross_origin</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">json.decoder</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">JSONDecodeError</span> <span class="o">=</span> <span class="ne">ValueError</span>
+
+<span class="n">UPLOAD_FOLDER</span> <span class="o">=</span> <span class="s1">&#39;/home/abhi/Desktop/vishnu/Automated Data Visualization/deepeye/Process_po/CSV/&#39;</span>
+<span class="n">ALLOWED_EXTENSIONS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;txt&#39;</span><span class="p">,</span> <span class="s1">&#39;csv&#39;</span><span class="p">])</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">cors</span> <span class="o">=</span> <span class="n">CORS</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;CORS_HEADERS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Content-Type&#39;</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;UPLOAD_FOLDER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">UPLOAD_FOLDER</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="hello"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.hello">[docs]</a><span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Render main page at every ping/refresh.\n</span>
+<span class="sd">        Target url: 0.0.0.0:5018/     </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        None</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        Rendered Template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/uploaddata&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="upload_data"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.upload_data">[docs]</a><span class="k">def</span> <span class="nf">upload_data</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Upload data for graph generation. \n</span>
+<span class="sd">        Target url: 0.0.0.0:/5018/uploaddata.      </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        None</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        Redirected to rendered page if upload success. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">file</span> <span class="ow">and</span> <span class="n">allowed_file</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">secure_filename</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;UPLOAD_FOLDER&#39;</span><span class="p">],</span> <span class="n">filename</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;upload_data&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/parsedata&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="parse_data"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.parse_data">[docs]</a><span class="k">def</span> <span class="nf">parse_data</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Parse input data to make it application compatible.\n</span>
+<span class="sd">        Target url: 0.0.0.0:/5018/parsedata.       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        None</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        json: Compatible jsonified data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+    <span class="c1">#print(input_data)</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+    <span class="c1">#print(input_data)</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">parsed_data</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1">#print(parsed_data)</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+    <span class="c1">#print(parsed_data)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">)</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/generateviz&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="generate_viz"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.generate_viz">[docs]</a><span class="k">def</span> <span class="nf">generate_viz</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Create Visualizations for input data.\n</span>
+<span class="sd">        Target url: 0.0.0.0:/5018/generateviz.       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        None</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        json: Check if process execution succesful.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+    <span class="n">input_filename</span> <span class="o">=</span> <span class="n">path_leaf</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="n">csv_2_sketch_py3</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">input_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">check</span><span class="p">)</span></div>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/serveviz&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="serve_hc_viz"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.serve_hc_viz">[docs]</a><span class="k">def</span> <span class="nf">serve_hc_viz</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Serve High-chart Visualizations for input data.\n</span>
+<span class="sd">        Target url: 0.0.0.0:/5018/serve_hc_viz.       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        None</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        list: List of high charts for visualization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+    <span class="n">viz_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;vizcount&quot;</span><span class="p">])</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;filepath&quot;</span><span class="p">]</span>
+    <span class="n">input_filename</span> <span class="o">=</span> <span class="n">path_leaf</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="n">out_dir_name</span> <span class="o">=</span> <span class="s2">&quot;HIGH_CHARTS_OUTPUT/&quot;</span> <span class="o">+</span> <span class="s2">&quot;out_lr_&quot;</span> <span class="o">+</span> <span class="n">input_filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="n">hc_spec_array</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">viz_count</span><span class="p">):</span>
+        <span class="n">f_file</span> <span class="o">=</span> <span class="n">out_dir_name</span> <span class="o">+</span> <span class="s2">&quot;/graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">hc_spec</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">hc_spec</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">hc_spec</span><span class="p">)</span>
+                <span class="n">hc_spec_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hc_spec</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hc_spec</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">hc_spec_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hc_spec</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">hc_spec_array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="allowed_file"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.allowed_file">[docs]</a><span class="k">def</span> <span class="nf">allowed_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Validate input data. Allowed file extensions - &quot;.txt, .csv&quot;       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        filename (str) : Input file name.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        bool: True if condition satisfied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">and</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ALLOWED_EXTENSIONS</span></div>
+
+<div class="viewcode-block" id="path_leaf"><a class="viewcode-back" href="../deepeye_po_demo.html#deepeye_po_demo.path_leaf">[docs]</a><span class="k">def</span> <span class="nf">path_leaf</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Find file traverser cursor location.    </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        path (str): Path where all relevant files are situated</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Current position of traversing through files in the path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">head</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tail</span> <span class="ow">or</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">head</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Starting webserver: &quot;</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;APPLICATION_ROOT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;static&quot;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5018</span><span class="p">,</span> <span class="n">threaded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

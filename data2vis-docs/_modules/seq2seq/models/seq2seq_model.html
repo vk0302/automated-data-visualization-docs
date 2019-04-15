@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.models.seq2seq_model &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.models.seq2seq_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;Base class for models&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">graph_utils</span>
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">losses</span> <span class="k">as</span> <span class="n">seq2seq_losses</span>
+<span class="kn">from</span> <span class="nn">seq2seq.contrib.seq2seq.decoder</span> <span class="kn">import</span> <span class="n">_transpose_batch_time</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">vocab</span>
+<span class="kn">from</span> <span class="nn">seq2seq.graph_utils</span> <span class="kn">import</span> <span class="n">templatemethod</span>
+<span class="kn">from</span> <span class="nn">seq2seq.decoders.beam_search_decoder</span> <span class="kn">import</span> <span class="n">BeamSearchDecoder</span>
+<span class="kn">from</span> <span class="nn">seq2seq.inference</span> <span class="kn">import</span> <span class="n">beam_search</span>
+<span class="kn">from</span> <span class="nn">seq2seq.models.model_base</span> <span class="kn">import</span> <span class="n">ModelBase</span><span class="p">,</span> <span class="n">_flatten_dict</span>
+
+
+<div class="viewcode-block" id="Seq2SeqModel"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.seq2seq_model.Seq2SeqModel">[docs]</a><span class="k">class</span> <span class="nc">Seq2SeqModel</span><span class="p">(</span><span class="n">ModelBase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base class for seq2seq models with embeddings</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Seq2SeqModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">source_vocab_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s2">&quot;vocab_source&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;vocab_source&quot;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">source_vocab_info</span> <span class="o">=</span> <span class="n">vocab</span><span class="o">.</span><span class="n">get_vocab_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;vocab_source&quot;</span><span class="p">])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s2">&quot;vocab_target&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;vocab_target&quot;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span> <span class="o">=</span> <span class="n">vocab</span><span class="o">.</span><span class="n">get_vocab_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;vocab_target&quot;</span><span class="p">])</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Seq2SeqModel.default_params"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.seq2seq_model.Seq2SeqModel.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">ModelBase</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source.max_seq_len&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s2">&quot;source.reverse&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s2">&quot;target.max_seq_len&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s2">&quot;embedding.dim&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s2">&quot;embedding.init_scale&quot;</span><span class="p">:</span> <span class="mf">0.04</span><span class="p">,</span>
+        <span class="s2">&quot;embedding.share&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;inference.beam_search.length_penalty_weight&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;inference.beam_search.choose_successors_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;choose_top_k&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;optimizer.clip_embed_gradients&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="s2">&quot;vocab_source&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vocab_target&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+  <span class="k">def</span> <span class="nf">_clip_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grads_and_vars</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;In addition to standard gradient clipping, also clips embedding</span>
+<span class="sd">    gradients to a specified value.&quot;&quot;&quot;</span>
+    <span class="n">grads_and_vars</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Seq2SeqModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_clip_gradients</span><span class="p">(</span><span class="n">grads_and_vars</span><span class="p">)</span>
+
+    <span class="n">clipped_gradients</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">gradient</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">grads_and_vars</span><span class="p">:</span>
+      <span class="k">if</span> <span class="s2">&quot;embedding&quot;</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_norm</span><span class="p">(</span>
+            <span class="n">gradient</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;optimizer.clip_embed_gradients&quot;</span><span class="p">])</span>
+        <span class="n">gradient</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">IndexedSlices</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">gradient</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="n">gradient</span><span class="o">.</span><span class="n">dense_shape</span><span class="p">)</span>
+      <span class="n">clipped_gradients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gradient</span><span class="p">)</span>
+      <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">clipped_gradients</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_create_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">losses</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates the dictionary of predictions that is returned by the model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Add features and, if available, labels to predictions</span>
+    <span class="n">predictions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_flatten_dict</span><span class="p">({</span><span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">features</span><span class="p">}))</span>
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">predictions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_flatten_dict</span><span class="p">({</span><span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">}))</span>
+
+    <span class="k">if</span> <span class="n">losses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;losses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_transpose_batch_time</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+
+    <span class="c1"># Decoders returns output in time-major form [T, B, ...]</span>
+    <span class="c1"># Here we transpose everything back to batch-major for the user</span>
+    <span class="n">output_dict</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">decoder_output</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="n">decoder_output</span><span class="p">))</span>
+    <span class="n">decoder_output_flat</span> <span class="o">=</span> <span class="n">_flatten_dict</span><span class="p">(</span><span class="n">output_dict</span><span class="p">)</span>
+    <span class="n">decoder_output_flat</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">_transpose_batch_time</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">decoder_output_flat</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="n">predictions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">decoder_output_flat</span><span class="p">)</span>
+
+    <span class="c1"># If we predict the ids also map them back into the vocab and process them</span>
+    <span class="k">if</span> <span class="s2">&quot;predicted_ids&quot;</span> <span class="ow">in</span> <span class="n">predictions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="n">vocab_tables</span> <span class="o">=</span> <span class="n">graph_utils</span><span class="o">.</span><span class="n">get_dict_from_collection</span><span class="p">(</span><span class="s2">&quot;vocab_tables&quot;</span><span class="p">)</span>
+      <span class="n">target_id_to_vocab</span> <span class="o">=</span> <span class="n">vocab_tables</span><span class="p">[</span><span class="s2">&quot;target_id_to_vocab&quot;</span><span class="p">]</span>
+      <span class="n">predicted_tokens</span> <span class="o">=</span> <span class="n">target_id_to_vocab</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">to_int64</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]))</span>
+      <span class="c1"># Raw predicted tokens</span>
+      <span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;predicted_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predicted_tokens</span>
+
+    <span class="k">return</span> <span class="n">predictions</span>
+
+<div class="viewcode-block" id="Seq2SeqModel.batch_size"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.seq2seq_model.Seq2SeqModel.batch_size">[docs]</a>  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the batch size of the curren batch based on the passed</span>
+<span class="sd">    features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_ids&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+  <span class="nd">@property</span>
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;source_embedding&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">source_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the embedding used for the source sequence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;W&quot;</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source_vocab_info</span><span class="o">.</span><span class="n">total_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.dim&quot;</span><span class="p">]],</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform_initializer</span><span class="p">(</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.init_scale&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.init_scale&quot;</span><span class="p">]))</span>
+
+  <span class="nd">@property</span>
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;target_embedding&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">target_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the embedding used for the target sequence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.share&quot;</span><span class="p">]:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_embedding</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;W&quot;</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.dim&quot;</span><span class="p">]],</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform_initializer</span><span class="p">(</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.init_scale&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;embedding.init_scale&quot;</span><span class="p">]))</span>
+
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;encode&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Encodes the inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;decode&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs decoding based on the encoder outputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_get_beam_search_decoder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps a decoder into a Beam Search decoder.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      decoder: The original decoder</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A BeamSearchDecoder with the same interfaces as the original decoder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">beam_search</span><span class="o">.</span><span class="n">BeamSearchConfig</span><span class="p">(</span>
+        <span class="n">beam_width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">],</span>
+        <span class="n">vocab_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span><span class="p">,</span>
+        <span class="n">eos_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">special_vocab</span><span class="o">.</span><span class="n">SEQUENCE_END</span><span class="p">,</span>
+        <span class="n">length_penalty_weight</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span>
+            <span class="s2">&quot;inference.beam_search.length_penalty_weight&quot;</span><span class="p">],</span>
+        <span class="n">choose_successors_fn</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">beam_search</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;inference.beam_search.choose_successors_fn&quot;</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">BeamSearchDecoder</span><span class="p">(</span><span class="n">decoder</span><span class="o">=</span><span class="n">decoder</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_beam_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true iff the model should perform beam search.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+  <span class="k">def</span> <span class="nf">_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model-specific preprocessing for features and labels:</span>
+
+<span class="sd">    - Creates vocabulary lookup tables for source and target vocab</span>
+<span class="sd">    - Converts tokens into vocabulary ids</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create vocabulary lookup for source</span>
+    <span class="n">source_vocab_to_id</span><span class="p">,</span> <span class="n">source_id_to_vocab</span><span class="p">,</span> <span class="n">source_word_to_count</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> \
+      <span class="n">vocab</span><span class="o">.</span><span class="n">create_vocabulary_lookup_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_vocab_info</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># Create vocabulary look for target</span>
+    <span class="n">target_vocab_to_id</span><span class="p">,</span> <span class="n">target_id_to_vocab</span><span class="p">,</span> <span class="n">target_word_to_count</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> \
+      <span class="n">vocab</span><span class="o">.</span><span class="n">create_vocabulary_lookup_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># Add vocab tables to graph colection so that we can access them in</span>
+    <span class="c1"># other places.</span>
+    <span class="n">graph_utils</span><span class="o">.</span><span class="n">add_dict_to_collection</span><span class="p">({</span>
+        <span class="s2">&quot;source_vocab_to_id&quot;</span><span class="p">:</span> <span class="n">source_vocab_to_id</span><span class="p">,</span>
+        <span class="s2">&quot;source_id_to_vocab&quot;</span><span class="p">:</span> <span class="n">source_id_to_vocab</span><span class="p">,</span>
+        <span class="s2">&quot;source_word_to_count&quot;</span><span class="p">:</span> <span class="n">source_word_to_count</span><span class="p">,</span>
+        <span class="s2">&quot;target_vocab_to_id&quot;</span><span class="p">:</span> <span class="n">target_vocab_to_id</span><span class="p">,</span>
+        <span class="s2">&quot;target_id_to_vocab&quot;</span><span class="p">:</span> <span class="n">target_id_to_vocab</span><span class="p">,</span>
+        <span class="s2">&quot;target_word_to_count&quot;</span><span class="p">:</span> <span class="n">target_word_to_count</span>
+    <span class="p">},</span> <span class="s2">&quot;vocab_tables&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Slice source to max_len</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source.max_seq_len&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">][:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span>
+          <span class="s2">&quot;source.max_seq_len&quot;</span><span class="p">]]</span>
+      <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">],</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source.max_seq_len&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Look up the source ids in the vocabulary</span>
+    <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_vocab_to_id</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">features</span><span class="p">[</span>
+        <span class="s2">&quot;source_tokens&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Maybe reverse the source</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source.reverse&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reverse_sequence</span><span class="p">(</span>
+          <span class="nb">input</span><span class="o">=</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_ids&quot;</span><span class="p">],</span>
+          <span class="n">seq_lengths</span><span class="o">=</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">],</span>
+          <span class="n">seq_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+          <span class="n">batch_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+          <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">])</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="s2">&quot;source_len&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="bp">None</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Slices targets to max length</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target.max_seq_len&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">][:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span>
+          <span class="s2">&quot;target.max_seq_len&quot;</span><span class="p">]]</span>
+      <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">],</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target.max_seq_len&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Look up the target ids in the vocabulary</span>
+    <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_vocab_to_id</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">])</span>
+
+    <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">])</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="s2">&quot;target_len&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]))</span>
+
+    <span class="c1"># Keep track of the number of processed tokens</span>
+    <span class="n">num_tokens</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">])</span>
+    <span class="n">num_tokens</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">])</span>
+    <span class="n">token_counter_var</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;tokens_counter&quot;</span><span class="p">)</span>
+    <span class="n">total_tokens</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="n">token_counter_var</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">)</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s2">&quot;num_tokens&quot;</span><span class="p">,</span> <span class="n">total_tokens</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([</span><span class="n">total_tokens</span><span class="p">]):</span>
+      <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Add to graph collection for later use</span>
+    <span class="n">graph_utils</span><span class="o">.</span><span class="n">add_dict_to_collection</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">labels</span><span class="p">:</span>
+      <span class="n">graph_utils</span><span class="o">.</span><span class="n">add_dict_to_collection</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span>
+
+<div class="viewcode-block" id="Seq2SeqModel.compute_loss"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.seq2seq_model.Seq2SeqModel.compute_loss">[docs]</a>  <span class="k">def</span> <span class="nf">compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder_output</span><span class="p">,</span> <span class="n">_features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the loss for this model.</span>
+
+<span class="sd">    Returns a tuple `(losses, loss)`, where `losses` are the per-batch</span>
+<span class="sd">    losses and loss is a single scalar tensor to minimize.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#pylint: disable=R0201</span>
+    <span class="c1"># Calculate loss per example-timestep of shape [B, T]</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="n">seq2seq_losses</span><span class="o">.</span><span class="n">cross_entropy_sequence_loss</span><span class="p">(</span>
+        <span class="n">logits</span><span class="o">=</span><span class="n">decoder_output</span><span class="o">.</span><span class="n">logits</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:],</span>
+        <span class="n">targets</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_ids&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+        <span class="n">sequence_length</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the average log perplexity</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">losses</span><span class="p">,</span> <span class="n">loss</span></div>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="c1"># Pre-process features and labels</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">encoder_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">decoder_output</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">:</span>
+      <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_predictions</span><span class="p">(</span>
+          <span class="n">decoder_output</span><span class="o">=</span><span class="n">decoder_output</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+      <span class="n">loss</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">train_op</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">losses</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_loss</span><span class="p">(</span><span class="n">decoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+      <span class="n">train_op</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">:</span>
+        <span class="n">train_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_train_op</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+      <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_predictions</span><span class="p">(</span>
+          <span class="n">decoder_output</span><span class="o">=</span><span class="n">decoder_output</span><span class="p">,</span>
+          <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+          <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+          <span class="n">losses</span><span class="o">=</span><span class="n">losses</span><span class="p">)</span>
+
+    <span class="c1"># We add &quot;useful&quot; tensors to the graph collection so that we</span>
+    <span class="c1"># can easly find them in our hooks/monitors.</span>
+    <span class="n">graph_utils</span><span class="o">.</span><span class="n">add_dict_to_collection</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="s2">&quot;predictions&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">train_op</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

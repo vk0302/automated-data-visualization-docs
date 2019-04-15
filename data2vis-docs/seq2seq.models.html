@@ -1,0 +1,431 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.models package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.models package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.attention_seq2seq">seq2seq.models.attention_seq2seq module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.basic_seq2seq">seq2seq.models.basic_seq2seq module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.bridges">seq2seq.models.bridges module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.image2seq">seq2seq.models.image2seq module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.model_base">seq2seq.models.model_base module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models.seq2seq_model">seq2seq.models.seq2seq_model module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-models-package">
+<h1>seq2seq.models package<a class="headerlink" href="#seq2seq-models-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.models.attention_seq2seq">
+<span id="seq2seq-models-attention-seq2seq-module"></span><h2>seq2seq.models.attention_seq2seq module<a class="headerlink" href="#module-seq2seq.models.attention_seq2seq" title="Permalink to this headline">¶</a></h2>
+<p>Sequence to Sequence model with attention</p>
+<dl class="class">
+<dt id="seq2seq.models.attention_seq2seq.AttentionSeq2Seq">
+<em class="property">class </em><code class="descclassname">seq2seq.models.attention_seq2seq.</code><code class="descname">AttentionSeq2Seq</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='att_seq2seq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/attention_seq2seq.html#AttentionSeq2Seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.attention_seq2seq.AttentionSeq2Seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.basic_seq2seq.BasicSeq2Seq" title="seq2seq.models.basic_seq2seq.BasicSeq2Seq"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.basic_seq2seq.BasicSeq2Seq</span></code></a></p>
+<p>Sequence2Sequence model with attention mechanism.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_vocab_info</strong> &#8211; An instance of <cite>VocabInfo</cite>
+for the source vocabulary</li>
+<li><strong>target_vocab_info</strong> &#8211; An instance of <cite>VocabInfo</cite>
+for the target vocabulary</li>
+<li><strong>params</strong> &#8211; A dictionary of hyperparameters</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.models.attention_seq2seq.AttentionSeq2Seq.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/attention_seq2seq.html#AttentionSeq2Seq.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.attention_seq2seq.AttentionSeq2Seq.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models.basic_seq2seq">
+<span id="seq2seq-models-basic-seq2seq-module"></span><h2>seq2seq.models.basic_seq2seq module<a class="headerlink" href="#module-seq2seq.models.basic_seq2seq" title="Permalink to this headline">¶</a></h2>
+<p>Definition of a basic seq2seq model</p>
+<dl class="class">
+<dt id="seq2seq.models.basic_seq2seq.BasicSeq2Seq">
+<em class="property">class </em><code class="descclassname">seq2seq.models.basic_seq2seq.</code><code class="descname">BasicSeq2Seq</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='basic_seq2seq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/basic_seq2seq.html#BasicSeq2Seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.basic_seq2seq.BasicSeq2Seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.seq2seq_model.Seq2SeqModel" title="seq2seq.models.seq2seq_model.Seq2SeqModel"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.seq2seq_model.Seq2SeqModel</span></code></a></p>
+<p>Basic Sequence2Sequence model with a unidirectional encoder and decoder.
+The last encoder state is used to initialize the decoder and thus both
+must share the same type of RNN cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_vocab_info</strong> &#8211; An instance of <cite>VocabInfo</cite>
+for the source vocabulary</li>
+<li><strong>target_vocab_info</strong> &#8211; An instance of <cite>VocabInfo</cite>
+for the target vocabulary</li>
+<li><strong>params</strong> &#8211; A dictionary of hyperparameters</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.models.basic_seq2seq.BasicSeq2Seq.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.models.basic_seq2seq.BasicSeq2Seq.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.models.basic_seq2seq.BasicSeq2Seq.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/basic_seq2seq.html#BasicSeq2Seq.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.basic_seq2seq.BasicSeq2Seq.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.basic_seq2seq.BasicSeq2Seq.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.models.basic_seq2seq.BasicSeq2Seq.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models.bridges">
+<span id="seq2seq-models-bridges-module"></span><h2>seq2seq.models.bridges module<a class="headerlink" href="#module-seq2seq.models.bridges" title="Permalink to this headline">¶</a></h2>
+<p>A collection of bridges between encoder and decoder. A bridge defines
+how encoder information are passed to the decoder.</p>
+<dl class="class">
+<dt id="seq2seq.models.bridges.Bridge">
+<em class="property">class </em><code class="descclassname">seq2seq.models.bridges.</code><code class="descname">Bridge</code><span class="sig-paren">(</span><em>encoder_outputs</em>, <em>decoder_state_size</em>, <em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#Bridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.Bridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a></p>
+<p>An abstract bridge class. A bridge defines how state is passed
+between encoder and decoder.</p>
+<p>All logic is contained in the <cite>_create</cite> method, which returns an
+initial state for the decoder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>encoder_outputs</strong> &#8211; A namedtuple that corresponds to the the encoder outputs.</li>
+<li><strong>decoder_state_size</strong> &#8211; An integer or tuple of integers defining the
+state size of the decoder.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.models.bridges.Bridge.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#Bridge.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.Bridge.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the bridge function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An initial decoder_state tensor or tuple of tensors.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.models.bridges.InitialStateBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.models.bridges.</code><code class="descname">InitialStateBridge</code><span class="sig-paren">(</span><em>encoder_outputs</em>, <em>decoder_state_size</em>, <em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#InitialStateBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.InitialStateBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.bridges.Bridge" title="seq2seq.models.bridges.Bridge"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.bridges.Bridge</span></code></a></p>
+<p>A bridge that creates an initial decoder state based on the output
+of the encoder. This state is created by passing the encoder outputs
+through an additional layer to match them to the decoder state size.
+The input function remains unmodified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>encoder_outputs</strong> &#8211; A namedtuple that corresponds to the the encoder outputs.</li>
+<li><strong>decoder_state_size</strong> &#8211; An integer or tuple of integers defining the
+state size of the decoder.</li>
+<li><strong>bridge_input</strong> &#8211; Which attribute of the <cite>encoder_outputs</cite> to use for the
+initial state calculation. For example, &#8220;final_state&#8221; means that
+<cite>encoder_outputs.final_state</cite> will be used.</li>
+<li><strong>activation_fn</strong> &#8211; An optional activation function for the extra
+layer inserted between encoder and decoder. A string for a function
+name contained in <cite>tf.nn</cite>, e.g. &#8220;tanh&#8221;.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="seq2seq.models.bridges.InitialStateBridge.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#InitialStateBridge.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.InitialStateBridge.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.models.bridges.PassThroughBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.models.bridges.</code><code class="descname">PassThroughBridge</code><span class="sig-paren">(</span><em>encoder_outputs</em>, <em>decoder_state_size</em>, <em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#PassThroughBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.PassThroughBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.bridges.Bridge" title="seq2seq.models.bridges.Bridge"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.bridges.Bridge</span></code></a></p>
+<p>Passes the encoder state through to the decoder as-is. This bridge
+can only be used if encoder and decoder have the exact same state size, i.e.
+use the same RNN cell.</p>
+<dl class="staticmethod">
+<dt id="seq2seq.models.bridges.PassThroughBridge.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#PassThroughBridge.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.PassThroughBridge.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.models.bridges.ZeroBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.models.bridges.</code><code class="descname">ZeroBridge</code><span class="sig-paren">(</span><em>encoder_outputs</em>, <em>decoder_state_size</em>, <em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#ZeroBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.ZeroBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.bridges.Bridge" title="seq2seq.models.bridges.Bridge"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.bridges.Bridge</span></code></a></p>
+<p>A bridge that does not pass any information between encoder and decoder
+and sets the initial decoder state to 0. The input function is not modified.</p>
+<dl class="staticmethod">
+<dt id="seq2seq.models.bridges.ZeroBridge.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/bridges.html#ZeroBridge.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.bridges.ZeroBridge.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models.image2seq">
+<span id="seq2seq-models-image2seq-module"></span><h2>seq2seq.models.image2seq module<a class="headerlink" href="#module-seq2seq.models.image2seq" title="Permalink to this headline">¶</a></h2>
+<p>Definition of a basic seq2seq model</p>
+<dl class="class">
+<dt id="seq2seq.models.image2seq.Image2Seq">
+<em class="property">class </em><code class="descclassname">seq2seq.models.image2seq.</code><code class="descname">Image2Seq</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name='image_seq2seq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/image2seq.html#Image2Seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.image2seq.Image2Seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.attention_seq2seq.AttentionSeq2Seq" title="seq2seq.models.attention_seq2seq.AttentionSeq2Seq"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.attention_seq2seq.AttentionSeq2Seq</span></code></a></p>
+<p>A model that encodes an image and produces a sequence
+of tokens.</p>
+<dl class="method">
+<dt id="seq2seq.models.image2seq.Image2Seq.batch_size">
+<code class="descname">batch_size</code><span class="sig-paren">(</span><em>features</em>, <em>_labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/image2seq.html#Image2Seq.batch_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.image2seq.Image2Seq.batch_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.models.image2seq.Image2Seq.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/image2seq.html#Image2Seq.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.image2seq.Image2Seq.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.image2seq.Image2Seq.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.models.image2seq.Image2Seq.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models.model_base">
+<span id="seq2seq-models-model-base-module"></span><h2>seq2seq.models.model_base module<a class="headerlink" href="#module-seq2seq.models.model_base" title="Permalink to this headline">¶</a></h2>
+<p>Base class for models</p>
+<dl class="class">
+<dt id="seq2seq.models.model_base.ModelBase">
+<em class="property">class </em><code class="descclassname">seq2seq.models.model_base.</code><code class="descname">ModelBase</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/model_base.html#ModelBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.model_base.ModelBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a></p>
+<p>Abstract base class for models.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>params</strong> &#8211; A dictionary of hyperparameter values</li>
+<li><strong>name</strong> &#8211; A name for this model to be used as a variable scope</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.models.model_base.ModelBase.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>features</em>, <em>labels</em>, <em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/model_base.html#ModelBase.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.model_base.ModelBase.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the model graph. See the model_fn documentation in
+tf.contrib.learn.Estimator class for a more detailed explanation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.model_base.ModelBase.batch_size">
+<code class="descname">batch_size</code><span class="sig-paren">(</span><em>features</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/model_base.html#ModelBase.batch_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.model_base.ModelBase.batch_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the batch size for a batch of examples</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.models.model_base.ModelBase.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/model_base.html#ModelBase.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.model_base.ModelBase.default_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of default parameters for this model.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models.seq2seq_model">
+<span id="seq2seq-models-seq2seq-model-module"></span><h2>seq2seq.models.seq2seq_model module<a class="headerlink" href="#module-seq2seq.models.seq2seq_model" title="Permalink to this headline">¶</a></h2>
+<p>Base class for models</p>
+<dl class="class">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel">
+<em class="property">class </em><code class="descclassname">seq2seq.models.seq2seq_model.</code><code class="descname">Seq2SeqModel</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/seq2seq_model.html#Seq2SeqModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.models.model_base.ModelBase" title="seq2seq.models.model_base.ModelBase"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.models.model_base.ModelBase</span></code></a></p>
+<p>Base class for seq2seq models with embeddings</p>
+<dl class="method">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.batch_size">
+<code class="descname">batch_size</code><span class="sig-paren">(</span><em>features</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/seq2seq_model.html#Seq2SeqModel.batch_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.batch_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the batch size of the curren batch based on the passed
+features.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.compute_loss">
+<code class="descname">compute_loss</code><span class="sig-paren">(</span><em>decoder_output</em>, <em>_features</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/seq2seq_model.html#Seq2SeqModel.compute_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.compute_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the loss for this model.</p>
+<p>Returns a tuple <cite>(losses, loss)</cite>, where <cite>losses</cite> are the per-batch
+losses and loss is a single scalar tensor to minimize.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/models/seq2seq_model.html#Seq2SeqModel.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.source_embedding">
+<code class="descname">source_embedding</code><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.source_embedding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.target_embedding">
+<code class="descname">target_embedding</code><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.target_embedding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inner wrapper function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.models.seq2seq_model.Seq2SeqModel.use_beam_search">
+<code class="descname">use_beam_search</code><a class="headerlink" href="#seq2seq.models.seq2seq_model.Seq2SeqModel.use_beam_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true iff the model should perform beam search.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.models" title="Permalink to this headline">¶</a></h2>
+<p>This module contains various Encoder-Decoder models</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

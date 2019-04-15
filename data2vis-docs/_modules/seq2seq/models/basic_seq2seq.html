@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.models.basic_seq2seq &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.models.basic_seq2seq</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Definition of a basic seq2seq model</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pydoc</span> <span class="kn">import</span> <span class="n">locate</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">seq2seq.contrib.seq2seq</span> <span class="kn">import</span> <span class="n">helper</span> <span class="k">as</span> <span class="n">tf_decode_helper</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.models.seq2seq_model</span> <span class="kn">import</span> <span class="n">Seq2SeqModel</span>
+<span class="kn">from</span> <span class="nn">seq2seq.graph_utils</span> <span class="kn">import</span> <span class="n">templatemethod</span>
+<span class="kn">from</span> <span class="nn">seq2seq.models</span> <span class="kn">import</span> <span class="n">bridges</span>
+
+
+<div class="viewcode-block" id="BasicSeq2Seq"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.basic_seq2seq.BasicSeq2Seq">[docs]</a><span class="k">class</span> <span class="nc">BasicSeq2Seq</span><span class="p">(</span><span class="n">Seq2SeqModel</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Basic Sequence2Sequence model with a unidirectional encoder and decoder.</span>
+<span class="sd">  The last encoder state is used to initialize the decoder and thus both</span>
+<span class="sd">  must share the same type of RNN cell.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    source_vocab_info: An instance of `VocabInfo`</span>
+<span class="sd">      for the source vocabulary</span>
+<span class="sd">    target_vocab_info: An instance of `VocabInfo`</span>
+<span class="sd">      for the target vocabulary</span>
+<span class="sd">    params: A dictionary of hyperparameters</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;basic_seq2seq&quot;</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BasicSeq2Seq</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_class</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;encoder.class&quot;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder_class</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;decoder.class&quot;</span><span class="p">])</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BasicSeq2Seq.default_params"><a class="viewcode-back" href="../../../seq2seq.models.html#seq2seq.models.basic_seq2seq.BasicSeq2Seq.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">Seq2SeqModel</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;bridge.class&quot;</span><span class="p">:</span> <span class="s2">&quot;seq2seq.models.bridges.InitialStateBridge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bridge.params&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;encoder.class&quot;</span><span class="p">:</span> <span class="s2">&quot;seq2seq.encoders.UnidirectionalRNNEncoder&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;encoder.params&quot;</span><span class="p">:</span> <span class="p">{},</span>  <span class="c1"># Arbitrary parameters for the encoder</span>
+        <span class="s2">&quot;decoder.class&quot;</span><span class="p">:</span> <span class="s2">&quot;seq2seq.decoders.BasicDecoder&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;decoder.params&quot;</span><span class="p">:</span> <span class="p">{}</span>  <span class="c1"># Arbitrary parameters for the decoder</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+  <span class="k">def</span> <span class="nf">_create_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoder_outputs</span><span class="p">,</span> <span class="n">decoder_state_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates the bridge to be used between encoder and decoder&quot;&quot;&quot;</span>
+    <span class="n">bridge_class</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;bridge.class&quot;</span><span class="p">])</span> <span class="ow">or</span> \
+      <span class="nb">getattr</span><span class="p">(</span><span class="n">bridges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;bridge.class&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">bridge_class</span><span class="p">(</span>
+        <span class="n">encoder_outputs</span><span class="o">=</span><span class="n">encoder_outputs</span><span class="p">,</span>
+        <span class="n">decoder_state_size</span><span class="o">=</span><span class="n">decoder_state_size</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;bridge.params&quot;</span><span class="p">],</span>
+        <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_create_decoder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_encoder_output</span><span class="p">,</span> <span class="n">_features</span><span class="p">,</span> <span class="n">_labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a decoder instance based on the passed parameters.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_class</span><span class="p">(</span>
+        <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;decoder.params&quot;</span><span class="p">],</span>
+        <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+        <span class="n">vocab_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_decode_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">bridge</span><span class="p">,</span> <span class="n">_encoder_output</span><span class="p">,</span> <span class="n">_features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs decoding in training mode&quot;&quot;&quot;</span>
+    <span class="n">target_embedded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_embedding</span><span class="p">,</span>
+                                             <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_ids&quot;</span><span class="p">])</span>
+    <span class="n">helper_train</span> <span class="o">=</span> <span class="n">tf_decode_helper</span><span class="o">.</span><span class="n">TrainingHelper</span><span class="p">(</span>
+        <span class="n">inputs</span><span class="o">=</span><span class="n">target_embedded</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">sequence_length</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">decoder_initial_state</span> <span class="o">=</span> <span class="n">bridge</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="n">decoder_initial_state</span><span class="p">,</span> <span class="n">helper_train</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_decode_infer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">bridge</span><span class="p">,</span> <span class="n">_encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs decoding in inference mode&quot;&quot;&quot;</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_beam_search</span><span class="p">:</span>
+      <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">]</span>
+
+    <span class="n">target_start_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">special_vocab</span><span class="o">.</span><span class="n">SEQUENCE_START</span>
+    <span class="n">helper_infer</span> <span class="o">=</span> <span class="n">tf_decode_helper</span><span class="o">.</span><span class="n">GreedyEmbeddingHelper</span><span class="p">(</span>
+        <span class="n">embedding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_embedding</span><span class="p">,</span>
+        <span class="n">start_tokens</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">target_start_id</span><span class="p">),</span>
+        <span class="n">end_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">special_vocab</span><span class="o">.</span><span class="n">SEQUENCE_END</span><span class="p">)</span>
+    <span class="n">decoder_initial_state</span> <span class="o">=</span> <span class="n">bridge</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="n">decoder_initial_state</span><span class="p">,</span> <span class="n">helper_infer</span><span class="p">)</span>
+
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;encode&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="n">source_embedded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_embedding</span><span class="p">,</span>
+                                             <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_ids&quot;</span><span class="p">])</span>
+    <span class="n">encoder_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;encoder.params&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">encoder_fn</span><span class="p">(</span><span class="n">source_embedded</span><span class="p">,</span> <span class="n">features</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">])</span>
+
+  <span class="nd">@templatemethod</span><span class="p">(</span><span class="s2">&quot;decode&quot;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_decoder</span><span class="p">(</span><span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_beam_search</span><span class="p">:</span>
+      <span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_beam_search_decoder</span><span class="p">(</span><span class="n">decoder</span><span class="p">)</span>
+
+    <span class="n">bridge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_bridge</span><span class="p">(</span>
+        <span class="n">encoder_outputs</span><span class="o">=</span><span class="n">encoder_output</span><span class="p">,</span>
+        <span class="n">decoder_state_size</span><span class="o">=</span><span class="n">decoder</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_infer</span><span class="p">(</span><span class="n">decoder</span><span class="p">,</span> <span class="n">bridge</span><span class="p">,</span> <span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span>
+                                <span class="n">labels</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_train</span><span class="p">(</span><span class="n">decoder</span><span class="p">,</span> <span class="n">bridge</span><span class="p">,</span> <span class="n">encoder_output</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span>
+                                <span class="n">labels</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

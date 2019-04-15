@@ -1,0 +1,54 @@
+seq2seq.decoders package
+========================
+
+Submodules
+----------
+
+seq2seq.decoders.attention module
+---------------------------------
+
+.. automodule:: seq2seq.decoders.attention
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.decoders.attention_decoder module
+-----------------------------------------
+
+.. automodule:: seq2seq.decoders.attention_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.decoders.basic_decoder module
+-------------------------------------
+
+.. automodule:: seq2seq.decoders.basic_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.decoders.beam_search_decoder module
+-------------------------------------------
+
+.. automodule:: seq2seq.decoders.beam_search_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.decoders.rnn_decoder module
+-----------------------------------
+
+.. automodule:: seq2seq.decoders.rnn_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.decoders
+    :members:
+    :undoc-members:
+    :show-inheritance:

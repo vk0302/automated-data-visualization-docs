@@ -1,0 +1,596 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.data package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.data package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.input_pipeline">seq2seq.data.input_pipeline module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.parallel_data_provider">seq2seq.data.parallel_data_provider module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.postproc">seq2seq.data.postproc module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.sequence_example_decoder">seq2seq.data.sequence_example_decoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.split_tokens_decoder">seq2seq.data.split_tokens_decoder module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data.vocab">seq2seq.data.vocab module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.data">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.data.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-data-package">
+<h1>seq2seq.data package<a class="headerlink" href="#seq2seq-data-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.data.input_pipeline">
+<span id="seq2seq-data-input-pipeline-module"></span><h2>seq2seq.data.input_pipeline module<a class="headerlink" href="#module-seq2seq.data.input_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Collection of input pipelines.</p>
+<p>An input pipeline defines how to read and parse data. It produces a tuple
+of (features, labels) that can be read by tf.learn estimators.</p>
+<dl class="class">
+<dt id="seq2seq.data.input_pipeline.ImageCaptioningInputPipeline">
+<em class="property">class </em><code class="descclassname">seq2seq.data.input_pipeline.</code><code class="descname">ImageCaptioningInputPipeline</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ImageCaptioningInputPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.data.input_pipeline.InputPipeline" title="seq2seq.data.input_pipeline.InputPipeline"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.data.input_pipeline.InputPipeline</span></code></a></p>
+<p>An input pipeline that reads a TFRecords containing both source
+and target sequences.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">files: An array of file names to read from.
+source_field: The TFRecord feature field containing the source text.
+target_field: The TFRecord feature field containing the target text.
+source_delimiter: A character to split the source text on. Defaults</p>
+<blockquote>
+<div>to  &#8221; &#8221; (space). For character-level training this can be set to the
+empty string.</div></blockquote>
+<p class="last">target_delimiter: Same as <cite>source_delimiter</cite> but for the target text.</p>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ImageCaptioningInputPipeline.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.feature_keys">
+<code class="descname">feature_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.feature_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.label_keys">
+<code class="descname">label_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.label_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.make_data_provider">
+<code class="descname">make_data_provider</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ImageCaptioningInputPipeline.make_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.make_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.data.input_pipeline.InputPipeline">
+<em class="property">class </em><code class="descclassname">seq2seq.data.input_pipeline.</code><code class="descname">InputPipeline</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#InputPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a></p>
+<p>Abstract InputPipeline class. All input pipelines must inherit from this.
+An InputPipeline defines how data is read, parsed, and separated into
+features and labels.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">shuffle: If true, shuffle the data.
+num_epochs: Number of times to iterate through the dataset. If None,</p>
+<blockquote class="last">
+<div>iterate forever.</div></blockquote>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.data.input_pipeline.InputPipeline.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#InputPipeline.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.InputPipeline.feature_keys">
+<code class="descname">feature_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline.feature_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the features that this input pipeline provides. Returns
+a set of strings.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.InputPipeline.label_keys">
+<code class="descname">label_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline.label_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the labels that this input pipeline provides. Returns
+a set of strings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.input_pipeline.InputPipeline.make_data_provider">
+<code class="descname">make_data_provider</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#InputPipeline.make_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline.make_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates DataProvider instance for this input pipeline. Additional
+keyword arguments are passed to the DataProvider.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.data.input_pipeline.InputPipeline.read_from_data_provider">
+<em class="property">static </em><code class="descname">read_from_data_provider</code><span class="sig-paren">(</span><em>data_provider</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#InputPipeline.read_from_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.InputPipeline.read_from_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function to read all available items from a DataProvider.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.data.input_pipeline.ParallelTextInputPipeline">
+<em class="property">class </em><code class="descclassname">seq2seq.data.input_pipeline.</code><code class="descname">ParallelTextInputPipeline</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ParallelTextInputPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ParallelTextInputPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.data.input_pipeline.InputPipeline" title="seq2seq.data.input_pipeline.InputPipeline"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.data.input_pipeline.InputPipeline</span></code></a></p>
+<p>An input pipeline that reads two parallel (line-by-line aligned) text
+files.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">source_files: An array of file names for the source data.
+target_files: An array of file names for the target data. These must</p>
+<blockquote>
+<div>be aligned to the <cite>source_files</cite>.</div></blockquote>
+<dl class="docutils">
+<dt>source_delimiter: A character to split the source text on. Defaults</dt>
+<dd>to  &#8221; &#8221; (space). For character-level training this can be set to the
+empty string.</dd>
+</dl>
+<p class="last">target_delimiter: Same as <cite>source_delimiter</cite> but for the target text.</p>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.data.input_pipeline.ParallelTextInputPipeline.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ParallelTextInputPipeline.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ParallelTextInputPipeline.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.ParallelTextInputPipeline.feature_keys">
+<code class="descname">feature_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.ParallelTextInputPipeline.feature_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.ParallelTextInputPipeline.label_keys">
+<code class="descname">label_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.ParallelTextInputPipeline.label_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.input_pipeline.ParallelTextInputPipeline.make_data_provider">
+<code class="descname">make_data_provider</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#ParallelTextInputPipeline.make_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.ParallelTextInputPipeline.make_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.data.input_pipeline.TFRecordInputPipeline">
+<em class="property">class </em><code class="descclassname">seq2seq.data.input_pipeline.</code><code class="descname">TFRecordInputPipeline</code><span class="sig-paren">(</span><em>params</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#TFRecordInputPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.TFRecordInputPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.data.input_pipeline.InputPipeline" title="seq2seq.data.input_pipeline.InputPipeline"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.data.input_pipeline.InputPipeline</span></code></a></p>
+<p>An input pipeline that reads a TFRecords containing both source
+and target sequences.</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><p class="first">files: An array of file names to read from.
+source_field: The TFRecord feature field containing the source text.
+target_field: The TFRecord feature field containing the target text.
+source_delimiter: A character to split the source text on. Defaults</p>
+<blockquote>
+<div>to  &#8221; &#8221; (space). For character-level training this can be set to the
+empty string.</div></blockquote>
+<p class="last">target_delimiter: Same as <cite>source_delimiter</cite> but for the target text.</p>
+</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="seq2seq.data.input_pipeline.TFRecordInputPipeline.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#TFRecordInputPipeline.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.TFRecordInputPipeline.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.TFRecordInputPipeline.feature_keys">
+<code class="descname">feature_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.TFRecordInputPipeline.feature_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.input_pipeline.TFRecordInputPipeline.label_keys">
+<code class="descname">label_keys</code><a class="headerlink" href="#seq2seq.data.input_pipeline.TFRecordInputPipeline.label_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.input_pipeline.TFRecordInputPipeline.make_data_provider">
+<code class="descname">make_data_provider</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#TFRecordInputPipeline.make_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.TFRecordInputPipeline.make_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.input_pipeline.make_input_pipeline_from_def">
+<code class="descclassname">seq2seq.data.input_pipeline.</code><code class="descname">make_input_pipeline_from_def</code><span class="sig-paren">(</span><em>def_dict</em>, <em>mode</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/input_pipeline.html#make_input_pipeline_from_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.input_pipeline.make_input_pipeline_from_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an InputPipeline object from a dictionary definition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>def_dict</strong> &#8211; A dictionary defining the input pipeline.
+It must have &#8220;class&#8221; and &#8220;params&#8221; that correspond to the class
+name and constructor parameters of an InputPipeline, respectively.</li>
+<li><strong>mode</strong> &#8211; A value in tf.contrib.learn.ModeKeys</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A new InputPipeline object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data.parallel_data_provider">
+<span id="seq2seq-data-parallel-data-provider-module"></span><h2>seq2seq.data.parallel_data_provider module<a class="headerlink" href="#module-seq2seq.data.parallel_data_provider" title="Permalink to this headline">¶</a></h2>
+<p>A Data Provder that reads parallel (aligned) data.</p>
+<dl class="class">
+<dt id="seq2seq.data.parallel_data_provider.ParallelDataProvider">
+<em class="property">class </em><code class="descclassname">seq2seq.data.parallel_data_provider.</code><code class="descname">ParallelDataProvider</code><span class="sig-paren">(</span><em>dataset1</em>, <em>dataset2</em>, <em>shuffle=True</em>, <em>num_epochs=None</em>, <em>common_queue_capacity=4096</em>, <em>common_queue_min=1024</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/parallel_data_provider.html#ParallelDataProvider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.parallel_data_provider.ParallelDataProvider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.slim.python.slim.data.data_provider.DataProvider</span></code></p>
+<p>Creates a ParallelDataProvider. This data provider reads two datasets
+in parallel, keeping them aligned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dataset1</strong> &#8211; The first dataset. An instance of the Dataset class.</li>
+<li><strong>dataset2</strong> &#8211; The second dataset. An instance of the Dataset class.
+Can be None. If None, only <cite>dataset1</cite> is read.</li>
+<li><strong>num_readers</strong> &#8211; The number of parallel readers to use.</li>
+<li><strong>shuffle</strong> &#8211; Whether to shuffle the data sources and common queue when
+reading.</li>
+<li><strong>num_epochs</strong> &#8211; The number of times each data source is read. If left as None,
+the data will be cycled through indefinitely.</li>
+<li><strong>common_queue_capacity</strong> &#8211; The capacity of the common queue.</li>
+<li><strong>common_queue_min</strong> &#8211; The minimum number of elements in the common queue after
+a dequeue.</li>
+<li><strong>seed</strong> &#8211; The seed to use if shuffling.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.parallel_data_provider.make_parallel_data_provider">
+<code class="descclassname">seq2seq.data.parallel_data_provider.</code><code class="descname">make_parallel_data_provider</code><span class="sig-paren">(</span><em>data_sources_source</em>, <em>data_sources_target</em>, <em>reader=&lt;class 'tensorflow.python.ops.io_ops.TextLineReader'&gt;</em>, <em>num_samples=None</em>, <em>source_delimiter=' '</em>, <em>target_delimiter=' '</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/parallel_data_provider.html#make_parallel_data_provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.parallel_data_provider.make_parallel_data_provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a DataProvider that reads parallel text data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data_sources_source</strong> &#8211; A list of data sources for the source text files.</li>
+<li><strong>data_sources_target</strong> &#8211; A list of data sources for the target text files.
+Can be None for inference mode.</li>
+<li><strong>num_samples</strong> &#8211; Optional, number of records in the dataset</li>
+<li><strong>delimiter</strong> &#8211; Split tokens in the data on this delimiter. Defaults to space.</li>
+<li><strong>kwargs</strong> &#8211; Additional arguments (shuffle, num_epochs, etc) that are passed
+to the data provider</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A DataProvider instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data.postproc">
+<span id="seq2seq-data-postproc-module"></span><h2>seq2seq.data.postproc module<a class="headerlink" href="#module-seq2seq.data.postproc" title="Permalink to this headline">¶</a></h2>
+<p>A collection of commonly used post-processing functions.</p>
+<dl class="function">
+<dt id="seq2seq.data.postproc.decode_sentencepiece">
+<code class="descclassname">seq2seq.data.postproc.</code><code class="descname">decode_sentencepiece</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/postproc.html#decode_sentencepiece"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.postproc.decode_sentencepiece" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes text that uses <a class="reference external" href="https://github.com/google/sentencepiece">https://github.com/google/sentencepiece</a> encoding.
+Assumes that pieces are separated by a space</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.postproc.slice_text">
+<code class="descclassname">seq2seq.data.postproc.</code><code class="descname">slice_text</code><span class="sig-paren">(</span><em>text</em>, <em>eos_token='SEQUENCE_END'</em>, <em>sos_token='SEQUENCE_START'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/postproc.html#slice_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.postproc.slice_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slices text from SEQUENCE_START to SEQUENCE_END, not including
+these special tokens.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.postproc.strip_bpe">
+<code class="descclassname">seq2seq.data.postproc.</code><code class="descname">strip_bpe</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/postproc.html#strip_bpe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.postproc.strip_bpe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deodes text that was processed using BPE from
+<a class="reference external" href="https://github.com/rsennrich/subword-nmt">https://github.com/rsennrich/subword-nmt</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data.sequence_example_decoder">
+<span id="seq2seq-data-sequence-example-decoder-module"></span><h2>seq2seq.data.sequence_example_decoder module<a class="headerlink" href="#module-seq2seq.data.sequence_example_decoder" title="Permalink to this headline">¶</a></h2>
+<p>A decoder for tf.SequenceExample</p>
+<dl class="class">
+<dt id="seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder">
+<em class="property">class </em><code class="descclassname">seq2seq.data.sequence_example_decoder.</code><code class="descname">TFSEquenceExampleDecoder</code><span class="sig-paren">(</span><em>context_keys_to_features</em>, <em>sequence_keys_to_features</em>, <em>items_to_handlers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/sequence_example_decoder.html#TFSEquenceExampleDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.slim.python.slim.data.data_decoder.DataDecoder</span></code></p>
+<p>A decoder for TensorFlow Examples.
+Decoding Example proto buffers is comprised of two stages: (1) Example parsing
+and (2) tensor manipulation.
+In the first stage, the tf.parse_example function is called with a list of
+FixedLenFeatures and SparseLenFeatures. These instances tell TF how to parse
+the example. The output of this stage is a set of tensors.
+In the second stage, the resulting tensors are manipulated to provide the
+requested &#8216;item&#8217; tensors.
+To perform this decoding operation, an ExampleDecoder is given a list of
+ItemHandlers. Each ItemHandler indicates the set of features for stage 1 and
+contains the instructions for post_processing its tensors for stage 2.</p>
+<dl class="method">
+<dt id="seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>serialized_example</em>, <em>items=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/sequence_example_decoder.html#TFSEquenceExampleDecoder.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes the given serialized TF-example.
+:param serialized_example: a serialized TF-example tensor.
+:param items: the list of items to decode. These must be a subset of the item</p>
+<blockquote>
+<div>keys in self._items_to_handlers. If <cite>items</cite> is left as None, then all
+of the items in self._items_to_handlers are decoded.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the decoded items, a list of tensor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder.list_items">
+<code class="descname">list_items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/sequence_example_decoder.html#TFSEquenceExampleDecoder.list_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.sequence_example_decoder.TFSEquenceExampleDecoder.list_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>See base class.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data.split_tokens_decoder">
+<span id="seq2seq-data-split-tokens-decoder-module"></span><h2>seq2seq.data.split_tokens_decoder module<a class="headerlink" href="#module-seq2seq.data.split_tokens_decoder" title="Permalink to this headline">¶</a></h2>
+<p>A decoder that splits a string into tokens and returns the
+individual tokens and the length.</p>
+<dl class="class">
+<dt id="seq2seq.data.split_tokens_decoder.SplitTokensDecoder">
+<em class="property">class </em><code class="descclassname">seq2seq.data.split_tokens_decoder.</code><code class="descname">SplitTokensDecoder</code><span class="sig-paren">(</span><em>delimiter=' '</em>, <em>tokens_feature_name='tokens'</em>, <em>length_feature_name='length'</em>, <em>prepend_token=None</em>, <em>append_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/split_tokens_decoder.html#SplitTokensDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.split_tokens_decoder.SplitTokensDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.slim.python.slim.data.data_decoder.DataDecoder</span></code></p>
+<p>A DataProvider that splits a string tensor into individual tokens and
+returns the tokens and the length.
+Optionally prepends or appends special tokens.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>delimiter</strong> &#8211; Delimiter to split on. Must be a single character.</li>
+<li><strong>tokens_feature_name</strong> &#8211; A descriptive feature name for the token values</li>
+<li><strong>length_feature_name</strong> &#8211; A descriptive feature name for the length value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.data.split_tokens_decoder.SplitTokensDecoder.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>data</em>, <em>items</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/split_tokens_decoder.html#SplitTokensDecoder.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.split_tokens_decoder.SplitTokensDecoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.split_tokens_decoder.SplitTokensDecoder.list_items">
+<code class="descname">list_items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/split_tokens_decoder.html#SplitTokensDecoder.list_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.split_tokens_decoder.SplitTokensDecoder.list_items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data.vocab">
+<span id="seq2seq-data-vocab-module"></span><h2>seq2seq.data.vocab module<a class="headerlink" href="#module-seq2seq.data.vocab" title="Permalink to this headline">¶</a></h2>
+<p>Vocabulary related functions.</p>
+<dl class="class">
+<dt id="seq2seq.data.vocab.SpecialVocab">
+<em class="property">class </em><code class="descclassname">seq2seq.data.vocab.</code><code class="descname">SpecialVocab</code><span class="sig-paren">(</span><em>UNK</em>, <em>SEQUENCE_START</em>, <em>SEQUENCE_END</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="seq2seq.data.vocab.SpecialVocab.SEQUENCE_END">
+<code class="descname">SEQUENCE_END</code><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.SEQUENCE_END" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.vocab.SpecialVocab.SEQUENCE_START">
+<code class="descname">SEQUENCE_START</code><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.SEQUENCE_START" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.data.vocab.SpecialVocab.UNK">
+<code class="descname">UNK</code><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.UNK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.vocab.SpecialVocab.__getnewargs__">
+<code class="descname">__getnewargs__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.__getnewargs__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self as a plain tuple.  Used by copy and pickle.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.data.vocab.SpecialVocab.__new__">
+<em class="property">static </em><code class="descname">__new__</code><span class="sig-paren">(</span><em>_cls</em>, <em>UNK</em>, <em>SEQUENCE_START</em>, <em>SEQUENCE_END</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new instance of SpecialVocab(UNK, SEQUENCE_START, SEQUENCE_END)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.data.vocab.SpecialVocab.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.data.vocab.SpecialVocab.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a nicely formatted representation string</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.data.vocab.VocabInfo">
+<em class="property">class </em><code class="descclassname">seq2seq.data.vocab.</code><code class="descname">VocabInfo</code><a class="reference internal" href="_modules/seq2seq/data/vocab.html#VocabInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.vocab.VocabInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">seq2seq.data.vocab.VocbabInfo</span></code></p>
+<p>Convenience structure for vocabulary information.</p>
+<dl class="attribute">
+<dt id="seq2seq.data.vocab.VocabInfo.total_size">
+<code class="descname">total_size</code><a class="headerlink" href="#seq2seq.data.vocab.VocabInfo.total_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns size the the base vocabulary plus the size of extra vocabulary</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.vocab.create_vocabulary_lookup_table">
+<code class="descclassname">seq2seq.data.vocab.</code><code class="descname">create_vocabulary_lookup_table</code><span class="sig-paren">(</span><em>filename</em>, <em>default_value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/vocab.html#create_vocabulary_lookup_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.vocab.create_vocabulary_lookup_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a lookup table for a vocabulary file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> &#8211; Path to a vocabulary file containg one word per line.
+Each word is mapped to its line number.</li>
+<li><strong>default_value</strong> &#8211; UNK tokens will be mapped to this id.
+If None, UNK tokens will be mapped to [vocab_size]</li>
+<li><strong>Returns</strong> &#8211; A tuple (vocab_to_id_table, id_to_vocab_table,
+word_to_count_table, vocab_size). The vocab size does not include
+the UNK token.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.vocab.get_special_vocab">
+<code class="descclassname">seq2seq.data.vocab.</code><code class="descname">get_special_vocab</code><span class="sig-paren">(</span><em>vocabulary_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/vocab.html#get_special_vocab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.vocab.get_special_vocab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>SpecialVocab</cite> instance for a given vocabulary size.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.data.vocab.get_vocab_info">
+<code class="descclassname">seq2seq.data.vocab.</code><code class="descname">get_vocab_info</code><span class="sig-paren">(</span><em>vocab_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/data/vocab.html#get_vocab_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.data.vocab.get_vocab_info" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Creates a <cite>VocabInfo</cite> instance that contains the vocabulary size and</dt>
+<dd>the special vocabulary for the given file.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vocab_path</strong> &#8211; Path to a vocabulary file with one word per line.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A VocabInfo tuple.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.data" title="Permalink to this headline">¶</a></h2>
+<p>Collection of input-related utlities.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

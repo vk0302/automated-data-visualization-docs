@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.data.input_pipeline &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.data.input_pipeline</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Collection of input pipelines.</span>
+
+<span class="sd">An input pipeline defines how to read and parse data. It produces a tuple</span>
+<span class="sd">of (features, labels) that can be read by tf.learn estimators.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.slim.python.slim.data</span> <span class="kn">import</span> <span class="n">tfexample_decoder</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">Configurable</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">split_tokens_decoder</span><span class="p">,</span> <span class="n">parallel_data_provider</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data.sequence_example_decoder</span> <span class="kn">import</span> <span class="n">TFSEquenceExampleDecoder</span>
+
+
+<div class="viewcode-block" id="make_input_pipeline_from_def"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.make_input_pipeline_from_def">[docs]</a><span class="k">def</span> <span class="nf">make_input_pipeline_from_def</span><span class="p">(</span><span class="n">def_dict</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Creates an InputPipeline object from a dictionary definition.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    def_dict: A dictionary defining the input pipeline.</span>
+<span class="sd">      It must have &quot;class&quot; and &quot;params&quot; that correspond to the class</span>
+<span class="sd">      name and constructor parameters of an InputPipeline, respectively.</span>
+<span class="sd">    mode: A value in tf.contrib.learn.ModeKeys</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A new InputPipeline object</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;class&quot;</span> <span class="ow">in</span> <span class="n">def_dict</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input Pipeline definition must have a class property.&quot;</span><span class="p">)</span>
+
+  <span class="n">class_</span> <span class="o">=</span> <span class="n">def_dict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">class_</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid Input Pipeline class: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_</span><span class="p">))</span>
+
+  <span class="n">pipeline_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">class_</span><span class="p">)</span>
+
+  <span class="c1"># Constructor arguments</span>
+  <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">if</span> <span class="s2">&quot;params&quot;</span> <span class="ow">in</span> <span class="n">def_dict</span><span class="p">:</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">def_dict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span>
+  <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">pipeline_class</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div>
+
+
+<span class="nd">@six.add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<div class="viewcode-block" id="InputPipeline"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.InputPipeline">[docs]</a><span class="k">class</span> <span class="nc">InputPipeline</span><span class="p">(</span><span class="n">Configurable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Abstract InputPipeline class. All input pipelines must inherit from this.</span>
+<span class="sd">  An InputPipeline defines how data is read, parsed, and separated into</span>
+<span class="sd">  features and labels.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    shuffle: If true, shuffle the data.</span>
+<span class="sd">    num_epochs: Number of times to iterate through the dataset. If None,</span>
+<span class="sd">      iterate forever.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="n">Configurable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="InputPipeline.default_params"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.InputPipeline.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s2">&quot;num_epochs&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="InputPipeline.make_data_provider"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.InputPipeline.make_data_provider">[docs]</a>  <span class="k">def</span> <span class="nf">make_data_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates DataProvider instance for this input pipeline. Additional</span>
+<span class="sd">    keyword arguments are passed to the DataProvider.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">feature_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Defines the features that this input pipeline provides. Returns</span>
+<span class="sd">      a set of strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">label_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Defines the labels that this input pipeline provides. Returns</span>
+<span class="sd">      a set of strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="InputPipeline.read_from_data_provider"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.InputPipeline.read_from_data_provider">[docs]</a>  <span class="k">def</span> <span class="nf">read_from_data_provider</span><span class="p">(</span><span class="n">data_provider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Utility function to read all available items from a DataProvider.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_values</span> <span class="o">=</span> <span class="n">data_provider</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_provider</span><span class="o">.</span><span class="n">list_items</span><span class="p">()))</span>
+    <span class="n">items_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">data_provider</span><span class="o">.</span><span class="n">list_items</span><span class="p">(),</span> <span class="n">item_values</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">items_dict</span></div></div>
+
+
+<div class="viewcode-block" id="ParallelTextInputPipeline"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ParallelTextInputPipeline">[docs]</a><span class="k">class</span> <span class="nc">ParallelTextInputPipeline</span><span class="p">(</span><span class="n">InputPipeline</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;An input pipeline that reads two parallel (line-by-line aligned) text</span>
+<span class="sd">  files.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    source_files: An array of file names for the source data.</span>
+<span class="sd">    target_files: An array of file names for the target data. These must</span>
+<span class="sd">      be aligned to the `source_files`.</span>
+<span class="sd">    source_delimiter: A character to split the source text on. Defaults</span>
+<span class="sd">      to  &quot; &quot; (space). For character-level training this can be set to the</span>
+<span class="sd">      empty string.</span>
+<span class="sd">    target_delimiter: Same as `source_delimiter` but for the target text.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ParallelTextInputPipeline.default_params"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ParallelTextInputPipeline.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">InputPipeline</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source_files&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;target_files&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;source_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="ParallelTextInputPipeline.make_data_provider"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ParallelTextInputPipeline.make_data_provider">[docs]</a>  <span class="k">def</span> <span class="nf">make_data_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">decoder_source</span> <span class="o">=</span> <span class="n">split_tokens_decoder</span><span class="o">.</span><span class="n">SplitTokensDecoder</span><span class="p">(</span>
+        <span class="n">tokens_feature_name</span><span class="o">=</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">,</span>
+        <span class="n">length_feature_name</span><span class="o">=</span><span class="s2">&quot;source_len&quot;</span><span class="p">,</span>
+        <span class="n">append_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">,</span>
+        <span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_delimiter&quot;</span><span class="p">])</span>
+
+    <span class="n">dataset_source</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+        <span class="n">data_sources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_files&quot;</span><span class="p">],</span>
+        <span class="n">reader</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TextLineReader</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="o">=</span><span class="n">decoder_source</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">items_to_descriptions</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="n">dataset_target</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_files&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">decoder_target</span> <span class="o">=</span> <span class="n">split_tokens_decoder</span><span class="o">.</span><span class="n">SplitTokensDecoder</span><span class="p">(</span>
+          <span class="n">tokens_feature_name</span><span class="o">=</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span>
+          <span class="n">length_feature_name</span><span class="o">=</span><span class="s2">&quot;target_len&quot;</span><span class="p">,</span>
+          <span class="n">prepend_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_START&quot;</span><span class="p">,</span>
+          <span class="n">append_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">,</span>
+          <span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_delimiter&quot;</span><span class="p">])</span>
+
+      <span class="n">dataset_target</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+          <span class="n">data_sources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_files&quot;</span><span class="p">],</span>
+          <span class="n">reader</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TextLineReader</span><span class="p">,</span>
+          <span class="n">decoder</span><span class="o">=</span><span class="n">decoder_target</span><span class="p">,</span>
+          <span class="n">num_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+          <span class="n">items_to_descriptions</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="k">return</span> <span class="n">parallel_data_provider</span><span class="o">.</span><span class="n">ParallelDataProvider</span><span class="p">(</span>
+        <span class="n">dataset1</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
+        <span class="n">dataset2</span><span class="o">=</span><span class="n">dataset_target</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;shuffle&quot;</span><span class="p">],</span>
+        <span class="n">num_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;num_epochs&quot;</span><span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">feature_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;source_len&quot;</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">label_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;target_len&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="TFRecordInputPipeline"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.TFRecordInputPipeline">[docs]</a><span class="k">class</span> <span class="nc">TFRecordInputPipeline</span><span class="p">(</span><span class="n">InputPipeline</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;An input pipeline that reads a TFRecords containing both source</span>
+<span class="sd">  and target sequences.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    files: An array of file names to read from.</span>
+<span class="sd">    source_field: The TFRecord feature field containing the source text.</span>
+<span class="sd">    target_field: The TFRecord feature field containing the target text.</span>
+<span class="sd">    source_delimiter: A character to split the source text on. Defaults</span>
+<span class="sd">      to  &quot; &quot; (space). For character-level training this can be set to the</span>
+<span class="sd">      empty string.</span>
+<span class="sd">    target_delimiter: Same as `source_delimiter` but for the target text.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TFRecordInputPipeline.default_params"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.TFRecordInputPipeline.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">InputPipeline</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;source_field&quot;</span><span class="p">:</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target_field&quot;</span><span class="p">:</span> <span class="s2">&quot;target&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;source_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="TFRecordInputPipeline.make_data_provider"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.TFRecordInputPipeline.make_data_provider">[docs]</a>  <span class="k">def</span> <span class="nf">make_data_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="n">splitter_source</span> <span class="o">=</span> <span class="n">split_tokens_decoder</span><span class="o">.</span><span class="n">SplitTokensDecoder</span><span class="p">(</span>
+        <span class="n">tokens_feature_name</span><span class="o">=</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">,</span>
+        <span class="n">length_feature_name</span><span class="o">=</span><span class="s2">&quot;source_len&quot;</span><span class="p">,</span>
+        <span class="n">append_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">,</span>
+        <span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_delimiter&quot;</span><span class="p">])</span>
+
+    <span class="n">splitter_target</span> <span class="o">=</span> <span class="n">split_tokens_decoder</span><span class="o">.</span><span class="n">SplitTokensDecoder</span><span class="p">(</span>
+        <span class="n">tokens_feature_name</span><span class="o">=</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span>
+        <span class="n">length_feature_name</span><span class="o">=</span><span class="s2">&quot;target_len&quot;</span><span class="p">,</span>
+        <span class="n">prepend_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_START&quot;</span><span class="p">,</span>
+        <span class="n">append_token</span><span class="o">=</span><span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">,</span>
+        <span class="n">delimiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_delimiter&quot;</span><span class="p">])</span>
+
+    <span class="n">keys_to_features</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_field&quot;</span><span class="p">]:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">((),</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_field&quot;</span><span class="p">]:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">(</span>
+            <span class="p">(),</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">items_to_handlers</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">items_to_handlers</span><span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">ItemHandlerCallback</span><span class="p">(</span>
+        <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_field&quot;</span><span class="p">]],</span>
+        <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">dict</span><span class="p">:</span> <span class="n">splitter_source</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_field&quot;</span><span class="p">]],</span> <span class="p">[</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">items_to_handlers</span><span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">ItemHandlerCallback</span><span class="p">(</span>
+        <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_field&quot;</span><span class="p">]],</span>
+        <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">dict</span><span class="p">:</span> <span class="n">splitter_source</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_field&quot;</span><span class="p">]],</span> <span class="p">[</span><span class="s2">&quot;source_len&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">items_to_handlers</span><span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">ItemHandlerCallback</span><span class="p">(</span>
+        <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_field&quot;</span><span class="p">]],</span>
+        <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">dict</span><span class="p">:</span> <span class="n">splitter_target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_field&quot;</span><span class="p">]],</span> <span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">items_to_handlers</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">ItemHandlerCallback</span><span class="p">(</span>
+        <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_field&quot;</span><span class="p">]],</span>
+        <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">dict</span><span class="p">:</span> <span class="n">splitter_target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_field&quot;</span><span class="p">]],</span> <span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">decoder</span> <span class="o">=</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">TFExampleDecoder</span><span class="p">(</span><span class="n">keys_to_features</span><span class="p">,</span>
+                                                 <span class="n">items_to_handlers</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+        <span class="n">data_sources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">],</span>
+        <span class="n">reader</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TFRecordReader</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="o">=</span><span class="n">decoder</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">items_to_descriptions</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset_data_provider</span><span class="o">.</span><span class="n">DatasetDataProvider</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;shuffle&quot;</span><span class="p">],</span>
+        <span class="n">num_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;num_epochs&quot;</span><span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">feature_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;source_len&quot;</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">label_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;target_len&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="ImageCaptioningInputPipeline"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline">[docs]</a><span class="k">class</span> <span class="nc">ImageCaptioningInputPipeline</span><span class="p">(</span><span class="n">InputPipeline</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;An input pipeline that reads a TFRecords containing both source</span>
+<span class="sd">  and target sequences.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    files: An array of file names to read from.</span>
+<span class="sd">    source_field: The TFRecord feature field containing the source text.</span>
+<span class="sd">    target_field: The TFRecord feature field containing the target text.</span>
+<span class="sd">    source_delimiter: A character to split the source text on. Defaults</span>
+<span class="sd">      to  &quot; &quot; (space). For character-level training this can be set to the</span>
+<span class="sd">      empty string.</span>
+<span class="sd">    target_delimiter: Same as `source_delimiter` but for the target text.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ImageCaptioningInputPipeline.default_params"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">InputPipeline</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;image_field&quot;</span><span class="p">:</span> <span class="s2">&quot;image/data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;image_format&quot;</span><span class="p">:</span> <span class="s2">&quot;jpg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;caption_ids_field&quot;</span><span class="p">:</span> <span class="s2">&quot;image/caption_ids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;caption_tokens_field&quot;</span><span class="p">:</span> <span class="s2">&quot;image/caption&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="ImageCaptioningInputPipeline.make_data_provider"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.input_pipeline.ImageCaptioningInputPipeline.make_data_provider">[docs]</a>  <span class="k">def</span> <span class="nf">make_data_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="n">context_keys_to_features</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;image_field&quot;</span><span class="p">]:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">(</span>
+            <span class="p">[],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">),</span>
+        <span class="s2">&quot;image/format&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">(</span>
+            <span class="p">[],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;image_format&quot;</span><span class="p">]),</span>
+    <span class="p">}</span>
+
+    <span class="n">sequence_keys_to_features</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_ids_field&quot;</span><span class="p">]:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenSequenceFeature</span><span class="p">(</span>
+            <span class="p">[],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_tokens_field&quot;</span><span class="p">]:</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenSequenceFeature</span><span class="p">(</span>
+            <span class="p">[],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">items_to_handlers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span>
+            <span class="n">image_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;image_field&quot;</span><span class="p">],</span>
+            <span class="n">format_key</span><span class="o">=</span><span class="s2">&quot;image/format&quot;</span><span class="p">,</span>
+            <span class="n">channels</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+        <span class="s2">&quot;target_ids&quot;</span><span class="p">:</span>
+        <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_ids_field&quot;</span><span class="p">]),</span>
+        <span class="s2">&quot;target_tokens&quot;</span><span class="p">:</span>
+        <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_tokens_field&quot;</span><span class="p">]),</span>
+        <span class="s2">&quot;target_len&quot;</span><span class="p">:</span> <span class="n">tfexample_decoder</span><span class="o">.</span><span class="n">ItemHandlerCallback</span><span class="p">(</span>
+            <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_tokens_field&quot;</span><span class="p">]],</span>
+            <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;caption_tokens_field&quot;</span><span class="p">]]))</span>
+    <span class="p">}</span>
+
+    <span class="n">decoder</span> <span class="o">=</span> <span class="n">TFSEquenceExampleDecoder</span><span class="p">(</span>
+        <span class="n">context_keys_to_features</span><span class="p">,</span> <span class="n">sequence_keys_to_features</span><span class="p">,</span> <span class="n">items_to_handlers</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+        <span class="n">data_sources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">],</span>
+        <span class="n">reader</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TFRecordReader</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="o">=</span><span class="n">decoder</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">items_to_descriptions</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">dataset_data_provider</span><span class="o">.</span><span class="n">DatasetDataProvider</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;shuffle&quot;</span><span class="p">],</span>
+        <span class="n">num_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;num_epochs&quot;</span><span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">feature_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">label_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;target_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;target_len&quot;</span><span class="p">])</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

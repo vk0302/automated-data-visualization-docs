@@ -1,0 +1,38 @@
+seq2seq.metrics package
+=======================
+
+Submodules
+----------
+
+seq2seq.metrics.bleu module
+---------------------------
+
+.. automodule:: seq2seq.metrics.bleu
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.metrics.metric_specs module
+-----------------------------------
+
+.. automodule:: seq2seq.metrics.metric_specs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.metrics.rouge module
+----------------------------
+
+.. automodule:: seq2seq.metrics.rouge
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.metrics
+    :members:
+    :undoc-members:
+    :show-inheritance:

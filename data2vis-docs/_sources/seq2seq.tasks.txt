@@ -1,0 +1,62 @@
+seq2seq.tasks package
+=====================
+
+Submodules
+----------
+
+seq2seq.tasks.decode_text module
+--------------------------------
+
+.. automodule:: seq2seq.tasks.decode_text
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.tasks.decode_text_og module
+-----------------------------------
+
+.. automodule:: seq2seq.tasks.decode_text_og
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.tasks.dump_attention module
+-----------------------------------
+
+.. automodule:: seq2seq.tasks.dump_attention
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.tasks.dump_attention_og module
+--------------------------------------
+
+.. automodule:: seq2seq.tasks.dump_attention_og
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.tasks.dump_beams module
+-------------------------------
+
+.. automodule:: seq2seq.tasks.dump_beams
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.tasks.inference_task module
+-----------------------------------
+
+.. automodule:: seq2seq.tasks.inference_task
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.tasks
+    :members:
+    :undoc-members:
+    :show-inheritance:

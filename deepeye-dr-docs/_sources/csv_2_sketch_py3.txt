@@ -1,0 +1,7 @@
+csv_2_sketch_py3 module
+=======================
+
+.. automodule:: csv_2_sketch_py3
+    :members:
+    :undoc-members:
+    :show-inheritance:

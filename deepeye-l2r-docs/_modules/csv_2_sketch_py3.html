@@ -1,0 +1,979 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>csv_2_sketch_py3 &mdash; Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_l2r  1.0.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for csv_2_sketch_py3</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: csv_2_sketch_py3.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2018\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    - Master file to execute the process mentioned below</span>
+<span class="sd">        - System and Engine Setup</span>
+<span class="sd">        - PART 1: CSV to SQL DB</span>
+<span class="sd">        - PART 2: SQL DB to JSON graphs</span>
+<span class="sd">        - PART 3: JSON graphs to Vega-lite graphs</span>
+<span class="sd">        - PART 4: Using JSON and Vega-lite graphs to generate High-charts graphs</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1">#coding:utf-8</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c1">#reload(sys)</span>
+<span class="c1">#sys.setdefaultencoding(&#39;utf-8&#39;)</span>
+<span class="kn">import</span> <span class="nn">MySQLdb</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="c1">#import cStringIO</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas.io.sql</span> <span class="kn">as</span> <span class="nn">psql</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="kn">import</span> <span class="n">parser</span>
+<span class="kn">from</span> <span class="nn">instance</span> <span class="kn">import</span> <span class="n">Instance</span>
+<span class="kn">from</span> <span class="nn">table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="nn">view</span> <span class="kn">import</span> <span class="n">Chart</span>
+<span class="kn">from</span> <span class="nn">features</span> <span class="kn">import</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">high_charts_parser</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+
+<span class="c1"># Process</span>
+<span class="c1">#   1. System and Engine Setup</span>
+<span class="c1">#</span>
+<span class="c1">#   2. PART 1 </span>
+<span class="c1">#       - CSV to SQL DB</span>
+<span class="c1">#</span>
+<span class="c1">#   3. PART 2</span>
+<span class="c1">#       - SQL DB to JSON graphs</span>
+<span class="c1">#</span>
+<span class="c1">#   4. PART 3</span>
+<span class="c1">#       - JSON graphs to Vega-lite graphs</span>
+<span class="c1">#</span>
+<span class="c1">#   5. PART 4</span>
+<span class="c1">#       - JSON graphs to High-charts graphs</span>
+
+
+
+<span class="c1">###################################################################################################</span>
+<span class="c1"># PART 1 Functions</span>
+
+<span class="n">dbtypes</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;mysql&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;DATE&#39;</span><span class="p">:</span><span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATETIME&#39;</span><span class="p">:</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span> <span class="s1">&#39;INT&#39;</span><span class="p">:</span><span class="s1">&#39;BIGINT&#39;</span><span class="p">,</span>  <span class="s1">&#39;FLOAT&#39;</span><span class="p">:</span><span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span>  <span class="s1">&#39;VARCHAR&#39;</span><span class="p">:</span><span class="s1">&#39;VARCHAR&#39;</span><span class="p">}}</span>
+
+<div class="viewcode-block" id="read_db"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.read_db">[docs]</a><span class="k">def</span> <span class="nf">read_db</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Read DB using sql query.       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sql (str): SQL query.</span>
+<span class="sd">        con (connectivity object): Object representing Database pointed by host, port, username and password.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        pandas dataframe: Data frame representing elements retrieved by query.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">psql</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">con</span><span class="p">);</span></div>
+
+<div class="viewcode-block" id="table_exists"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.table_exists">[docs]</a><span class="k">def</span> <span class="nf">table_exists</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Check if table exists at the Databse location       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        name (str): Table name to look for.</span>
+<span class="sd">        con (connectivity object): Object representing Database pointed by host, port, username and password.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        bool: exists -&gt; True if table exists in DB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sql</span><span class="o">=</span><span class="s2">&quot;show tables like &#39;MYTABLE&#39;;&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MYTABLE&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">read_db</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">con</span><span class="p">);</span>
+    <span class="c1">#print sql, df;</span>
+    <span class="c1">#print &#39;table_exists?&#39;, len(df);</span>
+    <span class="n">exists</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="bp">False</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">exists</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="db_colname"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.db_colname">[docs]</a><span class="k">def</span> <span class="nf">db_colname</span><span class="p">(</span><span class="n">pandas_colname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Ger column name from the pandas dataframe.       </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        pandas_colname (pandata dataframe): Dataframe in consideration.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: colname -&gt; Column name. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colname</span> <span class="o">=</span>  <span class="n">pandas_colname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">();</span>                  
+    <span class="k">return</span> <span class="n">colname</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="get_schema"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.get_schema">[docs]</a><span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Get schema of the dataframe in consideration.    </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        frame (pandata dataframe): Dataframe in consideration.</span>
+<span class="sd">        name (str): Table name</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: schema to create table.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">dbtypes</span><span class="p">[</span><span class="s1">&#39;mysql&#39;</span><span class="p">];</span>  <span class="c1">#deal with datatype differences</span>
+    <span class="n">column_types</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">dtypes</span><span class="p">;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dtypes</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">k</span><span class="p">];</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;numpy.datetime64&#39;&gt;&quot;</span><span class="p">:</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;INT&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;FLOAT&#39;</span><span class="p">];</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sampl</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">frame</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">0</span><span class="p">];</span>    
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sampl</span><span class="p">))</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;datetime.datetime&#39;&gt;&quot;</span><span class="p">:</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">];</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sampl</span><span class="p">))</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;datetime.date&#39;&gt;&quot;</span><span class="p">:</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">];</span>             
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="p">);</span>
+                <span class="c1">#print k,&#39;varchar sz&#39;, size;</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;VARCHAR&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;(?)&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="p">);</span>
+        <span class="n">colname</span> <span class="o">=</span>  <span class="s2">&quot;`&quot;</span> <span class="o">+</span> <span class="n">db_colname</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;`&quot;</span> <span class="c1">#k.upper().replace(&#39; &#39;,&#39;_&#39;);                 </span>
+        <span class="n">column_types</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">colname</span><span class="p">,</span> <span class="n">sqltype</span><span class="p">));</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">column_types</span><span class="p">);</span>
+    <span class="n">template_create</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;CREATE TABLE </span><span class="si">%(name)s</span><span class="s2"> (</span>
+<span class="s2">                      </span><span class="si">%(columns)s</span><span class="s2"></span>
+<span class="s2">                    );&quot;&quot;&quot;</span>
+    <span class="n">create</span> <span class="o">=</span> <span class="n">template_create</span> <span class="o">%</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="p">,</span> <span class="s1">&#39;columns&#39;</span> <span class="p">:</span> <span class="n">columns</span><span class="p">};</span>
+    <span class="k">return</span> <span class="n">create</span><span class="p">;</span></div>
+
+
+
+
+<div class="viewcode-block" id="write_frame"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.write_frame">[docs]</a><span class="k">def</span> <span class="nf">write_frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;fail&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Create table in database.    </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        frame (pandata dataframe): Dataframe in consideration.</span>
+<span class="sd">        name (str): Table name</span>
+<span class="sd">        con (connectivity object): Object representing Database pointed by host, port, username and password.</span>
+<span class="sd">        if_exists (str): Can be any of these values</span>
+<span class="sd">            - replace -&gt; Delete the table and replace it with a new one.</span>
+<span class="sd">            - append -&gt; If table exists then append it with this new sub-table.</span>
+<span class="sd">            - fail -&gt; Create a new table.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: schema to create table.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">if_exists</span><span class="o">==</span><span class="s1">&#39;replace&#39;</span> <span class="ow">and</span> <span class="n">table_exists</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">();</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;drop table &quot;</span><span class="o">+</span><span class="n">name</span><span class="p">);</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+    
+    <span class="k">if</span> <span class="n">if_exists</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;fail&#39;</span><span class="p">,</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span> <span class="n">if_exists</span><span class="o">==</span><span class="s1">&#39;append&#39;</span> <span class="ow">and</span> <span class="n">table_exists</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">con</span><span class="p">)</span><span class="o">==</span><span class="bp">False</span> <span class="p">):</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">();</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">get_schema</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SET sql_mode=&#39;ANSI_QUOTES&#39;;&quot;</span><span class="p">);</span>
+        <span class="c1">#print &#39;schema\n&#39;, schema;</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">schema</span><span class="p">);</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+        <span class="c1">#print &#39;created table&#39;; </span>
+        
+    <span class="c1">#bulk insert</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">();</span>
+    <span class="n">wildcards</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">columns</span><span class="p">));</span>
+    <span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;`&quot;</span> <span class="o">+</span> <span class="n">db_colname</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;`&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">index</span><span class="p">];</span>
+    <span class="n">colnames</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cols</span><span class="p">);</span>
+    <span class="n">insert_sql</span> <span class="o">=</span> <span class="s1">&#39;INSERT INTO </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) VALUES (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">colnames</span><span class="p">,</span> <span class="n">wildcards</span><span class="p">);</span>
+    <span class="c1">#print insert_sql;</span>
+    <span class="n">data</span><span class="o">=</span> <span class="p">[</span> <span class="nb">tuple</span><span class="p">([</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rw</span><span class="p">])</span> <span class="k">for</span> <span class="n">rw</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">values</span> <span class="p">];</span>
+    <span class="c1">#print data[0];</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">insert_sql</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>  
+    <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">();</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+    <span class="k">return</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="get_cols_and_types"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.get_cols_and_types">[docs]</a><span class="k">def</span> <span class="nf">get_cols_and_types</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Get column types in dataframe under consideration.  </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        frame (pandata dataframe): Dataframe in consideration.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        list: column_types</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">dbtypes</span><span class="p">[</span><span class="s1">&#39;mysql&#39;</span><span class="p">];</span>  <span class="c1">#deal with datatype differences</span>
+    <span class="n">column_types</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">dtypes</span><span class="p">;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dtypes</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">k</span><span class="p">];</span>
+        <span class="c1">#print i, k, dt</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;numpy.datetime64&#39;&gt;&quot;</span><span class="p">:</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;INT&#39;</span><span class="p">];</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;FLOAT&#39;</span><span class="p">];</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sampl</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">frame</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">0</span><span class="p">];</span>    
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sampl</span><span class="p">))</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;datetime.datetime&#39;&gt;&quot;</span><span class="p">:</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">];</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sampl</span><span class="p">))</span><span class="o">==</span><span class="s2">&quot;&lt;type &#39;datetime.date&#39;&gt;&quot;</span><span class="p">:</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">];</span>             
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="p">);</span>
+                <span class="c1">#print k,&#39;varchar sz&#39;, size;</span>
+                <span class="n">sqltype</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;VARCHAR&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;(?)&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="p">);</span>
+        <span class="n">colname</span> <span class="o">=</span>  <span class="n">db_colname</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>  <span class="c1">#k.upper().replace(&#39; &#39;,&#39;_&#39;);                 </span>
+        <span class="n">column_types</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">colname</span><span class="p">,</span> <span class="n">sqltype</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">column_types</span><span class="p">;</span></div>
+<span class="c1">###################################################################################################</span>
+
+
+
+
+<span class="c1">###################################################################################################</span>
+<span class="c1"># PART 3 Functions</span>
+
+<div class="viewcode-block" id="get_type_bar"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.get_type_bar">[docs]</a><span class="k">def</span> <span class="nf">get_type_bar</span><span class="p">(</span><span class="n">d_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar</span>
+<span class="sd">        - categorize data type on x-axis  </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        d_type (float/int): Data type of data on x-axis</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Categorized as \n</span>
+<span class="sd">            - &quot;Quantitative&quot; if d_type is &#39;float&#39; or &#39;int&#39;\n</span>
+<span class="sd">            - &quot;Ordinal&quot; elsewhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;quantitative&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ordinal&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="create_vega_lite_bar"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.create_vega_lite_bar">[docs]</a><span class="k">def</span> <span class="nf">create_vega_lite_bar</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar</span>
+<span class="sd">        - Parse dictionary to create Vega-lite compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sample_bar (dict): jsonified structured output from core application.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it Vega-lite compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vega_lite_bar</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_bar</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_bar</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;classes&#39;</span><span class="p">;</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ordinal&quot;</span><span class="p">;</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rangeStep&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">};</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_bar</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_bar</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;column&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_bar</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">vega_lite_bar</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">vega_lite_bar</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+<div class="viewcode-block" id="create_vega_lite_pie"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.create_vega_lite_pie">[docs]</a><span class="k">def</span> <span class="nf">create_vega_lite_pie</span><span class="p">(</span><span class="n">sample_pie</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Pie</span>
+<span class="sd">        - Parse dictionary to create Vega-lite compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sample_pie (dict): jsonified structured output from core application.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it Vega-lite compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vega_lite_pie</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;geoshape&quot;</span><span class="p">,</span><span class="s2">&quot;stroke&quot;</span><span class="p">:</span> <span class="s2">&quot;#fff&quot;</span><span class="p">};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;properties.cat&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;nominal&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;legend&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">]}</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;projection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;azimuthalEquidistant&quot;</span><span class="p">,</span> <span class="s2">&quot;rotate&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+    <span class="p">};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;view&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;stroke&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span> <span class="p">}</span> <span class="p">};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;FeatureCollection&quot;</span><span class="p">;</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span><span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="s2">&quot;features&quot;</span><span class="p">}</span>
+    <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="s2">&quot;features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">current_val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">old_val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">current_degree</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+    <span class="n">old_degree</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Feature&quot;</span><span class="p">;</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cat&quot;</span><span class="p">:</span> <span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">;</span>
+        
+        <span class="n">current_val</span> <span class="o">+=</span> <span class="n">sample_pie</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">total</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">current_degree</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_val</span><span class="o">/</span><span class="n">total</span><span class="p">)</span> <span class="o">*</span> <span class="mi">360</span><span class="p">;</span>
+            <span class="n">old_degree</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_val</span><span class="o">/</span><span class="n">total</span><span class="p">)</span> <span class="o">*</span> <span class="mi">360</span><span class="p">;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_degree</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_val</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">))</span> <span class="o">*</span> <span class="mi">360</span><span class="p">;</span>
+            <span class="n">old_degree</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_val</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">))</span> <span class="o">*</span> <span class="mi">360</span><span class="p">;</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">90</span><span class="p">],[</span><span class="n">current_degree</span><span class="p">,</span><span class="o">-</span><span class="mi">89</span><span class="p">],[</span><span class="n">old_degree</span><span class="p">,</span><span class="o">-</span><span class="mi">89</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">90</span><span class="p">]]];</span>
+        <span class="n">old_val</span> <span class="o">=</span> <span class="n">current_val</span><span class="p">;</span>
+        <span class="n">vega_lite_pie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="s2">&quot;features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">vega_lite_pie</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+<div class="viewcode-block" id="get_type_line"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.get_type_line">[docs]</a><span class="k">def</span> <span class="nf">get_type_line</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line</span>
+<span class="sd">        - categorize data type on x-axis  </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        val (float/int/string): Data point on x-axis</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Categorized as \n</span>
+<span class="sd">            - &quot;Quantitative&quot; if data type is &#39;float&#39; or &#39;int&#39;\n</span>
+<span class="sd">            - &quot;Temporal&quot; if &quot;-&quot; exists in val \n</span>
+<span class="sd">            - &quot;Ordinal&quot; elsewhere</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;quantitative&quot;</span><span class="p">;</span>
+    <span class="k">elif</span> <span class="s2">&quot;~&quot;</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ordinal&quot;</span><span class="p">;</span>
+    <span class="k">elif</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;temporal&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ordinal&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="create_vega_lite_line"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.create_vega_lite_line">[docs]</a><span class="k">def</span> <span class="nf">create_vega_lite_line</span><span class="p">(</span><span class="n">sample_line</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line</span>
+<span class="sd">        - Parse dictionary to create Vega-lite compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sample_line (dict): jsonified structured output from core application.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it Vega-lite compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vega_lite_line</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span><span class="p">;</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>    
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_line</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_line</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;symbol&#39;</span><span class="p">;</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nominal&quot;</span><span class="p">;</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_line</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_line</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_line</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">vega_lite_line</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">vega_lite_line</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+<div class="viewcode-block" id="get_type_scatter"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.get_type_scatter">[docs]</a><span class="k">def</span> <span class="nf">get_type_scatter</span><span class="p">(</span><span class="n">d_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter</span>
+<span class="sd">        - categorize data type on x-axis  </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        d_type (float/int): Data type of data on x-axis</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Categorized as \n</span>
+<span class="sd">            - &quot;Quantitative&quot; if d_type is &#39;float&#39; or &#39;int&#39;\n</span>
+<span class="sd">            - &quot;Ordinal&quot; elsewhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">d_type</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;quantitative&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;temporal&quot;</span><span class="p">;</span></div>
+    
+<div class="viewcode-block" id="create_vega_lite_scatter"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.create_vega_lite_scatter">[docs]</a><span class="k">def</span> <span class="nf">create_vega_lite_scatter</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter</span>
+<span class="sd">        - Parse dictionary to create Vega-lite compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sample_scatter (dict): jsonified structured output from core application.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it Vega-lite compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vega_lite_scatter</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;describe&#39;</span><span class="p">];</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;point&#39;</span><span class="p">;</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span><span class="p">;</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span> 
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_scatter</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_scatter</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>       
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;classes&#39;</span><span class="p">;</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nominal&quot;</span><span class="p">;</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_scatter</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">];</span>
+        <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_type_scatter</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]));</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">])):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;field&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_scatter</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+                <span class="n">vega_lite_scatter</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">vega_lite_scatter</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+<span class="c1">###################################################################################################</span>
+
+
+<span class="c1">####################################### PROCESS ##################################################</span>
+
+
+<span class="c1">###################################################################################################</span>
+<span class="c1"># System setup</span>
+<div class="viewcode-block" id="process"><a class="viewcode-back" href="../csv_2_sketch_py3.html#csv_2_sketch_py3.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">in_file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Master function to execute the process in theis order:</span>
+<span class="sd">        - System and Engine Setup</span>
+<span class="sd">        - PART 1: CSV to SQL DB</span>
+<span class="sd">        - PART 2: SQL DB to JSON graphs</span>
+<span class="sd">        - PART 3: JSON graphs to Vega-lite graphs</span>
+<span class="sd">        - PART 4: Using JSON and Vega-lite graphs to generate High-charts graphs</span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        in_file_name (str): Input CSV file for which graphs will be created</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        bool: True if process successful.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Part 0</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Executing System setup...&quot;</span><span class="p">);</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span><span class="p">;</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="mi">3306</span><span class="p">;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span><span class="p">;</span>
+    <span class="n">passwd</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span><span class="p">;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="s1">&#39;sketch_data&#39;</span><span class="p">;</span> <span class="c1"># DB name</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;df&#39;</span><span class="p">;</span> <span class="c1"># Table name</span>
+    <span class="c1">#in_file_name = &quot;sample8.csv&quot;</span>
+    <span class="n">out_file_name</span> <span class="o">=</span> <span class="s2">&quot;JSON_OUTPUT/&quot;</span> <span class="o">+</span> <span class="s2">&quot;out_lr_&quot;</span> <span class="o">+</span> <span class="n">in_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+    <span class="n">out_dir_name</span> <span class="o">=</span> <span class="s2">&quot;VEGA_LITE_OUTPUT/&quot;</span> <span class="o">+</span> <span class="s2">&quot;out_lr_&quot;</span> <span class="o">+</span> <span class="n">in_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="n">out_dir_name2</span> <span class="o">=</span> <span class="s2">&quot;HIGH_CHARTS_OUTPUT/&quot;</span> <span class="o">+</span> <span class="s2">&quot;out_lr_&quot;</span> <span class="o">+</span> <span class="n">in_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="n">json_dir</span> <span class="o">=</span> <span class="s2">&quot;JSON_OUTPUT&quot;</span>
+    <span class="n">base_out_dir_1</span> <span class="o">=</span> <span class="s2">&quot;VEGA_LITE_OUTPUT&quot;</span><span class="p">;</span>
+    <span class="n">base_out_dir_2</span> <span class="o">=</span> <span class="s2">&quot;HIGH_CHARTS_OUTPUT&quot;</span><span class="p">;</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">json_dir</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">json_dir</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">base_out_dir_1</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">base_out_dir_1</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">base_out_dir_2</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">base_out_dir_2</span><span class="p">);</span>
+
+
+    <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">out_dir_name</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm -r &quot;</span> <span class="o">+</span> <span class="n">out_dir_name</span><span class="p">);</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">out_dir_name</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">out_dir_name</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">out_dir_name2</span><span class="p">)):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm -r &quot;</span> <span class="o">+</span> <span class="n">out_dir_name2</span><span class="p">);</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">out_dir_name2</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">out_dir_name2</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+<span class="c1">###################################################################################################</span>
+
+<span class="c1">###################################################################################################</span>
+    <span class="c1"># Part 1</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Executing part 1...&quot;</span><span class="p">);</span>
+    <span class="n">con</span> <span class="o">=</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="n">passwd</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">);</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">();</span>
+    <span class="n">databases</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;show databases&quot;</span><span class="p">)</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">databases</span><span class="p">)</span>
+    <span class="n">db_list</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">databases</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">:</span>
+        <span class="n">db_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">databases</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="k">if</span> <span class="s2">&quot;sketch_data&quot;</span> <span class="ow">in</span> <span class="n">db_list</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;DROP DATABASE &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="p">);</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CREATE DATABASE &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="p">);</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CREATE DATABASE &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="p">);</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;CSV/&quot;</span> <span class="o">+</span> <span class="n">in_file_name</span><span class="p">);</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">();</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="c1">#print(&quot;col name - &quot;, df[col].name);</span>
+        <span class="c1">#print(&quot;dtype name - &quot;, df[col].dtype);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">):</span>
+        <span class="c1">#   print(&quot;\n&quot;);</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">or</span> <span class="n">val</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">normalize</span><span class="p">();</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="s2">&quot;year&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">);</span>
+
+    <span class="n">coltypes</span> <span class="o">=</span> <span class="n">get_cols_and_types</span><span class="p">(</span><span class="n">df</span><span class="p">);</span>
+    <span class="n">cn</span> <span class="o">=</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="n">passwd</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">);</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">write_frame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="n">cn</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">);</span>
+        <span class="n">df_mysql</span> <span class="o">=</span> <span class="n">read_db</span><span class="p">(</span><span class="s1">&#39;select * from &#39;</span><span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="n">cn</span><span class="p">);</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">cn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">);</span>
+<span class="c1">###################################################################################################</span>
+
+<span class="c1">###################################################################################################</span>
+    <span class="c1"># Part 2</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Executing part 2...&quot;</span><span class="p">);</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="p">];</span>
+    <span class="n">base_command</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM `&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;`&quot;</span><span class="p">;</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_command</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coltypes</span><span class="p">)):</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coltypes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coltypes</span><span class="p">)):</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coltypes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="n">dbArgs</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">6</span><span class="p">];</span>
+    <span class="n">instance</span><span class="o">=</span><span class="n">Instance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">6</span><span class="p">]);</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">addTable</span><span class="p">(</span><span class="n">Table</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">));</span>
+    <span class="n">conn</span><span class="o">=</span><span class="n">MySQLdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">dbArgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">port</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">dbArgs</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">user</span><span class="o">=</span><span class="n">dbArgs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">passwd</span><span class="o">=</span><span class="n">dbArgs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">db</span><span class="o">=</span><span class="n">dbArgs</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">);</span>
+    <span class="n">cur</span><span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">();</span>
+    <span class="c1"># UPDATE - for python 3, div output by default is float</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">column_num</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">column_num</span><span class="o">=</span><span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">instance</span><span class="o">.</span><span class="n">column_num</span><span class="p">):</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">8</span><span class="o">+</span><span class="n">i</span><span class="p">]);</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Type</span><span class="o">.</span><span class="n">getType</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">8</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">instance</span><span class="o">.</span><span class="n">column_num</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()));</span>
+    <span class="c1">#print instance.tables[0].names;</span>
+    <span class="c1">#print instance.tables[0].types;</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">origins</span><span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">column_num</span><span class="p">)];</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">tuple_num</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tuple_num</span><span class="o">=</span><span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">7</span><span class="p">]);</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">D</span><span class="o">=</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">());</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+    <span class="c1"># UPDATE: for python3 - map has no func len and is not subscriptable</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">D</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">D</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}&#39;</span><span class="p">);</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">addTables</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dealWithTable</span><span class="p">());</span>
+    <span class="n">begin_id</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="k">while</span> <span class="n">begin_id</span><span class="o">&lt;</span><span class="n">instance</span><span class="o">.</span><span class="n">table_num</span><span class="p">:</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">begin_id</span><span class="p">]</span><span class="o">.</span><span class="n">dealWithTable</span><span class="p">();</span>
+        <span class="n">begin_id</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">view_num</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}&#39;</span><span class="p">);</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">getScore</span><span class="p">();</span>
+    <span class="n">order1</span><span class="o">=</span><span class="n">order2</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">old_view</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">;</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+    <span class="n">data_list</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">table_pos</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">view_pos</span><span class="p">];</span>
+        <span class="n">classify</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([]);</span>
+        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">series_num</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#UPDATE - for python 3: decode removed in python 3;</span>
+            <span class="c1">#classify = str([v[0] for v in view.table.classes]).replace(&quot;u&#39;&quot;, &#39;\&#39;&#39;).decode(&quot;unicode-escape&quot;).replace(&quot;&#39;&quot;,&#39;&quot;&#39;);</span>
+            <span class="n">classify</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">view</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">classes</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;u&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span><span class="s1">&#39;&quot;&#39;</span><span class="p">);</span>
+        <span class="n">x_data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">X</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="n">Type</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="n">x_data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+        <span class="k">elif</span> <span class="n">view</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="n">Type</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span>
+            <span class="c1">#UPDATE - for python 3: decode removed in python 3;</span>
+            <span class="c1">#x_data=str(view.X).replace(&quot;u&#39;&quot;,&#39;\&#39;&#39;).decode(&quot;unicode-escape&quot;).replace(&quot;&#39;&quot;,&#39;&quot;&#39;);</span>
+            <span class="n">x_data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;u&#39;&quot;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span><span class="s1">&#39;&quot;&#39;</span><span class="p">);</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">len_x</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">X</span><span class="p">);</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">:</span> <span class="n">s1</span> <span class="o">+</span> <span class="n">s2</span><span class="p">,</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">view</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">len_x</span><span class="p">)])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;]&#39;</span><span class="p">;</span>
+        <span class="n">y_data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">Y</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">fy</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Type</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">old_view</span><span class="p">:</span>
+            <span class="n">order2</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">order1</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;{&quot;order1&quot;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">order1</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;,&quot;describe&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">view</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="o">+</span> <span class="s1">&#39;&quot;,&quot;x_name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">view</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;&quot;,&quot;y_name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">view</span><span class="o">.</span><span class="n">fy</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;&quot;,&quot;chart&quot;:&quot;&#39;</span> <span class="o">+</span> \
+            <span class="n">Chart</span><span class="o">.</span><span class="n">chart</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">chart</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot;,&quot;classify&quot;:&#39;</span> <span class="o">+</span> <span class="n">classify</span> <span class="o">+</span> <span class="s1">&#39;,&quot;x_data&quot;:&#39;</span> <span class="o">+</span> <span class="n">x_data</span> <span class="o">+</span> <span class="s1">&#39;,&quot;y_data&quot;:&#39;</span> <span class="o">+</span> <span class="n">y_data</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="n">old_view</span> <span class="o">=</span> <span class="n">view</span><span class="p">;</span>
+    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data_list</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">));</span>
+    <span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">);</span>
+<span class="c1">###################################################################################################</span>
+
+<span class="c1">###################################################################################################</span>
+    <span class="c1"># Part 3</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Executing part 3...&quot;</span><span class="p">);</span>
+    <span class="n">json_data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">out_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">();</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_data</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+        <span class="c1">#print i, data[i][&#39;chart&#39;];</span>
+        <span class="n">outfile_name</span> <span class="o">=</span> <span class="n">out_dir_name</span> <span class="o">+</span> <span class="s2">&quot;/graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;bar&quot;</span><span class="p">):</span>
+            <span class="n">vega_lite_out</span> <span class="o">=</span> <span class="n">create_vega_lite_bar</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;pie&quot;</span><span class="p">):</span>
+            <span class="n">vega_lite_out</span> <span class="o">=</span> <span class="n">create_vega_lite_pie</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;line&quot;</span><span class="p">):</span>
+            <span class="n">vega_lite_out</span> <span class="o">=</span> <span class="n">create_vega_lite_line</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span><span class="p">):</span>
+            <span class="n">vega_lite_out</span> <span class="o">=</span> <span class="n">create_vega_lite_scatter</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Chart type &quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chart&#39;</span><span class="p">],</span> <span class="s2">&quot; unknown&quot;</span><span class="p">);</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;System Error&quot;</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">vega_lite_out</span><span class="p">);</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">);</span>
+<span class="c1">###################################################################################################</span>
+
+<span class="c1">###################################################################################################</span>
+    <span class="c1"># Part 4</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Executing part 4...&quot;</span><span class="p">);</span>
+    <span class="n">json_data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">out_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">();</span>
+    <span class="n">data_main</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_data</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_main</span><span class="p">))):</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        
+        <span class="n">main_file</span> <span class="o">=</span> <span class="n">out_file_name</span><span class="p">;</span>
+        <span class="n">main_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">main_file</span><span class="p">);</span>
+        <span class="n">sub_data</span> <span class="o">=</span> <span class="n">main_data</span><span class="p">[</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+        <span class="c1">##print(sub_data);</span>
+
+        <span class="n">f_file</span> <span class="o">=</span> <span class="n">out_dir_name</span> <span class="o">+</span> <span class="s2">&quot;/graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">f_file</span><span class="p">);</span>
+        <span class="c1">#print(&quot;data.keys() = &quot;, data.keys());</span>
+
+        <span class="n">chart_type</span> <span class="o">=</span> <span class="n">get_chart_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="c1">#print(&quot;chart_type = &quot;, chart_type);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">chart_type</span> <span class="o">==</span> <span class="s2">&quot;bar&quot;</span><span class="p">):</span>  <span class="c1">#bar, #pie, #line, #scatter</span>
+            <span class="n">bar_chart_sub_type</span> <span class="o">=</span> <span class="n">bar_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">#print(&quot;  bar_chart_sub_type = &quot;, bar_chart_sub_type);</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">bar_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;bar_simple&quot;</span><span class="p">):</span> <span class="c1">#bar_simple, #bar_grouped</span>
+                <span class="n">bar_simple_x_type</span> <span class="o">=</span> <span class="n">bar_simple_get_x_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">#print(&quot;    bar_simple_x_type = &quot;, bar_simple_x_type);</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="n">bar_simple_x_type</span> <span class="o">==</span> <span class="s2">&quot;category_type&quot;</span> <span class="ow">or</span> <span class="s2">&quot;date_type&quot;</span><span class="p">):</span> <span class="c1">#category_type, #date_type</span>
+                    <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span> <span class="o">=</span> <span class="n">bar_simple_category_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      x_axis_name, y_axis_name = &quot;, x_axis_name, y_axis_name);</span>
+                    <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="n">bar_simple_category_get_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      x_values = &quot;, x_values);</span>
+                    <span class="c1">##print(&quot;      y_values = &quot;, y_values);</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">bar_simple_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      title = &quot;, title);</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_bar_simple_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                    <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                    <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+            <span class="k">elif</span><span class="p">(</span><span class="n">bar_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;bar_grouped&quot;</span><span class="p">):</span> <span class="c1">#bar_simple, #bar_grouped</span>
+                <span class="n">bar_grouped_x_type</span> <span class="o">=</span> <span class="n">bar_grouped_get_x_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">#print(&quot;    bar_grouped_x_type = &quot;, bar_grouped_x_type);</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="n">bar_grouped_x_type</span> <span class="o">==</span> <span class="s2">&quot;category_type&quot;</span> <span class="ow">or</span> <span class="s2">&quot;date_type&quot;</span><span class="p">):</span> <span class="c1">#category_type, #date_type</span>
+                    <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">column_axis_name</span> <span class="o">=</span> <span class="n">bar_grouped_category_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      x_axis_name, y_axis_name, column_axis_name = &quot;, x_axis_name, y_axis_name, column_axis_name);</span>
+                    <span class="n">column_values</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="n">bar_grouped_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      x_values = &quot;, x_values);</span>
+                    <span class="c1">##print(&quot;      y_values = &quot;, y_values);</span>
+                    <span class="c1">##print(&quot;      column_values = &quot;, column_values);</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">bar_simple_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                    <span class="c1">##print(&quot;      title = &quot;, title);</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_bar_grouped_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">column_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">column_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                    <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                    <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">chart_type</span> <span class="o">==</span> <span class="s2">&quot;point&quot;</span><span class="p">):</span>  <span class="c1">#bar, #pie, #line, #scatter</span>
+            <span class="n">scatter_chart_sub_type</span> <span class="o">=</span> <span class="n">scatter_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">#print(&quot;  scatter_chart_sub_type = &quot;, scatter_chart_sub_type);</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">scatter_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;scatter_single&quot;</span><span class="p">):</span> <span class="c1">#scatter_single, #scatter_multi</span>
+                <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span> <span class="o">=</span> <span class="n">scatter_single_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_axis_name, y_axis_name = &quot;, x_axis_name, y_axis_name);</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+                <span class="n">x_y_value_pair</span> <span class="o">=</span> <span class="n">scatter_single_category_get_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_y_value_pair = &quot;, x_y_value_pair);</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">scatter_single_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    title = &quot;, title);</span>
+                <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_scatter_single</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+            <span class="k">elif</span><span class="p">(</span><span class="n">scatter_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;scatter_multi&quot;</span><span class="p">):</span> <span class="c1">#scatter_single, #scatter_multi</span>
+                <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">color_axis_name</span> <span class="o">=</span> <span class="n">scatter_multi_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_axis_name, y_axis_name, color_axis_name = &quot;, x_axis_name, y_axis_name, color_axis_name);</span>
+                <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">color_values</span> <span class="o">=</span> <span class="n">scatter_multi_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_y_value_pair = &quot;, x_y_value_pair);</span>
+                <span class="c1">##print(&quot;    color_values = &quot;, color_values);</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">scatter_multi_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;      title = &quot;, title);</span>
+                <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_scatter_multi</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">color_axis_name</span><span class="p">,</span> <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+
+        <span class="k">if</span><span class="p">(</span><span class="n">chart_type</span> <span class="o">==</span> <span class="p">{</span><span class="sa">u</span><span class="s1">&#39;stroke&#39;</span><span class="p">:</span> <span class="sa">u</span><span class="s1">&#39;#fff&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="sa">u</span><span class="s1">&#39;geoshape&#39;</span><span class="p">}):</span>  <span class="c1">#bar, #pie, #line, #scatter</span>
+            <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span> <span class="o">=</span> <span class="n">pie_get_axes_names</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+            <span class="c1">##print(&quot;    x_axis_name, y_axis_name = &quot;, x_axis_name, y_axis_name);</span>
+            <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="n">pie_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+            <span class="c1">##print(&quot;    x_values = &quot;, x_values);</span>
+            <span class="c1">##print(&quot;    y_values = &quot;, y_values);</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">pie_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">##print(&quot;      title = &quot;, title);</span>
+            <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_pie</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+            <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+            <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">chart_type</span> <span class="o">==</span> <span class="s2">&quot;line&quot;</span><span class="p">):</span>  <span class="c1">#bar, #pie, #line, #scatter</span>
+            <span class="n">line_chart_sub_type</span> <span class="o">=</span> <span class="n">line_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">#print(&quot;  line_chart_sub_type = &quot;, line_chart_sub_type);</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">line_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;line_single&quot;</span><span class="p">):</span> <span class="c1">#line_single, #line_multi</span>
+                <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span> <span class="o">=</span> <span class="n">line_single_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_axis_name, y_axis_name = &quot;, x_axis_name, y_axis_name);</span>
+                <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="n">line_simple_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;      len(x_values) = &quot;, len(x_values));</span>
+                <span class="c1">##print(&quot;      len(y_values) = &quot;, len(y_values));</span>
+                <span class="n">x_val_type</span> <span class="o">=</span> <span class="n">line_simple_get_x_type</span><span class="p">(</span><span class="n">x_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="c1">##print(&quot;      x_val_type = &quot;, x_val_type);</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">line_single_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;      title = &quot;, title);</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">x_val_type</span> <span class="o">==</span> <span class="s2">&quot;date&quot;</span><span class="p">):</span> <span class="c1">#date, #category</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_line_single_chart_date</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                    <span class="c1">#outwrite = outwrite.replace(&quot;\&quot;Date.UTC&quot;, &quot;Date.UTC&quot;);</span>
+                    <span class="c1">#outwrite = outwrite.replace(&quot;)\&quot;,&quot;, &quot;),&quot;)</span>
+                <span class="k">elif</span><span class="p">(</span><span class="n">x_val_type</span> <span class="o">==</span> <span class="s2">&quot;category&quot;</span><span class="p">):</span> <span class="c1">#date, #category:</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_line_single_chart_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+            <span class="k">elif</span><span class="p">(</span><span class="n">line_chart_sub_type</span> <span class="o">==</span> <span class="s2">&quot;line_multi&quot;</span><span class="p">):</span> <span class="c1">#line_single, #line_multi</span>
+                <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span> <span class="o">=</span> <span class="n">line_multi_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;    x_axis_name, y_axis_name = &quot;, x_axis_name, y_axis_name);</span>
+                <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color_values</span> <span class="o">=</span> <span class="n">line_multi_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;      len(x_values) = &quot;, len(x_values));</span>
+                <span class="c1">##print(&quot;      len(y_values) = &quot;, len(y_values));</span>
+                <span class="c1">##print(&quot;      len(y_values[0]) = &quot;, len(y_values[0]));</span>
+                <span class="c1">##print(&quot;      color_values = &quot;, color_values);</span>
+                <span class="n">x_val_type</span> <span class="o">=</span> <span class="n">line_multi_get_x_type</span><span class="p">(</span><span class="n">x_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="c1">##print(&quot;      x_val_type = &quot;, x_val_type);</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">line_multi_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+                <span class="c1">##print(&quot;      title = &quot;, title);</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">x_val_type</span> <span class="o">==</span> <span class="s2">&quot;date&quot;</span><span class="p">):</span> <span class="c1">#date, #category</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_line_multi_chart_date</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                    <span class="c1">#outwrite = outwrite.replace(&quot;\&quot;Date.UTC&quot;, &quot;Date.UTC&quot;);</span>
+                    <span class="c1">#outwrite = outwrite.replace(&quot;)\&quot;,&quot;, &quot;),&quot;)</span>
+                <span class="k">elif</span><span class="p">(</span><span class="n">x_val_type</span> <span class="o">==</span> <span class="s2">&quot;category&quot;</span><span class="p">):</span> <span class="c1">#date, #category:</span>
+                    <span class="n">outwrite</span> <span class="o">=</span> <span class="n">create_line_multi_chart_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">);</span>
+                <span class="n">out_file_name_sub</span> <span class="o">=</span> <span class="n">out_dir_name2</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;graph_rank_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">;</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file_name_sub</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">);</span>
+                <span class="c1">#f.write(&quot;Highcharts.chart(\&#39;container\&#39;,\n&quot;);</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">outwrite</span><span class="p">);</span> <span class="c1"># + &quot;\n);&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+
+        <span class="c1">#break</span>
+
+
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">);</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">);</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+<span class="c1">###################################################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

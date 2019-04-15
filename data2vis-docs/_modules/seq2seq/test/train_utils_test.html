@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.test.train_utils_test &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.test.train_utils_test</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test Cases for Training utils.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.contrib</span> <span class="kn">import</span> <span class="n">rnn_cell</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">input_pipeline</span>
+<span class="kn">from</span> <span class="nn">seq2seq.test</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">test_utils</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">training_utils</span>
+
+
+<div class="viewcode-block" id="TestGetRNNCell"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell">[docs]</a><span class="k">class</span> <span class="nc">TestGetRNNCell</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests the get_rnn_cell function.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestGetRNNCell.test_single_layer"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell.test_single_layer">[docs]</a>  <span class="k">def</span> <span class="nf">test_single_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+        <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;BasicLSTMCell&quot;</span><span class="p">,</span> <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span> <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">BasicLSTMCell</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestGetRNNCell.test_multi_layer"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell.test_multi_layer">[docs]</a>  <span class="k">def</span> <span class="nf">test_multi_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+        <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;BasicLSTMCell&quot;</span><span class="p">,</span> <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span> <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">rnn_cell</span><span class="o">.</span><span class="n">ExtendedMultiRNNCell</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestGetRNNCell.test_full_class_path"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell.test_full_class_path">[docs]</a>  <span class="k">def</span> <span class="nf">test_full_class_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+        <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;tensorflow.contrib.rnn.BasicRNNCell&quot;</span><span class="p">,</span>
+        <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+        <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">BasicRNNCell</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestGetRNNCell.test_dropout"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell.test_dropout">[docs]</a>  <span class="k">def</span> <span class="nf">test_dropout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+        <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;BasicLSTMCell&quot;</span><span class="p">,</span>
+        <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+        <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">dropout_input_keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">DropoutWrapper</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestGetRNNCell.test_extra_args"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestGetRNNCell.test_extra_args">[docs]</a>  <span class="k">def</span> <span class="nf">test_extra_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Invalid args should raise a ValueError</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+      <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+          <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;LSTMCell&quot;</span><span class="p">,</span>
+          <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+                       <span class="s2">&quot;use_peepholesERROR&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">},</span>
+          <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">get_rnn_cell</span><span class="p">(</span>
+        <span class="n">cell_class</span><span class="o">=</span><span class="s2">&quot;LSTMCell&quot;</span><span class="p">,</span>
+        <span class="n">cell_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;num_units&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                     <span class="s2">&quot;use_peepholes&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                     <span class="s2">&quot;forget_bias&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+        <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMCell</span><span class="p">)</span>
+    <span class="c1">#pylint: disable=E1101,W0212</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">_use_peepholes</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">_forget_bias</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestTrainOptions"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestTrainOptions">[docs]</a><span class="k">class</span> <span class="nc">TestTrainOptions</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests reading and writing of training options&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestTrainOptions.setUp"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestTrainOptions.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TestTrainOptions</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;num_layers&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="s2">&quot;AttentionSeq2Seq&quot;</span></div>
+
+<div class="viewcode-block" id="TestTrainOptions.test_read_write"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestTrainOptions.test_read_write">[docs]</a>  <span class="k">def</span> <span class="nf">test_read_write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">saved_opts</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">TrainOptions</span><span class="p">(</span>
+        <span class="n">model_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">,</span> <span class="n">model_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+    <span class="n">saved_opts</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+    <span class="n">loaded_opt</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">TrainOptions</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">saved_opts</span><span class="o">.</span><span class="n">model_params</span><span class="p">,</span> <span class="n">loaded_opt</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">saved_opts</span><span class="o">.</span><span class="n">model_class</span><span class="p">,</span> <span class="n">loaded_opt</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInputFn"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestInputFn">[docs]</a><span class="k">class</span> <span class="nc">TestInputFn</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests create_input_fn&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_test_with_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to test create_input_fn with keyword arguments&quot;&quot;&quot;</span>
+    <span class="n">sources_file</span><span class="p">,</span> <span class="n">targets_file</span> <span class="o">=</span> <span class="n">test_utils</span><span class="o">.</span><span class="n">create_temp_parallel_data</span><span class="p">(</span>
+        <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Hello World .&quot;</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Goodbye .&quot;</span><span class="p">])</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">ParallelTextInputPipeline</span><span class="p">(</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;source_files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">sources_file</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+            <span class="s2">&quot;target_files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">targets_file</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+    <span class="n">input_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_input_fn</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">input_fn</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">QueueRunners</span><span class="p">(</span><span class="n">sess</span><span class="p">):</span>
+        <span class="n">features_</span><span class="p">,</span> <span class="n">labels_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+        <span class="nb">set</span><span class="p">(</span><span class="n">features_</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;source_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;source_len&quot;</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels_</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;target_len&quot;</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="TestInputFn.test_without_buckets"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestInputFn.test_without_buckets">[docs]</a>  <span class="k">def</span> <span class="nf">test_without_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_test_with_args</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInputFn.test_wit_buckets"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestInputFn.test_wit_buckets">[docs]</a>  <span class="k">def</span> <span class="nf">test_wit_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_test_with_args</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">bucket_boundaries</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="TestLRDecay"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestLRDecay">[docs]</a><span class="k">class</span> <span class="nc">TestLRDecay</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests learning rate decay function.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestLRDecay.test_no_decay"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestLRDecay.test_no_decay">[docs]</a>  <span class="k">def</span> <span class="nf">test_no_decay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">decay_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_learning_rate_decay_fn</span><span class="p">(</span>
+        <span class="n">decay_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">decay_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">decay_rate</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">decay_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_learning_rate_decay_fn</span><span class="p">(</span>
+        <span class="n">decay_type</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">decay_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">decay_rate</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestLRDecay.test_decay_without_min"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestLRDecay.test_decay_without_min">[docs]</a>  <span class="k">def</span> <span class="nf">test_decay_without_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">decay_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_learning_rate_decay_fn</span><span class="p">(</span>
+        <span class="n">decay_type</span><span class="o">=</span><span class="s2">&quot;exponential_decay&quot;</span><span class="p">,</span>
+        <span class="n">decay_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">decay_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">start_decay_at</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">stop_decay_at</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">staircase</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">initial_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="c1"># Should not decay before start_decay_at</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">(</span><span class="n">initial_lr</span><span class="p">,</span> <span class="mi">50</span><span class="p">)),</span> <span class="n">initial_lr</span><span class="p">)</span>
+      <span class="c1"># Proper decay</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span>
+          <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">(</span><span class="n">initial_lr</span><span class="p">,</span> <span class="mi">115</span><span class="p">)),</span> <span class="n">initial_lr</span> <span class="o">*</span> <span class="mf">0.9</span><span class="o">**</span><span class="p">(</span><span class="mf">15.0</span> <span class="o">/</span> <span class="mf">10.0</span><span class="p">))</span>
+      <span class="c1"># Should not decay past stop_decay_at</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span>
+          <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">(</span><span class="n">initial_lr</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)),</span> <span class="n">initial_lr</span> <span class="o">*</span> <span class="mf">0.9</span><span class="o">**</span><span class="p">(</span>
+              <span class="p">(</span><span class="mf">1000.0</span> <span class="o">-</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestLRDecay.test_decay_with_min"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.train_utils_test.TestLRDecay.test_decay_with_min">[docs]</a>  <span class="k">def</span> <span class="nf">test_decay_with_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">decay_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_learning_rate_decay_fn</span><span class="p">(</span>
+        <span class="n">decay_type</span><span class="o">=</span><span class="s2">&quot;exponential_decay&quot;</span><span class="p">,</span>
+        <span class="n">decay_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">decay_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">start_decay_at</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">stop_decay_at</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span>
+        <span class="n">min_learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">staircase</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">initial_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="c1"># Should not decay past min_learning_rate</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">decay_fn</span><span class="p">(</span><span class="n">initial_lr</span><span class="p">,</span> <span class="mi">900</span><span class="p">)),</span> <span class="mf">0.01</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

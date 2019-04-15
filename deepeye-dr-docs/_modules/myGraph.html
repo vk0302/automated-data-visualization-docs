@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>myGraph &mdash; Automated Data Visualization - POC - Process_dr  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_dr  1.0.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_dr  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myGraph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: myGraph.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2018\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    1. Class to:</span>
+<span class="sd">        - Handle main data and create/manipulate sub-tables.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">view</span> <span class="kn">import</span> <span class="n">Chart</span>
+
+<div class="viewcode-block" id="myGraph"><a class="viewcode-back" href="../myGraph.html#myGraph.myGraph">[docs]</a><span class="k">class</span> <span class="nc">myGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class: </span>
+<span class="sd">        - Create and manage a directed graph for visualization ranking</span>
+<span class="sd">        - Weight aware graph creation.    </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        node_num (int): Initialization node. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">node_num</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">=</span><span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node_num</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node_num</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node_num</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node_num</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="myGraph.getCost"><a class="viewcode-back" href="../myGraph.html#myGraph.myGraph.getCost">[docs]</a>    <span class="k">def</span> <span class="nf">getCost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">node1</span><span class="p">,</span><span class="n">node2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC:</span>
+<span class="sd">            Calculate weight-aware edge score between two nodes.\n</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            node1 (struct): Representing Node 1.</span>
+<span class="sd">            node2 (struct): Representing Node 2. </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            float: Edge score.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#markEditOps   -&gt;   p5 (change chart type) and p4 (different aggregation)</span>
+        <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">y_name</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.02</span>
+            <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">pie</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">bar</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.03</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">pie</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">line</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.02</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">pie</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">scatter</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.04</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">bar</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">line</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.04</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">bar</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">scatter</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.02</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">line</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">Chart</span><span class="o">.</span><span class="n">scatter</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.03</span>
+            <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;CNT&#39;</span> <span class="ow">or</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;CNT&#39;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.02</span>
+                <span class="n">t1</span><span class="p">,</span><span class="n">t2</span><span class="o">=</span><span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">,</span><span class="n">node2</span><span class="o">.</span><span class="n">y_name</span>
+                <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                    <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                    <span class="n">t2</span><span class="o">=</span><span class="n">t2</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">t1</span><span class="o">==</span><span class="n">t2</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mf">0.01</span>
+        <span class="c1">#transformEditOps  -&gt;    p3 (BIN)</span>
+        <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="o">==</span><span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;BIN&#39;</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.62</span>
+        <span class="k">elif</span> <span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="o">==</span><span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;BIN&#39;</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="o">==</span><span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.62</span>
+        <span class="c1">#encodingEditOps   -&gt;   p1 (change x) and p2 (change y)</span>
+        <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">y_name</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>   <span class="c1">#change x</span>
+            <span class="k">return</span> <span class="mf">4.45</span>
+        <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>   <span class="c1">#change y</span>
+            <span class="k">return</span> <span class="mf">4.45</span>
+        <span class="k">elif</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe2</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;GROUP&#39;</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>  <span class="c1">#add z</span>
+            <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">,</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span>
+            <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">t1</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">t2</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">t1</span> <span class="o">==</span> <span class="n">t2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">4.22</span>
+        <span class="k">elif</span> <span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe2</span><span class="o">==</span><span class="n">node1</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe</span> <span class="ow">and</span> <span class="n">node2</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">describe1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;GROUP&#39;</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">x_name</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">x_name</span> <span class="ow">and</span> <span class="n">node1</span><span class="o">.</span><span class="n">chart</span><span class="o">==</span><span class="n">node2</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span>   <span class="c1">#add z</span>
+            <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">,</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span>
+            <span class="k">if</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node1</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">t1</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SUM&#39;</span> <span class="ow">or</span> <span class="n">node2</span><span class="o">.</span><span class="n">y_name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AVG&#39;</span><span class="p">:</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">t2</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">t1</span> <span class="o">==</span> <span class="n">t2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">4.22</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="myGraph.addNode"><a class="viewcode-back" href="../myGraph.html#myGraph.myGraph.addNode">[docs]</a>    <span class="k">def</span> <span class="nf">addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC:</span>
+<span class="sd">            Add node to current graph.\n</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            node (struct): Representing Node. </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getCost</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="o">+=</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="myGraph.getSim"><a class="viewcode-back" href="../myGraph.html#myGraph.myGraph.getSim">[docs]</a>    <span class="k">def</span> <span class="nf">getSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC:</span>
+<span class="sd">            Calculate distance and corresponding similarity between graph nodes using floyd-warshall algorithm. </span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            None </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get dis by floyd</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="c1">#get sim</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="myGraph.getTopK"><a class="viewcode-back" href="../myGraph.html#myGraph.myGraph.getTopK">[docs]</a>    <span class="k">def</span> <span class="nf">getTopK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">K</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC:</span>
+<span class="sd">            Get Top-K visualizations from graph.\n</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            K (int): Number of visualizations to take from graph.</span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            list: Outputs for K graphs with top scores.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">score</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+            <span class="n">max_id</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="n">max_delta_score</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_num</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">delta_score</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">score</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="n">delta_score</span><span class="o">-=</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">delta_score</span><span class="o">&gt;</span><span class="n">max_delta_score</span><span class="p">:</span>
+                    <span class="n">max_delta_score</span><span class="o">=</span><span class="n">delta_score</span>
+                    <span class="n">max_id</span><span class="o">=</span><span class="n">i</span>
+            <span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="o">+</span><span class="n">max_delta_score</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+
+
+<span class="c1"># class view(object):</span>
+<span class="c1">#     def __init__(self,name,score):</span>
+<span class="c1">#         self.name=name</span>
+<span class="c1">#         self.score=score</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># G=myGraph()</span>
+<span class="c1"># G.addNode(view(&#39;a&#39;,1))</span>
+<span class="c1"># G.addNode(view(&#39;b&#39;,2))</span>
+<span class="c1"># G.addNode(view(&#39;c&#39;,3))</span>
+<span class="c1"># G.addNode(view(&#39;d&#39;,4))</span>
+<span class="c1"># G.addNode(view(&#39;e&#39;,5))</span>
+<span class="c1"># G.addNode(view(&#39;f&#39;,6))</span>
+<span class="c1"># G.addNode(view(&#39;g&#39;,7))</span>
+<span class="c1"># G.getSim()</span>
+<span class="c1"># print G.getTopK(4)</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_dr  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,166 @@
+seq2seq.test package
+====================
+
+Submodules
+----------
+
+seq2seq.test.attention_test module
+----------------------------------
+
+.. automodule:: seq2seq.test.attention_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.beam_search_test module
+------------------------------------
+
+.. automodule:: seq2seq.test.beam_search_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.bridges_test module
+--------------------------------
+
+.. automodule:: seq2seq.test.bridges_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.conv_encoder_test module
+-------------------------------------
+
+.. automodule:: seq2seq.test.conv_encoder_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.data_test module
+-----------------------------
+
+.. automodule:: seq2seq.test.data_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.decoder_test module
+--------------------------------
+
+.. automodule:: seq2seq.test.decoder_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.example_config_test module
+---------------------------------------
+
+.. automodule:: seq2seq.test.example_config_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.hooks_test module
+------------------------------
+
+.. automodule:: seq2seq.test.hooks_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.input_pipeline_test module
+---------------------------------------
+
+.. automodule:: seq2seq.test.input_pipeline_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.losses_test module
+-------------------------------
+
+.. automodule:: seq2seq.test.losses_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.metrics_test module
+--------------------------------
+
+.. automodule:: seq2seq.test.metrics_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.models_test module
+-------------------------------
+
+.. automodule:: seq2seq.test.models_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.pipeline_test module
+---------------------------------
+
+.. automodule:: seq2seq.test.pipeline_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.pooling_encoder_test module
+----------------------------------------
+
+.. automodule:: seq2seq.test.pooling_encoder_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.rnn_cell_test module
+---------------------------------
+
+.. automodule:: seq2seq.test.rnn_cell_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.rnn_encoder_test module
+------------------------------------
+
+.. automodule:: seq2seq.test.rnn_encoder_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.train_utils_test module
+------------------------------------
+
+.. automodule:: seq2seq.test.train_utils_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.utils module
+-------------------------
+
+.. automodule:: seq2seq.test.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.test.vocab_test module
+------------------------------
+
+.. automodule:: seq2seq.test.vocab_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.test
+    :members:
+    :undoc-members:
+    :show-inheritance:

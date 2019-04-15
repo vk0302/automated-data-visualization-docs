@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.test.bridges_test &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.test.bridges_test</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tests for Encoder-Decoder bridges.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">nest</span>  <span class="c1"># pylint: disable=E0611</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.encoders.encoder</span> <span class="kn">import</span> <span class="n">EncoderOutput</span>
+<span class="kn">from</span> <span class="nn">seq2seq.models.bridges</span> <span class="kn">import</span> <span class="n">ZeroBridge</span><span class="p">,</span> <span class="n">InitialStateBridge</span>
+<span class="kn">from</span> <span class="nn">seq2seq.models.bridges</span> <span class="kn">import</span> <span class="n">PassThroughBridge</span>
+
+<span class="n">DecoderOutput</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;DecoderOutput&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="BridgeTest"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.BridgeTest">[docs]</a><span class="k">class</span> <span class="nc">BridgeTest</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Abstract class for bridge tests&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BridgeTest.setUp"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.BridgeTest.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BridgeTest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">MultiRNNCell</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">GRUCell</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">GRUCell</span><span class="p">(</span><span class="mi">8</span><span class="p">)])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">MultiRNNCell</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMCell</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">GRUCell</span><span class="p">(</span><span class="mi">8</span><span class="p">)])</span>
+    <span class="n">final_encoder_state</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span> <span class="o">=</span> <span class="n">EncoderOutput</span><span class="p">(</span>
+        <span class="n">outputs</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="n">attention_values</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="n">attention_values_length</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">],</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">final_state</span><span class="o">=</span><span class="n">final_encoder_state</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_create_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates the bridge class to be tests. Must be implemented by</span>
+<span class="sd">    child classes&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Asserts bridge outputs are correct. Must be implemented by</span>
+<span class="sd">    child classes&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs the bridge with the given arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">scope</span> <span class="ow">or</span> <span class="s2">&quot;bridge&quot;</span><span class="p">):</span>
+      <span class="n">bridge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_bridge</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+      <span class="n">initial_state</span> <span class="o">=</span> <span class="n">bridge</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">())</span>
+      <span class="n">initial_state_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">initial_state</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">initial_state_</span></div>
+
+
+<div class="viewcode-block" id="TestZeroBridge"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestZeroBridge">[docs]</a><span class="k">class</span> <span class="nc">TestZeroBridge</span><span class="p">(</span><span class="n">BridgeTest</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests for the ZeroBridge class&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_create_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ZeroBridge</span><span class="p">(</span>
+        <span class="n">encoder_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span><span class="p">,</span>
+        <span class="n">decoder_state_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_state_</span><span class="p">):</span>
+    <span class="n">initial_state_flat_</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">initial_state_</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">initial_state_flat_</span><span class="p">:</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+
+<div class="viewcode-block" id="TestZeroBridge.test_zero_bridge"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestZeroBridge.test_zero_bridge">[docs]</a>  <span class="k">def</span> <span class="nf">test_zero_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="TestPassThroughBridge"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestPassThroughBridge">[docs]</a><span class="k">class</span> <span class="nc">TestPassThroughBridge</span><span class="p">(</span><span class="n">BridgeTest</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests for the ZeroBridge class&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_create_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">PassThroughBridge</span><span class="p">(</span>
+        <span class="n">encoder_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span><span class="p">,</span>
+        <span class="n">decoder_state_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_state_</span><span class="p">):</span>
+    <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">initial_state_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+    <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">initial_state_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span><span class="o">.</span><span class="n">final_state</span><span class="p">)</span>
+
+    <span class="n">encoder_state_flat</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span><span class="o">.</span><span class="n">final_state</span><span class="p">)</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="n">encoder_state_flat_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">encoder_state_flat</span><span class="p">)</span>
+
+    <span class="n">initial_state_flat_</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">initial_state_</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">e_dec</span><span class="p">,</span> <span class="n">e_enc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">initial_state_flat_</span><span class="p">,</span> <span class="n">encoder_state_flat_</span><span class="p">):</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">e_dec</span><span class="p">,</span> <span class="n">e_enc</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestPassThroughBridge.test_passthrough_bridge"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestPassThroughBridge.test_passthrough_bridge">[docs]</a>  <span class="k">def</span> <span class="nf">test_passthrough_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_cell</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="TestInitialStateBridge"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestInitialStateBridge">[docs]</a><span class="k">class</span> <span class="nc">TestInitialStateBridge</span><span class="p">(</span><span class="n">BridgeTest</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests for the InitialStateBridge class&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_create_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">InitialStateBridge</span><span class="p">(</span>
+        <span class="n">encoder_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_outputs</span><span class="p">,</span>
+        <span class="n">decoder_state_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_state_</span><span class="p">):</span>
+    <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">initial_state_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_cell</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestInitialStateBridge.test_with_final_state"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_final_state">[docs]</a>  <span class="k">def</span> <span class="nf">test_with_final_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run</span><span class="p">(</span><span class="n">bridge_input</span><span class="o">=</span><span class="s2">&quot;final_state&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestInitialStateBridge.test_with_outputs"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_outputs">[docs]</a>  <span class="k">def</span> <span class="nf">test_with_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_outputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run</span><span class="p">(</span><span class="n">bridge_input</span><span class="o">=</span><span class="s2">&quot;outputs&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestInitialStateBridge.test_with_activation_fn"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_activation_fn">[docs]</a>  <span class="k">def</span> <span class="nf">test_with_activation_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_outputs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_run</span><span class="p">(</span>
+            <span class="n">bridge_input</span><span class="o">=</span><span class="s2">&quot;final_state&quot;</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="s2">&quot;tanh&quot;</span><span class="p">))</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

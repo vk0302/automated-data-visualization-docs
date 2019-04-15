@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.decoders.beam_search_decoder &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.decoders.beam_search_decoder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;A decoder that uses beam search. Can only be used for inference, not</span>
+<span class="sd">training.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">nest</span>  <span class="c1"># pylint: disable=E0611</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.inference</span> <span class="kn">import</span> <span class="n">beam_search</span>
+<span class="kn">from</span> <span class="nn">seq2seq.decoders.rnn_decoder</span> <span class="kn">import</span> <span class="n">RNNDecoder</span>
+
+
+<div class="viewcode-block" id="FinalBeamDecoderOutput"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.FinalBeamDecoderOutput">[docs]</a><span class="k">class</span> <span class="nc">FinalBeamDecoderOutput</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;FinalBeamDecoderOutput&quot;</span><span class="p">,</span>
+               <span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;beam_search_output&quot;</span><span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;Final outputs returned by the beam search after all decoding is finished.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    predicted_ids: The final prediction. A tensor of shape</span>
+<span class="sd">      `[T, 1, beam_width]`.</span>
+<span class="sd">    beam_search_output: An instance of `BeamDecoderOutput` that describes</span>
+<span class="sd">      the state of the beam search.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BeamDecoderOutput"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.BeamDecoderOutput">[docs]</a><span class="k">class</span> <span class="nc">BeamDecoderOutput</span><span class="p">(</span>
+    <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BeamDecoderOutput&quot;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;logits&quot;</span><span class="p">,</span> <span class="s2">&quot;predicted_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;log_probs&quot;</span><span class="p">,</span> <span class="s2">&quot;scores&quot;</span><span class="p">,</span> <span class="s2">&quot;beam_parent_ids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;original_outputs&quot;</span>
+    <span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;Structure for the output of a beam search decoder. This class is used</span>
+<span class="sd">  to define the output at each step as well as the final output of the decoder.</span>
+<span class="sd">  If used as the final output, a time dimension `T` is inserted after the</span>
+<span class="sd">  beam_size dimension.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    logits: Logits at the current time step of shape `[beam_size, vocab_size]`</span>
+<span class="sd">    predicted_ids: Chosen softmax predictions at the current time step.</span>
+<span class="sd">      An int32 tensor of shape `[beam_size]`.</span>
+<span class="sd">    log_probs: Total log probabilities of all beams at the current time step.</span>
+<span class="sd">      A float32 tensor of shaep `[beam_size]`.</span>
+<span class="sd">    scores: Total scores of all beams at the current time step. This differs</span>
+<span class="sd">      from log probabilities in that the score may add additional processing</span>
+<span class="sd">      such as length normalization. A float32 tensor of shape `[beam_size]`.</span>
+<span class="sd">    beam_parent_ids: The indices of the beams that are being continued.</span>
+<span class="sd">      An int32 tensor of shape `[beam_size]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BeamSearchDecoder"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.BeamSearchDecoder">[docs]</a><span class="k">class</span> <span class="nc">BeamSearchDecoder</span><span class="p">(</span><span class="n">RNNDecoder</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;The BeamSearchDecoder wraps another decoder to perform beam search instead</span>
+<span class="sd">  of greedy selection. This decoder must be used with batch size of 1, which</span>
+<span class="sd">  will result in an effective batch size of `beam_width`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    decoder: A instance of `RNNDecoder` to be used with beam search.</span>
+<span class="sd">    config: A `BeamSearchConfig` that defines beam search decoding parameters.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BeamSearchDecoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">decoder</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">decoder</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                                            <span class="n">decoder</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+
+  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">():</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">BeamDecoderOutput</span><span class="p">(</span>
+        <span class="n">logits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span>
+        <span class="n">predicted_ids</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([]),</span>
+        <span class="n">log_probs</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([]),</span>
+        <span class="n">scores</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([]),</span>
+        <span class="n">beam_parent_ids</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([]),</span>
+        <span class="n">original_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">output_size</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">BeamDecoderOutput</span><span class="p">(</span>
+        <span class="n">logits</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">predicted_ids</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+        <span class="n">log_probs</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">scores</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">beam_parent_ids</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+        <span class="n">original_outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">output_dtype</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span>
+
+<div class="viewcode-block" id="BeamSearchDecoder.initialize"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.BeamSearchDecoder.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">finished</span><span class="p">,</span> <span class="n">first_inputs</span><span class="p">,</span> <span class="n">initial_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+    <span class="c1"># Create beam state</span>
+    <span class="n">beam_state</span> <span class="o">=</span> <span class="n">beam_search</span><span class="o">.</span><span class="n">create_initial_beam_state</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">finished</span><span class="p">,</span> <span class="n">first_inputs</span><span class="p">,</span> <span class="p">(</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">beam_state</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BeamSearchDecoder.finalize"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.BeamSearchDecoder.finalize">[docs]</a>  <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">final_state</span><span class="p">):</span>
+    <span class="c1"># Gather according to beam search result</span>
+    <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">beam_search</span><span class="o">.</span><span class="n">gather_tree</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">predicted_ids</span><span class="p">,</span>
+                                            <span class="n">outputs</span><span class="o">.</span><span class="n">beam_parent_ids</span><span class="p">)</span>
+
+    <span class="c1"># We&#39;re using a batch size of 1, so we add an extra dimension to</span>
+    <span class="c1"># convert tensors to [1, beam_width, ...] shape. This way Tensorflow</span>
+    <span class="c1"># doesn&#39;t confuse batch_size with beam_width</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">final_outputs</span> <span class="o">=</span> <span class="n">FinalBeamDecoderOutput</span><span class="p">(</span>
+        <span class="n">predicted_ids</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">beam_search_output</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_outputs</span><span class="p">,</span> <span class="n">final_state</span></div>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_state</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+    <span class="c1"># Tile initial state</span>
+    <span class="n">initial_state</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">initial_state</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">_setup</span><span class="p">(</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">helper</span><span class="p">)</span>  <span class="c1">#pylint: disable=W0212</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BeamSearchDecoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">initial_state</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">helper</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BeamSearchDecoder.step"><a class="viewcode-back" href="../../../seq2seq.decoders.html#seq2seq.decoders.beam_search_decoder.BeamSearchDecoder.step">[docs]</a>  <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">decoder_state</span><span class="p">,</span> <span class="n">beam_state</span> <span class="o">=</span> <span class="n">state</span>
+
+    <span class="c1"># Call the original decoder</span>
+    <span class="p">(</span><span class="n">decoder_output</span><span class="p">,</span> <span class="n">decoder_state</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">time_</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span>
+                                                              <span class="n">decoder_state</span><span class="p">)</span>
+
+    <span class="c1"># Perform a step of beam search</span>
+    <span class="n">bs_output</span><span class="p">,</span> <span class="n">beam_state</span> <span class="o">=</span> <span class="n">beam_search</span><span class="o">.</span><span class="n">beam_search_step</span><span class="p">(</span>
+        <span class="n">time_</span><span class="o">=</span><span class="n">time_</span><span class="p">,</span>
+        <span class="n">logits</span><span class="o">=</span><span class="n">decoder_output</span><span class="o">.</span><span class="n">logits</span><span class="p">,</span>
+        <span class="n">beam_state</span><span class="o">=</span><span class="n">beam_state</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># Shuffle everything according to beam search result</span>
+    <span class="n">decoder_state</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bs_output</span><span class="o">.</span><span class="n">beam_parent_ids</span><span class="p">),</span> <span class="n">decoder_state</span><span class="p">)</span>
+    <span class="n">decoder_output</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bs_output</span><span class="o">.</span><span class="n">beam_parent_ids</span><span class="p">),</span> <span class="n">decoder_output</span><span class="p">)</span>
+
+    <span class="n">next_state</span> <span class="o">=</span> <span class="p">(</span><span class="n">decoder_state</span><span class="p">,</span> <span class="n">beam_state</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">BeamDecoderOutput</span><span class="p">(</span>
+        <span class="n">logits</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">beam_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">]),</span>
+        <span class="n">predicted_ids</span><span class="o">=</span><span class="n">bs_output</span><span class="o">.</span><span class="n">predicted_ids</span><span class="p">,</span>
+        <span class="n">log_probs</span><span class="o">=</span><span class="n">beam_state</span><span class="o">.</span><span class="n">log_probs</span><span class="p">,</span>
+        <span class="n">scores</span><span class="o">=</span><span class="n">bs_output</span><span class="o">.</span><span class="n">scores</span><span class="p">,</span>
+        <span class="n">beam_parent_ids</span><span class="o">=</span><span class="n">bs_output</span><span class="o">.</span><span class="n">beam_parent_ids</span><span class="p">,</span>
+        <span class="n">original_outputs</span><span class="o">=</span><span class="n">decoder_output</span><span class="p">)</span>
+
+    <span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">next_inputs</span><span class="p">(</span>
+        <span class="n">time</span><span class="o">=</span><span class="n">time_</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="o">=</span><span class="n">decoder_output</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">=</span><span class="n">next_state</span><span class="p">,</span>
+        <span class="n">sample_ids</span><span class="o">=</span><span class="n">bs_output</span><span class="o">.</span><span class="n">predicted_ids</span><span class="p">)</span>
+    <span class="n">next_inputs</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">None</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">finished</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

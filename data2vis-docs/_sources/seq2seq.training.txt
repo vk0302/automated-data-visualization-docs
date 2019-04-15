@@ -1,0 +1,30 @@
+seq2seq.training package
+========================
+
+Submodules
+----------
+
+seq2seq.training.hooks module
+-----------------------------
+
+.. automodule:: seq2seq.training.hooks
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.training.utils module
+-----------------------------
+
+.. automodule:: seq2seq.training.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.training
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>myGraph module &mdash; Automated Data Visualization - POC - Process_dr  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_dr  1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_dr  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/myGraph.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-myGraph">
+<span id="mygraph-module"></span><h1>myGraph module<a class="headerlink" href="#module-myGraph" title="Permalink to this headline">¶</a></h1>
+<p>Filename: myGraph.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2018</p>
+<p>Description:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><dl class="first docutils">
+<dt>Class to:</dt>
+<dd><ul class="first last">
+<li>Handle main data and create/manipulate sub-tables.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<dl class="class">
+<dt id="myGraph.myGraph">
+<em class="property">class </em><code class="descclassname">myGraph.</code><code class="descname">myGraph</code><span class="sig-paren">(</span><em>node_num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myGraph.html#myGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myGraph.myGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="docutils">
+<dt>Class:</dt>
+<dd><ul class="first last simple">
+<li>Create and manage a directed graph for visualization ranking</li>
+<li>Weight aware graph creation.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node_num</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Initialization node.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="myGraph.myGraph.addNode">
+<code class="descname">addNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myGraph.html#myGraph.addNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myGraph.myGraph.addNode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Add node to current graph.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<a class="reference external" href="https://docs.python.org/library/struct.html#module-struct" title="(in Python v3.7)"><em>struct</em></a>) &#8211; Representing Node.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/constants.html#None" title="(in Python v3.7)">None</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="myGraph.myGraph.getCost">
+<code class="descname">getCost</code><span class="sig-paren">(</span><em>node1</em>, <em>node2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myGraph.html#myGraph.getCost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myGraph.myGraph.getCost" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Calculate weight-aware edge score between two nodes.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>node1</strong> (<a class="reference external" href="https://docs.python.org/library/struct.html#module-struct" title="(in Python v3.7)"><em>struct</em></a>) &#8211; Representing Node 1.</li>
+<li><strong>node2</strong> (<a class="reference external" href="https://docs.python.org/library/struct.html#module-struct" title="(in Python v3.7)"><em>struct</em></a>) &#8211; Representing Node 2.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Edge score.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v3.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="myGraph.myGraph.getSim">
+<code class="descname">getSim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myGraph.html#myGraph.getSim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myGraph.myGraph.getSim" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Calculate distance and corresponding similarity between graph nodes using floyd-warshall algorithm.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/constants.html#None" title="(in Python v3.7)">None</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="myGraph.myGraph.getTopK">
+<code class="descname">getTopK</code><span class="sig-paren">(</span><em>K</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myGraph.html#myGraph.getTopK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myGraph.myGraph.getTopK" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Get Top-K visualizations from graph.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Number of visualizations to take from graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Outputs for K graphs with top scores.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_dr  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

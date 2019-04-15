@@ -1,0 +1,489 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>csv_2_sketch_py3 module &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/csv_2_sketch_py3.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-csv_2_sketch_py3">
+<span id="csv-2-sketch-py3-module"></span><h1>csv_2_sketch_py3 module<a class="headerlink" href="#module-csv_2_sketch_py3" title="Permalink to this headline">¶</a></h1>
+<p>Filename: csv_2_sketch_py3.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2018</p>
+<p>Description:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="first docutils">
+<dt>Master file to execute the process mentioned below</dt>
+<dd><ul class="first last">
+<li>System and Engine Setup</li>
+<li>PART 1: CSV to SQL DB</li>
+<li>PART 2: SQL DB to JSON graphs</li>
+<li>PART 3: JSON graphs to Vega-lite graphs</li>
+<li>PART 4: Using JSON and Vega-lite graphs to generate High-charts graphs</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="csv_2_sketch_py3.create_vega_lite_bar">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">create_vega_lite_bar</code><span class="sig-paren">(</span><em>sample_bar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#create_vega_lite_bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.create_vega_lite_bar" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar</li>
+<li>Parse dictionary to create Vega-lite compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_bar</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; jsonified structured output from core application.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Jsonified data encoded to make it Vega-lite compatible.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.create_vega_lite_line">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">create_vega_lite_line</code><span class="sig-paren">(</span><em>sample_line</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#create_vega_lite_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.create_vega_lite_line" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line</li>
+<li>Parse dictionary to create Vega-lite compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_line</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; jsonified structured output from core application.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Jsonified data encoded to make it Vega-lite compatible.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.create_vega_lite_pie">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">create_vega_lite_pie</code><span class="sig-paren">(</span><em>sample_pie</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#create_vega_lite_pie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.create_vega_lite_pie" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Pie</li>
+<li>Parse dictionary to create Vega-lite compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_pie</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; jsonified structured output from core application.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Jsonified data encoded to make it Vega-lite compatible.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.create_vega_lite_scatter">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">create_vega_lite_scatter</code><span class="sig-paren">(</span><em>sample_scatter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#create_vega_lite_scatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.create_vega_lite_scatter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter</li>
+<li>Parse dictionary to create Vega-lite compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_scatter</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; jsonified structured output from core application.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Jsonified data encoded to make it Vega-lite compatible.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.db_colname">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">db_colname</code><span class="sig-paren">(</span><em>pandas_colname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#db_colname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.db_colname" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Ger column name from the pandas dataframe.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pandas_colname</strong> (<em>pandata dataframe</em>) &#8211; Dataframe in consideration.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">colname -&gt; Column name.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.get_cols_and_types">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">get_cols_and_types</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#get_cols_and_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.get_cols_and_types" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Get column types in dataframe under consideration.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> (<em>pandata dataframe</em>) &#8211; Dataframe in consideration.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">column_types</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.get_schema">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">get_schema</code><span class="sig-paren">(</span><em>frame</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#get_schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.get_schema" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Get schema of the dataframe in consideration.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>frame</strong> (<em>pandata dataframe</em>) &#8211; Dataframe in consideration.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Table name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">schema to create table.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.get_type_bar">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">get_type_bar</code><span class="sig-paren">(</span><em>d_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#get_type_bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.get_type_bar" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar</li>
+<li>categorize data type on x-axis</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>d_type</strong> (<em>float/int</em>) &#8211; Data type of data on x-axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Categorized as<ul class="simple">
+<li>&#8220;Quantitative&#8221; if d_type is &#8216;float&#8217; or &#8216;int&#8217;</li>
+<li>&#8220;Ordinal&#8221; elsewhere.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.get_type_line">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">get_type_line</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#get_type_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.get_type_line" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line</li>
+<li>categorize data type on x-axis</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>val</strong> (<em>float/int/string</em>) &#8211; Data point on x-axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Categorized as<ul class="simple">
+<li>&#8220;Quantitative&#8221; if data type is &#8216;float&#8217; or &#8216;int&#8217;</li>
+<li>&#8220;Temporal&#8221; if &#8220;-&#8221; exists in val</li>
+<li>&#8220;Ordinal&#8221; elsewhere</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.get_type_scatter">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">get_type_scatter</code><span class="sig-paren">(</span><em>d_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#get_type_scatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.get_type_scatter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter</li>
+<li>categorize data type on x-axis</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>d_type</strong> (<em>float/int</em>) &#8211; Data type of data on x-axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Categorized as<ul class="simple">
+<li>&#8220;Quantitative&#8221; if d_type is &#8216;float&#8217; or &#8216;int&#8217;</li>
+<li>&#8220;Ordinal&#8221; elsewhere.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.process">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">process</code><span class="sig-paren">(</span><em>in_file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.process" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC: Master function to execute the process in theis order:</dt>
+<dd><ul class="first last simple">
+<li>System and Engine Setup</li>
+<li>PART 1: CSV to SQL DB</li>
+<li>PART 2: SQL DB to JSON graphs</li>
+<li>PART 3: JSON graphs to Vega-lite graphs</li>
+<li>PART 4: Using JSON and Vega-lite graphs to generate High-charts graphs</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Input CSV file for which graphs will be created</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if process successful.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.read_db">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">read_db</code><span class="sig-paren">(</span><em>sql</em>, <em>con</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#read_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.read_db" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Read DB using sql query.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sql</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; SQL query.</li>
+<li><strong>con</strong> (<em>connectivity object</em>) &#8211; Object representing Database pointed by host, port, username and password.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data frame representing elements retrieved by query.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas dataframe</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.table_exists">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">table_exists</code><span class="sig-paren">(</span><em>name=None</em>, <em>con=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#table_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.table_exists" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Check if table exists at the Databse location</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Table name to look for.</li>
+<li><strong>con</strong> (<em>connectivity object</em>) &#8211; Object representing Database pointed by host, port, username and password.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">exists -&gt; True if table exists in DB.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="csv_2_sketch_py3.write_frame">
+<code class="descclassname">csv_2_sketch_py3.</code><code class="descname">write_frame</code><span class="sig-paren">(</span><em>frame</em>, <em>name=None</em>, <em>con=None</em>, <em>if_exists='fail'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/csv_2_sketch_py3.html#write_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#csv_2_sketch_py3.write_frame" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Create table in database.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>frame</strong> (<em>pandata dataframe</em>) &#8211; Dataframe in consideration.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Table name</li>
+<li><strong>con</strong> (<em>connectivity object</em>) &#8211; Object representing Database pointed by host, port, username and password.</li>
+<li><strong>if_exists</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Can be any of these values
+- replace -&gt; Delete the table and replace it with a new one.
+- append -&gt; If table exists then append it with this new sub-table.
+- fail -&gt; Create a new table.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">schema to create table.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

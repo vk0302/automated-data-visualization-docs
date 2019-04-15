@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.metrics package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.metrics package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.metrics.bleu">seq2seq.metrics.bleu module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.metrics.metric_specs">seq2seq.metrics.metric_specs module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.metrics.rouge">seq2seq.metrics.rouge module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.metrics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.metrics.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-metrics-package">
+<h1>seq2seq.metrics package<a class="headerlink" href="#seq2seq-metrics-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.metrics.bleu">
+<span id="seq2seq-metrics-bleu-module"></span><h2>seq2seq.metrics.bleu module<a class="headerlink" href="#module-seq2seq.metrics.bleu" title="Permalink to this headline">¶</a></h2>
+<p>BLEU metric implementation.</p>
+<dl class="function">
+<dt id="seq2seq.metrics.bleu.moses_multi_bleu">
+<code class="descclassname">seq2seq.metrics.bleu.</code><code class="descname">moses_multi_bleu</code><span class="sig-paren">(</span><em>hypotheses</em>, <em>references</em>, <em>lowercase=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/bleu.html#moses_multi_bleu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.bleu.moses_multi_bleu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the bleu score for hypotheses and references
+using the MOSES ulti-bleu.perl script.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hypotheses</strong> &#8211; A numpy array of strings where each string is a single example.</li>
+<li><strong>references</strong> &#8211; A numpy array of strings where each string is a single example.</li>
+<li><strong>lowercase</strong> &#8211; If true, pass the &#8220;-lc&#8221; flag to the multi-bleu script</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The BLEU score as a float32 value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.metrics.metric_specs">
+<span id="seq2seq-metrics-metric-specs-module"></span><h2>seq2seq.metrics.metric_specs module<a class="headerlink" href="#module-seq2seq.metrics.metric_specs" title="Permalink to this headline">¶</a></h2>
+<p>Collection of MetricSpecs for training and evaluation</p>
+<dl class="class">
+<dt id="seq2seq.metrics.metric_specs.BleuMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.metrics.metric_specs.</code><code class="descname">BleuMetricSpec</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#BleuMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.BleuMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.metrics.metric_specs.TextMetricSpec" title="seq2seq.metrics.metric_specs.TextMetricSpec"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.metrics.metric_specs.TextMetricSpec</span></code></a></p>
+<p>Calculates BLEU score using the Moses multi-bleu.perl script.</p>
+<dl class="method">
+<dt id="seq2seq.metrics.metric_specs.BleuMetricSpec.metric_fn">
+<code class="descname">metric_fn</code><span class="sig-paren">(</span><em>hypotheses</em>, <em>references</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#BleuMetricSpec.metric_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.BleuMetricSpec.metric_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.metrics.metric_specs.LogPerplexityMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.metrics.metric_specs.</code><code class="descname">LogPerplexityMetricSpec</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#LogPerplexityMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.learn.python.learn.metric_spec.MetricSpec</span></code>, <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a></p>
+<p>A MetricSpec to calculate straming log perplexity</p>
+<dl class="method">
+<dt id="seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.create_metric_ops">
+<code class="descname">create_metric_ops</code><span class="sig-paren">(</span><em>_inputs</em>, <em>labels</em>, <em>predictions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#LogPerplexityMetricSpec.create_metric_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.create_metric_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the metric op</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#LogPerplexityMetricSpec.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.name">
+<code class="descname">name</code><a class="headerlink" href="#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the metric</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.metrics.metric_specs.RougeMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.metrics.metric_specs.</code><code class="descname">RougeMetricSpec</code><span class="sig-paren">(</span><em>params</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#RougeMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.RougeMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.metrics.metric_specs.TextMetricSpec" title="seq2seq.metrics.metric_specs.TextMetricSpec"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.metrics.metric_specs.TextMetricSpec</span></code></a></p>
+<p>Calculates BLEU score using the Moses multi-bleu.perl script.</p>
+<dl class="staticmethod">
+<dt id="seq2seq.metrics.metric_specs.RougeMetricSpec.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#RougeMetricSpec.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.RougeMetricSpec.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.metrics.metric_specs.RougeMetricSpec.metric_fn">
+<code class="descname">metric_fn</code><span class="sig-paren">(</span><em>hypotheses</em>, <em>references</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#RougeMetricSpec.metric_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.RougeMetricSpec.metric_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.metrics.metric_specs.TextMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.metrics.metric_specs.</code><code class="descname">TextMetricSpec</code><span class="sig-paren">(</span><em>params</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#TextMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.TextMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seq2seq.html#seq2seq.configurable.Configurable" title="seq2seq.configurable.Configurable"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.configurable.Configurable</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">tensorflow.contrib.learn.python.learn.metric_spec.MetricSpec</span></code></p>
+<p>Abstract class for text-based metrics calculated based on
+hypotheses and references. Subclasses must implement <cite>metric_fn</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; A name for the metric</li>
+<li><strong>separator</strong> &#8211; A separator used to join predicted tokens. Default to space.</li>
+<li><strong>eos_token</strong> &#8211; A string token used to find the end of a sequence. Hypotheses
+and references will be slcied until this token is found.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="seq2seq.metrics.metric_specs.TextMetricSpec.create_metric_ops">
+<code class="descname">create_metric_ops</code><span class="sig-paren">(</span><em>_inputs</em>, <em>labels</em>, <em>predictions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#TextMetricSpec.create_metric_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.TextMetricSpec.create_metric_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates (value, update_op) tensors</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.metrics.metric_specs.TextMetricSpec.default_params">
+<em class="property">static </em><code class="descname">default_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#TextMetricSpec.default_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.TextMetricSpec.default_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.metrics.metric_specs.TextMetricSpec.metric_fn">
+<code class="descname">metric_fn</code><span class="sig-paren">(</span><em>hypotheses</em>, <em>references</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#TextMetricSpec.metric_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.TextMetricSpec.metric_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the value of the metric.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hypotheses</strong> &#8211; A python list of strings, each corresponding to a
+single hypothesis/example.</li>
+<li><strong>references</strong> &#8211; A python list of strings, each corresponds to a single
+reference. Must have the same number of elements of <cite>hypotheses</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A float value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.metrics.metric_specs.TextMetricSpec.name">
+<code class="descname">name</code><a class="headerlink" href="#seq2seq.metrics.metric_specs.TextMetricSpec.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the metric</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.metrics.metric_specs.accumulate_strings">
+<code class="descclassname">seq2seq.metrics.metric_specs.</code><code class="descname">accumulate_strings</code><span class="sig-paren">(</span><em>values</em>, <em>name='strings'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/metric_specs.html#accumulate_strings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.metric_specs.accumulate_strings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accumulates strings into a vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> &#8211; A 1-d string tensor that contains values to add to the accumulator.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A tuple (value_tensor, update_op).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.metrics.rouge">
+<span id="seq2seq-metrics-rouge-module"></span><h2>seq2seq.metrics.rouge module<a class="headerlink" href="#module-seq2seq.metrics.rouge" title="Permalink to this headline">¶</a></h2>
+<p>ROUGe metric implementation.</p>
+<p>This is a modified and slightly extended verison of
+<a class="reference external" href="https://github.com/miso-belica/sumy/blob/dev/sumy/evaluation/rouge.py">https://github.com/miso-belica/sumy/blob/dev/sumy/evaluation/rouge.py</a>.</p>
+<dl class="function">
+<dt id="seq2seq.metrics.rouge.rouge">
+<code class="descclassname">seq2seq.metrics.rouge.</code><code class="descname">rouge</code><span class="sig-paren">(</span><em>hypotheses</em>, <em>references</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/rouge.html#rouge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.rouge.rouge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates average rouge scores for a list of hypotheses and
+references</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.metrics.rouge.rouge_l_sentence_level">
+<code class="descclassname">seq2seq.metrics.rouge.</code><code class="descname">rouge_l_sentence_level</code><span class="sig-paren">(</span><em>evaluated_sentences</em>, <em>reference_sentences</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/rouge.html#rouge_l_sentence_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.rouge.rouge_l_sentence_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes ROUGE-L (sentence level) of two text collections of sentences.
+<a class="reference external" href="http://research.microsoft.com/en-us/um/people/cyl/download/papers/">http://research.microsoft.com/en-us/um/people/cyl/download/papers/</a>
+rouge-working-note-v1.3.1.pdf</p>
+<p>Calculated according to:
+R_lcs = LCS(X,Y)/m
+P_lcs = LCS(X,Y)/n
+F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)</p>
+<p>where:
+X = reference summary
+Y = Candidate summary
+m = length of reference summary
+n = length of candidate summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>evaluated_sentences</strong> &#8211; The sentences that have been picked by the summarizer</li>
+<li><strong>reference_sentences</strong> &#8211; The sentences from the referene set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">F_lcs</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">A float</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+raises exception if a param has len &lt;= 0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.metrics.rouge.rouge_l_summary_level">
+<code class="descclassname">seq2seq.metrics.rouge.</code><code class="descname">rouge_l_summary_level</code><span class="sig-paren">(</span><em>evaluated_sentences</em>, <em>reference_sentences</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/rouge.html#rouge_l_summary_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.rouge.rouge_l_summary_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes ROUGE-L (summary level) of two text collections of sentences.
+<a class="reference external" href="http://research.microsoft.com/en-us/um/people/cyl/download/papers/">http://research.microsoft.com/en-us/um/people/cyl/download/papers/</a>
+rouge-working-note-v1.3.1.pdf</p>
+<p>Calculated according to:
+R_lcs = SUM(1, u)[LCS&lt;union&gt;(r_i,C)]/m
+P_lcs = SUM(1, u)[LCS&lt;union&gt;(r_i,C)]/n
+F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)</p>
+<p>where:
+SUM(i,u) = SUM from i through u
+u = number of sentences in reference summary
+C = Candidate summary made up of v sentences
+m = number of words in reference summary
+n = number of words in candidate summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>evaluated_sentences</strong> &#8211; The sentences that have been picked by the summarizer</li>
+<li><strong>reference_sentence</strong> &#8211; One of the sentences in the reference summaries</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">F_lcs</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">A float</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+raises exception if a param has len &lt;= 0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.metrics.rouge.rouge_n">
+<code class="descclassname">seq2seq.metrics.rouge.</code><code class="descname">rouge_n</code><span class="sig-paren">(</span><em>evaluated_sentences</em>, <em>reference_sentences</em>, <em>n=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/metrics/rouge.html#rouge_n"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.metrics.rouge.rouge_n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes ROUGE-N of two text collections of sentences.
+Sourece: <a class="reference external" href="http://research.microsoft.com/en-us/um/people/cyl/download/">http://research.microsoft.com/en-us/um/people/cyl/download/</a>
+papers/rouge-working-note-v1.3.1.pdf</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>evaluated_sentences</strong> &#8211; The sentences that have been picked by the summarizer</li>
+<li><strong>reference_sentences</strong> &#8211; The sentences from the referene set</li>
+<li><strong>n</strong> &#8211; Size of ngram.  Defaults to 2.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple (f1, precision, recall) for ROUGE-N</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code></a> &#8211;
+raises exception if a param has len &lt;= 0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.metrics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.metrics" title="Permalink to this headline">¶</a></h2>
+<p>Collection of metric-related functions</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

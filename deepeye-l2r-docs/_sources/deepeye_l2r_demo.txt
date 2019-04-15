@@ -1,0 +1,7 @@
+deepeye_l2r_demo module
+=======================
+
+.. automodule:: deepeye_l2r_demo
+    :members:
+    :undoc-members:
+    :show-inheritance:

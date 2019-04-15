@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>instance &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for instance</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: instance.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2018\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    1. Class to:</span>
+<span class="sd">        - Handle attributes of table instance.</span>
+<span class="sd">        - Add new tables for future consideration.</span>
+<span class="sd">        - Get matching quality between data and chart calculated by view instance object.</span>
+<span class="sd">        - Caculate importance of columns.</span>
+<span class="sd">        - Calculate visualization score to generate a graph and rank each visualization. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ViewPosition"><a class="viewcode-back" href="../instance.html#instance.ViewPosition">[docs]</a><span class="k">class</span> <span class="nc">ViewPosition</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class: </span>
+<span class="sd">        - Help Navigate to sub-table and a correcsponding visualization.</span>
+
+<span class="sd">    ARGS:</span>
+<span class="sd">        table_pos (int): An id to know which sub-table is in consideration</span>
+<span class="sd">        view_pos (int): An id to know which visualization of that sub-table is in consideration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">table_pos</span><span class="p">,</span><span class="n">view_pos</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_pos</span><span class="o">=</span><span class="n">table_pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_pos</span><span class="o">=</span><span class="n">view_pos</span></div>
+
+<div class="viewcode-block" id="Instance"><a class="viewcode-back" href="../instance.html#instance.Instance">[docs]</a><span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class: </span>
+<span class="sd">        - Handle attributes of table instance.</span>
+<span class="sd">        - Add new tables for future consideration.</span>
+<span class="sd">        - Get matching quality between data and chart calculated by view instance object.</span>
+<span class="sd">        - Caculate importance of columns.</span>
+<span class="sd">        - Calculate visualization score to generate a graph and rank each visualization. </span>
+<span class="sd">        </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        table_name (str): Unique name given to table.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">table_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tale_name</span><span class="o">=</span><span class="n">table_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tuple_num</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="o">=</span><span class="p">[]</span>
+
+<div class="viewcode-block" id="Instance.addTable"><a class="viewcode-back" href="../instance.html#instance.Instance.addTable">[docs]</a>    <span class="k">def</span> <span class="nf">addTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">table</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC: </span>
+<span class="sd">            Add table to list of tables handled in this class.</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            table (Table Class object): Table to be added to the list.        </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_num</span><span class="o">+=</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Instance.addTables"><a class="viewcode-back" href="../instance.html#instance.Instance.addTables">[docs]</a>    <span class="k">def</span> <span class="nf">addTables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC: </span>
+<span class="sd">            Add multiple table to the master list of tables handled in this class.</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            tables (list): List of tables to be added to the list.        </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addTable</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Instance.getM"><a class="viewcode-back" href="../instance.html#instance.Instance.getM">[docs]</a>    <span class="k">def</span> <span class="nf">getM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC: </span>
+<span class="sd">            Get matching quality between data and chart for each table.</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            None.        </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_M</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">views</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">M</span><span class="o">&gt;</span><span class="n">max_M</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">chart</span><span class="p">]:</span>
+                    <span class="n">max_M</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">chart</span><span class="p">]</span><span class="o">=</span><span class="n">view</span><span class="o">.</span><span class="n">M</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">views</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">max_M</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">chart</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">view</span><span class="o">.</span><span class="n">M</span><span class="o">=</span><span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">view</span><span class="o">.</span><span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="o">*</span><span class="n">view</span><span class="o">.</span><span class="n">M</span><span class="o">/</span><span class="n">max_M</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">chart</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Instance.getW"><a class="viewcode-back" href="../instance.html#instance.Instance.getW">[docs]</a>    <span class="k">def</span> <span class="nf">getW</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC: </span>
+<span class="sd">            Get importance of columns.</span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            None.        </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">views</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">z_id</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">view</span><span class="o">.</span><span class="n">W</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="mi">2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">view</span><span class="o">.</span><span class="n">W</span><span class="o">=</span><span class="mf">1.0</span></div>
+
+<div class="viewcode-block" id="Instance.getScore"><a class="viewcode-back" href="../instance.html#instance.Instance.getScore">[docs]</a>    <span class="k">def</span> <span class="nf">getScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FUNC: </span>
+<span class="sd">            Calculate visualization score to generate a graph and rank each visualization.  </span>
+<span class="sd">        ARGS:</span>
+<span class="sd">            None.        </span>
+<span class="sd">        RETURNS:</span>
+<span class="sd">            None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_num</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">ViewPosition</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">view_pos</span><span class="p">)</span> <span class="k">for</span> <span class="n">view_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">view_num</span><span class="p">)])</span>
+        <span class="n">G</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">)]</span>
+        <span class="n">out_edge_num</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">)]</span>
+        <span class="n">score</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">j</span><span class="p">:</span>
+                    <span class="c1">#print (&quot;self.view[i] = &quot;, self.views[i]);</span>
+                    <span class="n">view_i</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">table_pos</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">view_pos</span><span class="p">]</span>
+                    <span class="n">view_j</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">table_pos</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">view_pos</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">view_i</span><span class="o">.</span><span class="n">M</span> <span class="o">&gt;=</span> <span class="n">view_j</span><span class="o">.</span><span class="n">M</span> <span class="ow">and</span> <span class="n">view_i</span><span class="o">.</span><span class="n">Q</span> <span class="o">&gt;=</span> <span class="n">view_j</span><span class="o">.</span><span class="n">Q</span> <span class="ow">and</span> <span class="n">view_i</span><span class="o">.</span><span class="n">W</span> <span class="o">&gt;=</span> <span class="n">view_j</span><span class="o">.</span><span class="n">W</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">view_i</span><span class="o">.</span><span class="n">M</span><span class="o">==</span><span class="n">view_j</span><span class="o">.</span><span class="n">M</span> <span class="ow">and</span> <span class="n">view_i</span><span class="o">.</span><span class="n">Q</span><span class="o">==</span><span class="n">view_j</span><span class="o">.</span><span class="n">Q</span> <span class="ow">and</span> <span class="n">view_i</span><span class="o">.</span><span class="n">W</span><span class="o">==</span><span class="n">view_j</span><span class="o">.</span><span class="n">W</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">view_i</span><span class="o">.</span><span class="n">M</span> <span class="o">-</span> <span class="n">view_j</span><span class="o">.</span><span class="n">M</span> <span class="o">+</span> <span class="n">view_i</span><span class="o">.</span><span class="n">Q</span> <span class="o">-</span> <span class="n">view_j</span><span class="o">.</span><span class="n">Q</span> <span class="o">+</span> <span class="n">view_i</span><span class="o">.</span><span class="n">W</span> <span class="o">-</span> <span class="n">view_j</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span>
+                        <span class="n">out_edge_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">remove_time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">out_edge_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+                            <span class="n">score</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+=</span><span class="n">G</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                            <span class="n">G</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+                            <span class="n">out_edge_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+                            <span class="n">out_edge_num</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-=</span><span class="mi">1</span>
+                    <span class="k">break</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_num</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">table_pos</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">view_pos</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">view</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">table_pos</span><span class="p">]</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">view_pos</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">,</span><span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

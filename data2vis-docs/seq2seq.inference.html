@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.inference package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.inference package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.inference.beam_search">seq2seq.inference.beam_search module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.inference.inference">seq2seq.inference.inference module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.inference">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.inference.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-inference-package">
+<h1>seq2seq.inference package<a class="headerlink" href="#seq2seq-inference-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.inference.beam_search">
+<span id="seq2seq-inference-beam-search-module"></span><h2>seq2seq.inference.beam_search module<a class="headerlink" href="#module-seq2seq.inference.beam_search" title="Permalink to this headline">¶</a></h2>
+<p>In-Graph Beam Search Implementation.</p>
+<dl class="class">
+<dt id="seq2seq.inference.beam_search.BeamSearchConfig">
+<em class="property">class </em><code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">BeamSearchConfig</code><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#BeamSearchConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.BeamSearchConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.inference.beam_search.BeamSearchConfig" title="seq2seq.inference.beam_search.BeamSearchConfig"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.inference.beam_search.BeamSearchConfig</span></code></a></p>
+<p>Configuration object for beam search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>beam_width</strong> &#8211; Number of beams to use, an integer</li>
+<li><strong>vocab_size</strong> &#8211; Output vocabulary size</li>
+<li><strong>eos_token</strong> &#8211; The id of the EOS token, used to mark beams as &#8220;done&#8221;</li>
+<li><strong>length_penalty_weight</strong> &#8211; Weight for the length penalty factor. 0.0 disables
+the penalty.</li>
+<li><strong>choose_successors_fn</strong> &#8211; A function used to choose beam successors based
+on their scores. Maps from (scores, config) =&gt; (chosen scores, chosen_ids)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.inference.beam_search.BeamSearchState">
+<em class="property">class </em><code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">BeamSearchState</code><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#BeamSearchState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.BeamSearchState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.inference.beam_search.BeamSearchState" title="seq2seq.inference.beam_search.BeamSearchState"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.inference.beam_search.BeamSearchState</span></code></a></p>
+<p>State for a single step of beam search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_probs</strong> &#8211; The current log probabilities of all beams</li>
+<li><strong>finished</strong> &#8211; A boolean vector that specifies which beams are finished</li>
+<li><strong>lengths</strong> &#8211; Lengths of all beams</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.inference.beam_search.BeamSearchStepOutput">
+<em class="property">class </em><code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">BeamSearchStepOutput</code><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#BeamSearchStepOutput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.BeamSearchStepOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.inference.beam_search.BeamSearchStepOutput" title="seq2seq.inference.beam_search.BeamSearchStepOutput"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.inference.beam_search.BeamSearchStepOutput</span></code></a></p>
+<p>Outputs for a single step of beam search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>scores</strong> &#8211; Score for each beam, a float32 vector</li>
+<li><strong>predicted_ids</strong> &#8211; predictions for this step step, an int32 vector</li>
+<li><strong>beam_parent_ids</strong> &#8211; an int32 vector containing the beam indices of the
+continued beams from the previous step</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.beam_search_step">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">beam_search_step</code><span class="sig-paren">(</span><em>time_</em>, <em>logits</em>, <em>beam_state</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#beam_search_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.beam_search_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single step of Beam Search Decoding.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>time</strong> &#8211; Beam search time step, should start at 0. At time 0 we assume
+that all beams are equal and consider only the first beam for
+continuations.</li>
+<li><strong>logits</strong> &#8211; Logits at the current time step. A tensor of shape <cite>[B, vocab_size]</cite></li>
+<li><strong>beam_state</strong> &#8211; Current state of the beam search. An instance of <cite>BeamState</cite></li>
+<li><strong>config</strong> &#8211; An instance of <cite>BeamSearchConfig</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A new beam state.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.choose_top_k">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">choose_top_k</code><span class="sig-paren">(</span><em>scores_flat</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#choose_top_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.choose_top_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chooses the top-k beams as successors.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.create_initial_beam_state">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">create_initial_beam_state</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#create_initial_beam_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.create_initial_beam_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an instance of <cite>BeamState</cite> that can be used on the first
+call to <cite>beam_step</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> &#8211; A BeamSearchConfig</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An instance of <cite>BeamState</cite>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.gather_tree">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">gather_tree</code><span class="sig-paren">(</span><em>values</em>, <em>parents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#gather_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.gather_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tensor version of gather_tree_py</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.gather_tree_py">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">gather_tree_py</code><span class="sig-paren">(</span><em>values</em>, <em>parents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#gather_tree_py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.gather_tree_py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers path through a tree backwards from the leave nodes. Used
+to reconstruct beams given their parents.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.hyp_score">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">hyp_score</code><span class="sig-paren">(</span><em>log_probs</em>, <em>sequence_lengths</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#hyp_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.hyp_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates scores for beam search hypotheses.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.length_penalty">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">length_penalty</code><span class="sig-paren">(</span><em>sequence_lengths</em>, <em>penalty_factor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#length_penalty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.length_penalty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the length penalty according to
+<a class="reference external" href="https://arxiv.org/abs/1609.08144">https://arxiv.org/abs/1609.08144</a></p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>sequence_lengths: The sequence length of all hypotheses, a tensor</dt>
+<dd>of shape [beam_size, vocab_size].</dd>
+</dl>
+<p class="last">penalty_factor: A scalar that weights the length penalty.</p>
+</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The length penalty factor, a tensor fo shape [beam_size].</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.mask_probs">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">mask_probs</code><span class="sig-paren">(</span><em>probs</em>, <em>eos_token</em>, <em>finished</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#mask_probs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.mask_probs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Masks log probabilities such that finished beams
+allocate all probability mass to eos. Unfinished beams remain unchanged.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>probs</strong> &#8211; Log probabiltiies of shape <cite>[beam_width, vocab_size]</cite></li>
+<li><strong>eos_token</strong> &#8211; An int32 id corresponding to the EOS token to allocate
+probability to</li>
+<li><strong>finished</strong> &#8211; A boolean tensor of shape <cite>[beam_width]</cite> that specifies which
+elements in the beam are finished already.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tensor of shape <cite>[beam_width, vocab_size]</cite>, where unfinished beams
+stay unchanged and finished beams are replaced with a tensor that has all
+probability on the EOS token.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.inference.beam_search.nest_map">
+<code class="descclassname">seq2seq.inference.beam_search.</code><code class="descname">nest_map</code><span class="sig-paren">(</span><em>inputs</em>, <em>map_fn</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/beam_search.html#nest_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.beam_search.nest_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to (possibly nested) tuple of tensors.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.inference.inference">
+<span id="seq2seq-inference-inference-module"></span><h2>seq2seq.inference.inference module<a class="headerlink" href="#module-seq2seq.inference.inference" title="Permalink to this headline">¶</a></h2>
+<p>Generates model predictions.</p>
+<dl class="function">
+<dt id="seq2seq.inference.inference.create_inference_graph">
+<code class="descclassname">seq2seq.inference.inference.</code><code class="descname">create_inference_graph</code><span class="sig-paren">(</span><em>model</em>, <em>input_pipeline</em>, <em>batch_size=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/inference/inference.html#create_inference_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.inference.inference.create_inference_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a graph to perform inference.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>task</strong> &#8211; An <cite>InferenceTask</cite> instance.</li>
+<li><strong>input_pipeline</strong> &#8211; An instance of <cite>InputPipeline</cite> that defines
+how to read and parse data.</li>
+<li><strong>batch_size</strong> &#8211; The batch size used for inference</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The return value of the model function, typically a tuple of
+(predictions, loss, train_op).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.inference">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.inference" title="Permalink to this headline">¶</a></h2>
+<p>Modules related to running model inference.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

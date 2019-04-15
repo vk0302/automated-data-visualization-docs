@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.contrib.seq2seq.decoder &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.contrib.seq2seq.decoder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2016 The TensorFlow Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ==============================================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">IMPORTANT: This code is taken directly from Tensorflow</span>
+<span class="sd">(https://github.com/tensorflow/tensorflow) and is copied temporarily</span>
+<span class="sd">until it is available in a packaged Tensorflow version on pypi.</span>
+
+<span class="sd">TODO(dennybritz): Delete this code when it becomes available in TF.</span>
+
+<span class="sd">Seq2seq layer operations for use in neural networks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># pylint: skip-file</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">constant_op</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">tensor_util</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">control_flow_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">math_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">tensor_array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">variable_scope</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">nest</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Decoder&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamic_decode&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_transpose_batch_time</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Transpose the batch and time dimensions of a Tensor.</span>
+
+<span class="sd">  Retains as much of the static shape information as possible.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    x: A tensor of rank 2 or higher.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    x transposed along the first two dimensions.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: if `x` is rank 1 or lower.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">x_static_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">x_static_shape</span><span class="o">.</span><span class="n">ndims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">x_static_shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Expected input tensor </span><span class="si">%s</span><span class="s2"> to have rank at least 2, but saw shape: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+        <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_static_shape</span><span class="p">))</span>
+  <span class="n">x_rank</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="n">x_t</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+      <span class="n">x</span><span class="p">,</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+          <span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_rank</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+  <span class="n">x_t</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span>
+      <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span>
+          <span class="n">x_static_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">x_static_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+      <span class="p">])</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x_static_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]))</span>
+  <span class="k">return</span> <span class="n">x_t</span>
+
+
+<span class="nd">@six.add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<div class="viewcode-block" id="Decoder"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.decoder.Decoder">[docs]</a><span class="k">class</span> <span class="nc">Decoder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;An RNN Decoder abstract interface object.&quot;&quot;&quot;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The batch size of the inputs returned by `sample`.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A (possibly nested tuple of...) integer[s] or `TensorShape` object[s].&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A (possibly nested tuple of...) dtype[s].&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+  <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Decoder.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.decoder.Decoder.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Called before any decoding iterations.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Name scope for any created operations.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      `(finished, first_inputs, initial_state)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+  <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Decoder.step"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.decoder.Decoder.step">[docs]</a>  <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Called per step of decoding (but only once for dynamic decoding).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      time: Scalar `int32` tensor.</span>
+<span class="sd">      inputs: Input (possibly nested tuple of) tensor[s] for this time step.</span>
+<span class="sd">      state: State (possibly nested tuple of) tensor[s] from previous time step.</span>
+<span class="sd">      name: Name scope for any created operations.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      `(outputs, next_state, next_inputs, finished)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_create_zero_outputs</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Create a zero outputs Tensor structure.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_t</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">s</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">constant_op</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span>
+        <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">as_list</span><span class="p">(),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;zero_suffix_shape&quot;</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_create</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="n">array_ops</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">([</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">_t</span><span class="p">(</span><span class="n">s</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_create</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="dynamic_decode"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.decoder.dynamic_decode">[docs]</a><span class="k">def</span> <span class="nf">dynamic_decode</span><span class="p">(</span><span class="n">decoder</span><span class="p">,</span>
+                   <span class="n">output_time_major</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">impute_finished</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">maximum_iterations</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">parallel_iterations</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                   <span class="n">swap_memory</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Perform dynamic decoding with `decoder`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    decoder: A `Decoder` instance.</span>
+<span class="sd">    output_time_major: Python boolean.  Default: `False` (batch major).  If</span>
+<span class="sd">      `True`, outputs are returned as time major tensors (this mode is faster).</span>
+<span class="sd">      Otherwise, outputs are returned as batch major tensors (this adds extra</span>
+<span class="sd">      time to the computation).</span>
+<span class="sd">    impute_finished: Python boolean.  If `True`, then states for batch</span>
+<span class="sd">      entries which are marked as finished get copied through and the</span>
+<span class="sd">      corresponding outputs get zeroed out.  This causes some slowdown at</span>
+<span class="sd">      each time step, but ensures that the final state and outputs have</span>
+<span class="sd">      the correct values and that backprop ignores time steps that were</span>
+<span class="sd">      marked as finished.</span>
+<span class="sd">    maximum_iterations: `int32` scalar, maximum allowed number of decoding</span>
+<span class="sd">       steps.  Default is `None` (decode until the decoder is fully done).</span>
+<span class="sd">    parallel_iterations: Argument passed to `tf.while_loop`.</span>
+<span class="sd">    swap_memory: Argument passed to `tf.while_loop`.</span>
+<span class="sd">    scope: Optional variable scope to use.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    `(final_outputs, final_state)`.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    TypeError: if `decoder` is not an instance of `Decoder`.</span>
+<span class="sd">    ValueError: if maximum_iterations is provided but is not a scalar.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoder</span><span class="p">,</span> <span class="n">Decoder</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected decoder to be type Decoder, but saw: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">decoder</span><span class="p">))</span>
+
+  <span class="k">with</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">scope</span> <span class="ow">or</span> <span class="s2">&quot;decoder&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">varscope</span><span class="p">:</span>
+    <span class="c1"># Properly cache variable values inside the while_loop</span>
+    <span class="k">if</span> <span class="n">varscope</span><span class="o">.</span><span class="n">caching_device</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">varscope</span><span class="o">.</span><span class="n">set_caching_device</span><span class="p">(</span><span class="k">lambda</span> <span class="n">op</span><span class="p">:</span> <span class="n">op</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">maximum_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">maximum_iterations</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+          <span class="n">maximum_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;maximum_iterations&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">maximum_iterations</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;maximum_iterations must be a scalar&quot;</span><span class="p">)</span>
+
+    <span class="n">initial_finished</span><span class="p">,</span> <span class="n">initial_inputs</span><span class="p">,</span> <span class="n">initial_state</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+    <span class="n">zero_outputs</span> <span class="o">=</span> <span class="n">_create_zero_outputs</span><span class="p">(</span><span class="n">decoder</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span>
+                                        <span class="n">decoder</span><span class="o">.</span><span class="n">output_dtype</span><span class="p">,</span>
+                                        <span class="n">decoder</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">maximum_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">initial_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+          <span class="n">initial_finished</span><span class="p">,</span> <span class="mi">0</span> <span class="o">&gt;=</span> <span class="n">maximum_iterations</span><span class="p">)</span>
+    <span class="n">initial_time</span> <span class="o">=</span> <span class="n">constant_op</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_shape</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">from_shape</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">from_shape</span><span class="p">,</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tensor_util</span><span class="o">.</span><span class="n">constant_value</span><span class="p">(</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+                <span class="n">batch_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_size&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="n">batch_size</span><span class="p">])</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">from_shape</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_ta</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">tensor_array_ops</span><span class="o">.</span><span class="n">TensorArray</span><span class="p">(</span>
+          <span class="n">dtype</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+          <span class="n">size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+          <span class="n">dynamic_size</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">element_shape</span><span class="o">=</span><span class="n">_shape</span><span class="p">(</span><span class="n">decoder</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">s</span><span class="p">))</span>
+
+    <span class="n">initial_outputs_ta</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_create_ta</span><span class="p">,</span> <span class="n">decoder</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span>
+                                            <span class="n">decoder</span><span class="o">.</span><span class="n">output_dtype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">condition</span><span class="p">(</span><span class="n">unused_time</span><span class="p">,</span> <span class="n">unused_outputs_ta</span><span class="p">,</span> <span class="n">unused_state</span><span class="p">,</span> <span class="n">unused_inputs</span><span class="p">,</span>
+                  <span class="n">finished</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs_ta</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">finished</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Internal while_loop body.</span>
+
+<span class="sd">      Args:</span>
+<span class="sd">        time: scalar int32 tensor.</span>
+<span class="sd">        outputs_ta: structure of TensorArray.</span>
+<span class="sd">        state: (structure of) state tensors and TensorArrays.</span>
+<span class="sd">        inputs: (structure of) input tensors.</span>
+<span class="sd">        finished: 1-D bool tensor.</span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">        `(time + 1, outputs_ta, next_state, next_inputs, next_finished)`.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="p">(</span><span class="n">next_outputs</span><span class="p">,</span> <span class="n">decoder_state</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span>
+       <span class="n">decoder_finished</span><span class="p">)</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+      <span class="n">next_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">decoder_finished</span><span class="p">,</span> <span class="n">finished</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">maximum_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">next_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+            <span class="n">next_finished</span><span class="p">,</span> <span class="n">time</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">maximum_iterations</span><span class="p">)</span>
+
+      <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">decoder_state</span><span class="p">)</span>
+      <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">outputs_ta</span><span class="p">,</span> <span class="n">next_outputs</span><span class="p">)</span>
+      <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">)</span>
+
+      <span class="c1"># Zero out output values past finish</span>
+      <span class="k">if</span> <span class="n">impute_finished</span><span class="p">:</span>
+        <span class="n">emit</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">out</span><span class="p">,</span> <span class="n">zero</span><span class="p">:</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">out</span><span class="p">),</span>
+            <span class="n">next_outputs</span><span class="p">,</span>
+            <span class="n">zero_outputs</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">emit</span> <span class="o">=</span> <span class="n">next_outputs</span>
+
+      <span class="c1"># Copy through states past finish</span>
+      <span class="k">def</span> <span class="nf">_maybe_copy_state</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="c1"># TensorArrays and scalar states get passed through.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cur</span><span class="p">,</span> <span class="n">tensor_array_ops</span><span class="o">.</span><span class="n">TensorArray</span><span class="p">):</span>
+          <span class="n">pass_through</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">new</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+          <span class="n">pass_through</span> <span class="o">=</span> <span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span> <span class="k">if</span> <span class="n">pass_through</span> <span class="k">else</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">cur</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">impute_finished</span><span class="p">:</span>
+        <span class="n">next_state</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+            <span class="n">_maybe_copy_state</span><span class="p">,</span> <span class="n">decoder_state</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">next_state</span> <span class="o">=</span> <span class="n">decoder_state</span>
+
+      <span class="n">outputs_ta</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ta</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">ta</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">out</span><span class="p">),</span>
+                                      <span class="n">outputs_ta</span><span class="p">,</span> <span class="n">emit</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">outputs_ta</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">next_finished</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
+        <span class="n">condition</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">,</span>
+        <span class="n">loop_vars</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">initial_time</span><span class="p">,</span> <span class="n">initial_outputs_ta</span><span class="p">,</span> <span class="n">initial_state</span><span class="p">,</span> <span class="n">initial_inputs</span><span class="p">,</span>
+            <span class="n">initial_finished</span>
+        <span class="p">],</span>
+        <span class="n">parallel_iterations</span><span class="o">=</span><span class="n">parallel_iterations</span><span class="p">,</span>
+        <span class="n">swap_memory</span><span class="o">=</span><span class="n">swap_memory</span><span class="p">)</span>
+
+    <span class="n">final_outputs_ta</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">final_state</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">final_outputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ta</span><span class="p">:</span> <span class="n">ta</span><span class="o">.</span><span class="n">stack</span><span class="p">(),</span> <span class="n">final_outputs_ta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_time_major</span><span class="p">:</span>
+      <span class="n">final_outputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_transpose_batch_time</span><span class="p">,</span> <span class="n">final_outputs</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">final_outputs</span><span class="p">,</span> <span class="n">final_state</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

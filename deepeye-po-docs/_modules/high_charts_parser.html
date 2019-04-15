@@ -1,0 +1,1130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>high_charts_parser &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for high_charts_parser</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: high_chart_parser.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2018\n</span>
+<span class="sd">Description:\n</span>
+<span class="sd">    - Parser functions to convert vega-lite charts into high charts</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+
+<div class="viewcode-block" id="read_data"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.read_data">[docs]</a><span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">in_file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Read structured data from file and jsonify it        </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        in_file_name (string): Input file path.  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsoinified data in from of key-value pairs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">json_data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">in_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">();</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_data</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="get_chart_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.get_chart_type">[docs]</a><span class="k">def</span> <span class="nf">get_chart_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        Get chart type</span>
+<span class="sd">            - bar (bar chart)</span>
+<span class="sd">            - scatter (scatter plot)</span>
+<span class="sd">            - pie (pie chart)</span>
+<span class="sd">            - line (line chart)      </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Chart type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;mark&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="bar_chart_get_sub_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_chart_get_sub_type">[docs]</a><span class="k">def</span> <span class="nf">bar_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given bar type chart</span>
+<span class="sd">        - Find the chart subtype from</span>
+<span class="sd">            - bar_grouped (grouped bar chart)</span>
+<span class="sd">            - bar_simple (simple bar chart)      </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Sub-chart type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;column&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;bar_grouped&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;bar_simple&quot;</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="bar_simple_get_x_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_simple_get_x_type">[docs]</a><span class="k">def</span> <span class="nf">bar_simple_get_x_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Simple, </span>
+<span class="sd">        - Find data type of elemnts representing x-axis    </span>
+<span class="sd">            - date_type (Date type data on x-axis)</span>
+<span class="sd">            - category_type (Categorical data on x-axis) </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: data type of elemnts representing x-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;date&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;date_type&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;category_type&quot;</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="bar_simple_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_simple_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">bar_simple_category_get_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Simple</span>
+<span class="sd">        - find get x and y axes data   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes data</span>
+<span class="sd">            - x_values</span>
+<span class="sd">            - y_values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">];</span>
+    <span class="n">x_values</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">y_values</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))):</span>
+        <span class="n">x_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_axis_name</span><span class="p">]);</span>
+        <span class="n">y_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">y_axis_name</span><span class="p">]);</span>
+
+    <span class="k">return</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="bar_simple_category_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_simple_category_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">bar_simple_category_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Simple</span>
+<span class="sd">        - find get x and y axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="bar_simple_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_simple_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">bar_simple_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Simple</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="create_bar_simple_category"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_bar_simple_category">[docs]</a><span class="k">def</span> <span class="nf">create_bar_simple_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Simple</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        title (str): Title for graph</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bar_simple_category</span> <span class="o">=</span> <span class="p">{};</span>
+    
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;headerFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;span style=&#39;font-size:11px&#39;&gt;{series.name}&lt;/span&gt;&lt;br&gt;&quot;</span><span class="p">;</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;pointFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;span style=&#39;color:{point.color}&#39;&#39;&gt;{point.name}&lt;/span&gt;: &lt;b&gt;{point.y:.2f}&lt;/b&gt;&lt;br/&gt;&quot;</span><span class="p">;</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;series&#39;</span><span class="p">][</span><span class="s1">&#39;borderWidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;series&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;series&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;series&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;{point.y:.1f}&quot;</span><span class="p">;</span>    
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;false&quot;</span><span class="p">;</span> 
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span><span class="p">;</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;category&quot;</span><span class="p">;</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="n">series_tmp</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">series_tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+    <span class="n">series_tmp</span><span class="p">[</span><span class="s1">&#39;colorByPoint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">series_tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">)):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">series_tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="n">bar_simple_category</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">series_tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">bar_simple_category</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="bar_grouped_get_x_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_grouped_get_x_type">[docs]</a><span class="k">def</span> <span class="nf">bar_grouped_get_x_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Grouped, </span>
+<span class="sd">        - Find data type of elemnts representing x-axis    </span>
+<span class="sd">            - date_type (Date type data on x-axis)</span>
+<span class="sd">            - category_type (Categorical data on x-axis) </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: data type of elemnts representing x-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;date&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;date_type&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;category_type&quot;</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="bar_grouped_category_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_grouped_category_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">bar_grouped_category_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</span>
+<span class="sd">        - find get x, y and grouped axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x, y and grouped axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;column&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="bar_grouped_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_grouped_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">bar_grouped_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</span>
+<span class="sd">        - find get x, y and grouping axes data </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sub_data (dict): Jsonified data from pre vega-lite encoded dictionary</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes data</span>
+<span class="sd">            - column_values</span>
+<span class="sd">            - x_values</span>
+<span class="sd">            - y_values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+    <span class="n">y_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">];</span>
+    <span class="n">column_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">];</span>
+    <span class="k">return</span> <span class="n">column_values</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="bar_grouped_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.bar_grouped_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">bar_grouped_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="create_bar_grouped_category"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_bar_grouped_category">[docs]</a><span class="k">def</span> <span class="nf">create_bar_grouped_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">column_axis_name</span><span class="p">,</span>  <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">column_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        column_axis_name (str): Unique name representing grouped-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        column_values (list): Values for grouped axis</span>
+<span class="sd">        title (str): Title for the graph. </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bar_grouped_category</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;crosshair&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;categories&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_values</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;headerFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;span style=&#39;font-size:10px&#39;&gt;{point.key}&lt;/span&gt;&lt;table&gt;&quot;</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;pointFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;tr&gt;&lt;td style=&#39;color:{series.color};padding:0&#39;&gt;{series.name}: &lt;/td&gt;&quot;</span> <span class="o">+</span> <span class="s2">&quot;&lt;td style=&#39;padding:0&#39;&gt;&lt;b&gt;{point.y:.1f}&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&quot;</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;footerFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;/table&gt;&quot;</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;shared&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;useHTML&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;column&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;column&#39;</span><span class="p">][</span><span class="s1">&#39;pointPadding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">;</span>
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;column&#39;</span><span class="p">][</span><span class="s1">&#39;borderWidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_values</span><span class="p">))):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">column_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">bar_grouped_category</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">bar_grouped_category</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="scatter_chart_get_sub_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_chart_get_sub_type">[docs]</a><span class="k">def</span> <span class="nf">scatter_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given scatter type chart</span>
+<span class="sd">        - Find the chart subtype</span>
+<span class="sd">            - scatter_multi (3D data)</span>
+<span class="sd">            - scatter_single (2D data)      </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Sub-chart type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;color&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;scatter_multi&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;scatter_single&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="scatter_single_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_single_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">scatter_single_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Single</span>
+<span class="sd">        - find get x and y axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+<div class="viewcode-block" id="scatter_single_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_single_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">scatter_single_category_get_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Single</span>
+<span class="sd">        - find get x and y axes data   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data  </span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        list: Returns x and y axes data in terms of corresponding pairs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">];</span>
+    <span class="n">x_y_value_pair</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x_axis_name</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">y_axis_name</span><span class="p">]];</span>
+        <span class="n">x_y_value_pair</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">x_y_value_pair</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="scatter_single_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_single_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">scatter_single_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Single</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="create_scatter_single"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_scatter_single">[docs]</a><span class="k">def</span> <span class="nf">create_scatter_single</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Single</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        class_name (str): Unique name representing data attributes.</span>
+<span class="sd">        x_y_value_pair (list): X-Y Value pair axis</span>
+<span class="sd">        title (str): Title for the graph.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scatter_single</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;scatter&#39;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;zoomType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;startOnTick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;endOnTick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;showLastLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+    
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;layout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;align&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;verticalAlign&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;floating&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;borderWidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;backgroundColor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(Highcharts.theme &amp;&amp; Highcharts.theme.legendBackgroundColor) || &#39;#FFFFFF&#39;&quot;</span><span class="p">;</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;radius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;lineColor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rgb(100,100,100)&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;false&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;headerFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&#39;&lt;b&gt;{series.name}&lt;/b&gt;&lt;br&gt;&quot;</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;pointFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;{point.x}, {point.y}&quot;</span><span class="p">;</span>
+
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s2">&quot;series&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    
+    <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_name</span><span class="p">;</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">);</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rgba(&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, 0.5)&quot;</span><span class="p">;</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_y_value_pair</span><span class="p">;</span>
+    <span class="n">scatter_single</span><span class="p">[</span><span class="s2">&quot;series&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+
+
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">scatter_single</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="scatter_multi_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_multi_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">scatter_multi_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</span>
+<span class="sd">        - find get all axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns all axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="scatter_multi_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_multi_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">scatter_multi_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</span>
+<span class="sd">        - find get all axes data   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sub_data (dict): Jsonified data from pre vega-lite encoded data </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns </span>
+<span class="sd">            - x-y axes data in terms of corresponding pairs</span>
+<span class="sd">            - 3rd axes data. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">];</span>
+    <span class="n">y_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">];</span>
+    <span class="n">x_y_value_pair</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">color_values</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">))):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">]))):</span>
+            <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+        <span class="n">x_y_value_pair</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">color_values</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="scatter_multi_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.scatter_multi_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">scatter_multi_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+
+<div class="viewcode-block" id="create_scatter_multi"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_scatter_multi">[docs]</a><span class="k">def</span> <span class="nf">create_scatter_multi</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">color_axis_name</span><span class="p">,</span> <span class="n">x_y_value_pair</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        color_axes_name (str): 3rd axis name.</span>
+<span class="sd">        x_y_value_pair (list): X-Y Value pair axis</span>
+<span class="sd">        color_values (list): Values for 3rd axis.</span>
+<span class="sd">        title (str): Title for the graph.</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scatter_multi</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;scatter&#39;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;zoomType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;startOnTick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;endOnTick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;showLastLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+    
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;layout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;align&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;verticalAlign&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;floating&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;borderWidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;backgroundColor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(Highcharts.theme &amp;&amp; Highcharts.theme.legendBackgroundColor) || &#39;#FFFFFF&#39;&quot;</span><span class="p">;</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;radius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;lineColor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rgb(100,100,100)&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;states&#39;</span><span class="p">][</span><span class="s1">&#39;hover&#39;</span><span class="p">][</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;false&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;headerFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&#39;&lt;b&gt;{series.name}&lt;/b&gt;&lt;br&gt;&quot;</span><span class="p">;</span>
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;scatter&#39;</span><span class="p">][</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;pointFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;{point.x}, {point.y}&quot;</span><span class="p">;</span>
+
+    <span class="n">scatter_multi</span><span class="p">[</span><span class="s2">&quot;series&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">color_values</span><span class="p">))):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">);</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rgba(&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, 0.5)&quot;</span><span class="p">;</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_y_value_pair</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">scatter_multi</span><span class="p">[</span><span class="s2">&quot;series&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+
+
+
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">scatter_multi</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="pie_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.pie_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">pie_get_axes_names</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Pie</span>
+<span class="sd">        - find get x and y axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_name&#39;</span><span class="p">],</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_name&#39;</span><span class="p">];</span></div>
+
+<div class="viewcode-block" id="pie_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.pie_get_values">[docs]</a><span class="k">def</span> <span class="nf">pie_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Pie</span>
+<span class="sd">        - find get axes data   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data from pre vega-lite encoded dictionary</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns axes data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span></div>
+
+<div class="viewcode-block" id="pie_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.pie_get_title">[docs]</a><span class="k">def</span> <span class="nf">pie_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Pie</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="create_pie"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_pie">[docs]</a><span class="k">def</span> <span class="nf">create_pie</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Pie</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        title (str): Title for the graph. </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pie</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;plotBackgroundColor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;plotBorderWidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;null&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;plotShadow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pie&quot;</span><span class="p">;</span>
+
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">][</span><span class="s1">&#39;pointFormat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;{series.name}: &lt;b&gt;{point.percentage:.1f}%&lt;/b&gt;&quot;</span><span class="p">;</span>
+
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;allowPointSelect&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;cursor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pointer&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;{point.name}&lt;/b&gt;: {point.percentage:.1f} %&quot;</span><span class="p">;</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;plotOptions&#39;</span><span class="p">][</span><span class="s1">&#39;pie&#39;</span><span class="p">][</span><span class="s1">&#39;dataLabels&#39;</span><span class="p">][</span><span class="s1">&#39;style&#39;</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(Highcharts.theme &amp;&amp; Highcharts.theme.contrastTextColor) || &#39;black&#39;&quot;</span><span class="p">;</span>
+
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;colorByPoint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span><span class="p">;</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">)):</span>
+        <span class="n">tmp2</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp2</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp2</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp2</span><span class="p">);</span>
+    <span class="n">pie</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">pie</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+<div class="viewcode-block" id="line_chart_get_sub_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_chart_get_sub_type">[docs]</a><span class="k">def</span> <span class="nf">line_chart_get_sub_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given bar type chart</span>
+<span class="sd">        - Find the chart subtype from</span>
+<span class="sd">            - line_multi (Multiple Line chart)</span>
+<span class="sd">            - line_single (Single Line chart)      </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data from pre vega-lite encoded dictionary</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: Sub-chart type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;color&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;line_multi&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;line_single&quot;</span><span class="p">;</span></div>
+
+
+
+<div class="viewcode-block" id="line_single_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_single_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">line_single_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single</span>
+<span class="sd">        - find get x and y axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+<div class="viewcode-block" id="line_simple_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_simple_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">line_simple_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single</span>
+<span class="sd">        - find get x and y axes data   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sub_data (dict): Jsonified data from pre vega-lite encoded dictionary</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x and y axes data</span>
+<span class="sd">            - x_values</span>
+<span class="sd">            - y_values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span></div>
+
+<div class="viewcode-block" id="line_simple_get_x_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_simple_get_x_type">[docs]</a><span class="k">def</span> <span class="nf">line_simple_get_x_type</span><span class="p">(</span><span class="n">x_val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single, </span>
+<span class="sd">        - Find data type of elemnts representing x-axis    </span>
+<span class="sd">            - date (Date type data on x-axis)</span>
+<span class="sd">            - category (Categorical data on x-axis) </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_val (datetime/str): An element from x-axis </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: data type of elemnts representing x-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">x_val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;date&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;category&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="line_single_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_single_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">line_single_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="create_line_single_chart_category"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_line_single_chart_category">[docs]</a><span class="k">def</span> <span class="nf">create_line_single_chart_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single, data_type on x-axis - Categorical</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        title (str): Title for graph</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_single</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;category&quot;</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#036&quot;</span><span class="p">];</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">))):</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">]]);</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">line_single</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+<div class="viewcode-block" id="create_line_single_chart_date"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_line_single_chart_date">[docs]</a><span class="k">def</span> <span class="nf">create_line_single_chart_date</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Single, data_type on x-axis - DateTime</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        title (str): Title for graph</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_single</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;datetime&quot;</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#036&quot;</span><span class="p">];</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">))):</span>
+        <span class="c1">#y, m, d = x_values[i].split(&quot;-&quot;);</span>
+        <span class="c1">#x_val = &quot;Date.UTC(&quot; + y + &quot;,&quot; + str(int(m)-1) + &quot;,&quot; + d + &quot;)&quot;;</span>
+        <span class="c1">#tmp[&#39;data&#39;].append([x_val, y_values[i]]);</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">]]);</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">line_single</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+
+
+<div class="viewcode-block" id="line_multi_get_axes_names"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_multi_get_axes_names">[docs]</a><span class="k">def</span> <span class="nf">line_multi_get_axes_names</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple</span>
+<span class="sd">        - find get x, y axes names   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns x, y axes names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="line_multi_category_get_values"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_multi_category_get_values">[docs]</a><span class="k">def</span> <span class="nf">line_multi_category_get_values</span><span class="p">(</span><span class="n">sub_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple</span>
+<span class="sd">        - find get x, y and grouping axes data </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        sub_data (dict): Jsonified data from pre vega-lite encoded dictionary</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        tuple: Returns axes data</span>
+<span class="sd">            - x_values</span>
+<span class="sd">            - y_values</span>
+<span class="sd">            - category_values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;x_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;y_data&#39;</span><span class="p">],</span> <span class="n">sub_data</span><span class="p">[</span><span class="s1">&#39;classify&#39;</span><span class="p">];</span></div>
+
+
+<div class="viewcode-block" id="line_multi_get_x_type"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_multi_get_x_type">[docs]</a><span class="k">def</span> <span class="nf">line_multi_get_x_type</span><span class="p">(</span><span class="n">x_val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple, </span>
+<span class="sd">        - Find data type of elemnts representing x-axis    </span>
+<span class="sd">            - date (Date type data on x-axis)</span>
+<span class="sd">            - category (Categorical data on x-axis) </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_val (datetime/str): An element from x-axis  </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        str: data type of elemnts representing x-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">x_val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;date&quot;</span><span class="p">;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;category&quot;</span><span class="p">;</span></div>
+
+<div class="viewcode-block" id="line_multi_category_get_title"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.line_multi_category_get_title">[docs]</a><span class="k">def</span> <span class="nf">line_multi_category_get_title</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple</span>
+<span class="sd">        - Find graph title   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        data (dict): Jsonified data</span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        string: Graph Title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">];</span>
+    <span class="k">elif</span><span class="p">(</span><span class="s2">&quot;title&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">];</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span></div>
+
+
+
+<div class="viewcode-block" id="create_line_multi_chart_category"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_line_multi_chart_category">[docs]</a><span class="k">def</span> <span class="nf">create_line_multi_chart_category</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple, x_axis data type -&gt; Category</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        color_values (list): Categorical values</span>
+<span class="sd">        title (str): Title for the graph. </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_single</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;category&quot;</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">color_values</span><span class="p">)):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">))):</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]);</span>
+        <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">line_single</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+
+<div class="viewcode-block" id="create_line_multi_chart_date"><a class="viewcode-back" href="../high_charts_parser.html#high_charts_parser.create_line_multi_chart_date">[docs]</a><span class="k">def</span> <span class="nf">create_line_multi_chart_date</span><span class="p">(</span><span class="n">x_axis_name</span><span class="p">,</span> <span class="n">y_axis_name</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color_values</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Given Chart type -&gt; Line, Sub-type -&gt; Multiple, x_axis data type -&gt; Datetime</span>
+<span class="sd">        - Parse dictionary to create high-chart compatible graph.   </span>
+<span class="sd">    ARGS:</span>
+<span class="sd">        x_axis_name (str): Unique name representing x-axis</span>
+<span class="sd">        y_axis_name (str): Unique name representing y-axis</span>
+<span class="sd">        x_values (list): Values on X axis</span>
+<span class="sd">        y_values (list): Values on Y axis</span>
+<span class="sd">        color_values (list): Datetime values</span>
+<span class="sd">        title (str): Title for the graph. </span>
+<span class="sd">    RETURNS:</span>
+<span class="sd">        dict: Jsonified data encoded to make it high-charts compatible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_single</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;chart&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;datetime&quot;</span><span class="p">;</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;xAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_axis_name</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;yAxis&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_axis_name</span><span class="p">;</span>
+
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">color_values</span><span class="p">)):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">))):</span>
+            <span class="c1">#y, m, d = x_values[j].split(&quot;-&quot;);</span>
+            <span class="c1">#x_val = &quot;Date.UTC(&quot; + y + &quot;,&quot; + str(int(m)-1) + &quot;,&quot; + d + &quot;)&quot;;</span>
+            <span class="c1">#tmp[&#39;data&#39;].append([x_val, y_values[i][j]]);</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]);</span>
+        <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="c1"># Check if the following two lines of code are required</span>
+    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">]);</span>
+    <span class="n">line_single</span><span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">line_single</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">);</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

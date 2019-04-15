@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.test.models_test &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.test.models_test</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;Tests for Models</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">input_pipeline</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">training_utils</span>
+<span class="kn">from</span> <span class="nn">seq2seq.test</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">test_utils</span>
+<span class="kn">from</span> <span class="nn">seq2seq.models</span> <span class="kn">import</span> <span class="n">BasicSeq2Seq</span><span class="p">,</span> <span class="n">AttentionSeq2Seq</span>
+
+<span class="n">TEST_PARAMS</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">embedding.dim: 5</span>
+<span class="s2">encoder.params:</span>
+<span class="s2">  rnn_cell:</span>
+<span class="s2">    dropout_input_keep_prob: 0.8</span>
+<span class="s2">    num_layers: 2</span>
+<span class="s2">    residual_connections: True,</span>
+<span class="s2">    cell_class: LSTMCell</span>
+<span class="s2">    cell_params:</span>
+<span class="s2">      num_units: 4</span>
+<span class="s2">decoder.params:</span>
+<span class="s2">  rnn_cell:</span>
+<span class="s2">    num_layers: 2</span>
+<span class="s2">    cell_class: LSTMCell</span>
+<span class="s2">    cell_params:</span>
+<span class="s2">      num_units: 4</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="EncoderDecoderTests"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoderTests</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base class for EncoderDecoder tests. Tests for specific classes should</span>
+<span class="sd">  inherit from this and tf.test.TestCase.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EncoderDecoderTests.setUp"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">EncoderDecoderTests</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">input_depth</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1"># Create vocabulary</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;笑う&quot;</span><span class="p">,</span> <span class="s2">&quot;泣く&quot;</span><span class="p">,</span> <span class="s2">&quot;了解&quot;</span><span class="p">,</span> <span class="s2">&quot;はい&quot;</span><span class="p">,</span> <span class="s2">&quot;＾＿＾&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span> <span class="o">=</span> <span class="n">test_utils</span><span class="o">.</span><span class="n">create_temporary_vocab_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_info</span> <span class="o">=</span> <span class="n">vocab</span><span class="o">.</span><span class="n">get_vocab_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">get_or_create_global_step</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EncoderDecoderTests.tearDown"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.tearDown">[docs]</a>  <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EncoderDecoderTests.create_model"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.create_model">[docs]</a>  <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_mode</span><span class="p">,</span> <span class="n">_params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates model class to be tested. Subclasses must implement this method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">skipTest</span><span class="p">(</span><span class="s2">&quot;Base module should not be tested.&quot;</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_create_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates example data for a test&quot;&quot;&quot;</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">input_depth</span><span class="p">)</span>
+    <span class="n">source_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">])</span>
+    <span class="n">target_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">])</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">target_len</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_depth</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span>
+                               <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">target_len</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">example_</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+        <span class="s2">&quot;Example&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;source_len&quot;</span><span class="p">,</span> <span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;target_len&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">example_</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">source_len</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_len</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_test_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to test the full model pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create source and target example</span>
+    <span class="n">source_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span> <span class="o">+</span> <span class="mi">5</span>
+    <span class="n">target_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span> <span class="o">+</span> <span class="mi">10</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span><span class="p">,</span> <span class="n">source_len</span><span class="p">))</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab_list</span><span class="p">,</span> <span class="n">target_len</span><span class="p">))</span>
+    <span class="n">sources_file</span><span class="p">,</span> <span class="n">targets_file</span> <span class="o">=</span> <span class="n">test_utils</span><span class="o">.</span><span class="n">create_temp_parallel_data</span><span class="p">(</span>
+        <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+
+    <span class="c1"># Build model graph</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_model</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="n">input_pipeline_</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">ParallelTextInputPipeline</span><span class="p">(</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;source_files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">sources_file</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+            <span class="s2">&quot;target_files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">targets_file</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="n">input_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_input_fn</span><span class="p">(</span>
+        <span class="n">pipeline</span><span class="o">=</span><span class="n">input_pipeline_</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">input_fn</span><span class="p">()</span>
+    <span class="n">fetches</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">fetches</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">fetches</span> <span class="k">if</span> <span class="n">_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+      <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">())</span>
+      <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">local_variables_initializer</span><span class="p">())</span>
+      <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">tables_initializer</span><span class="p">())</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">slim</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">QueueRunners</span><span class="p">(</span><span class="n">sess</span><span class="p">):</span>
+        <span class="n">fetches_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fetches</span><span class="p">)</span>
+
+    <span class="n">sources_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">targets_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">fetches_</span>
+
+<div class="viewcode-block" id="EncoderDecoderTests.test_train"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.test_train">[docs]</a>  <span class="k">def</span> <span class="nf">test_train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">fetches_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_pipeline</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+    <span class="n">predictions_</span><span class="p">,</span> <span class="n">loss_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fetches_</span>
+
+    <span class="n">target_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_length</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="n">max_decode_length</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target.max_seq_len&quot;</span><span class="p">]</span>
+    <span class="n">expected_decode_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">target_len</span><span class="p">,</span> <span class="n">max_decode_length</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;logits&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">expected_decode_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span>
+    <span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;losses&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">expected_decode_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">expected_decode_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">loss_</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="EncoderDecoderTests.test_infer"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.test_infer">[docs]</a>  <span class="k">def</span> <span class="nf">test_infer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">fetches_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_pipeline</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">)</span>
+    <span class="n">predictions_</span><span class="p">,</span> <span class="o">=</span> <span class="n">fetches_</span>
+    <span class="n">pred_len</span> <span class="o">=</span> <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;logits&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span>
+    <span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="EncoderDecoderTests.test_infer_beam_search"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.EncoderDecoderTests.test_infer_beam_search">[docs]</a>  <span class="k">def</span> <span class="nf">test_infer_beam_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">beam_width</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">fetches_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_pipeline</span><span class="p">(</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;inference.beam_search.beam_width&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">})</span>
+    <span class="n">predictions_</span><span class="p">,</span> <span class="o">=</span> <span class="n">fetches_</span>
+    <span class="n">pred_len</span> <span class="o">=</span> <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">target_vocab_info</span><span class="o">.</span><span class="n">total_size</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span>
+        <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;beam_search_output.beam_parent_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span>
+        <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;beam_search_output.scores&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span>
+        <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;beam_search_output.original_outputs.predicted_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span>
+        <span class="n">predictions_</span><span class="p">[</span><span class="s2">&quot;beam_search_output.original_outputs.logits&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="TestBasicSeq2Seq"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestBasicSeq2Seq">[docs]</a><span class="k">class</span> <span class="nc">TestBasicSeq2Seq</span><span class="p">(</span><span class="n">EncoderDecoderTests</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests the seq2seq.models.BasicSeq2Seq model.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestBasicSeq2Seq.setUp"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestBasicSeq2Seq.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TestBasicSeq2Seq</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TestBasicSeq2Seq.create_model"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestBasicSeq2Seq.create_model">[docs]</a>  <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">params_</span> <span class="o">=</span> <span class="n">BasicSeq2Seq</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">TEST_PARAMS</span><span class="p">)</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;vocab_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;vocab_target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;bridge.class&quot;</span><span class="p">:</span> <span class="s2">&quot;PassThroughBridge&quot;</span>
+    <span class="p">})</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">BasicSeq2Seq</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params_</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestAttentionSeq2Seq"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestAttentionSeq2Seq">[docs]</a><span class="k">class</span> <span class="nc">TestAttentionSeq2Seq</span><span class="p">(</span><span class="n">EncoderDecoderTests</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tests the seq2seq.models.AttentionSeq2Seq model.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestAttentionSeq2Seq.setUp"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestAttentionSeq2Seq.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TestAttentionSeq2Seq</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_rnn_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMCell</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decoder_rnn_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMCell</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">attention_dim</span> <span class="o">=</span> <span class="mi">128</span></div>
+
+<div class="viewcode-block" id="TestAttentionSeq2Seq.create_model"><a class="viewcode-back" href="../../../seq2seq.test.html#seq2seq.test.models_test.TestAttentionSeq2Seq.create_model">[docs]</a>  <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">params_</span> <span class="o">=</span> <span class="n">AttentionSeq2Seq</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">TEST_PARAMS</span><span class="p">)</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source.reverse&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s2">&quot;vocab_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;vocab_target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="n">params_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">AttentionSeq2Seq</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params_</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

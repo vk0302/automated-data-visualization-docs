@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bin.train &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bin.train</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Main script to run training and evaluation of models.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.learn.python.learn</span> <span class="kn">import</span> <span class="n">learn_runner</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.learn.python.learn.estimators</span> <span class="kn">import</span> <span class="n">run_config</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">gfile</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">seq2seq.contrib.experiment</span> <span class="kn">import</span> <span class="n">Experiment</span> <span class="k">as</span> <span class="n">PatchedExperiment</span>
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">_maybe_load_yaml</span><span class="p">,</span> <span class="n">_create_from_dict</span>
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">_deep_merge_dict</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">input_pipeline</span>
+<span class="kn">from</span> <span class="nn">seq2seq.metrics</span> <span class="kn">import</span> <span class="n">metric_specs</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">hooks</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">training_utils</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;config_paths&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Path to a YAML configuration files defining FLAG</span>
+<span class="sd">                       values. Multiple files can be separated by commas.</span>
+<span class="sd">                       Files are merged recursively. Setting a key in these</span>
+<span class="sd">                       files is equivalent to setting the FLAG value with</span>
+<span class="sd">                       the same name.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;hooks&quot;</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;YAML configuration string for the</span>
+<span class="sd">                       training hooks to use.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;metrics&quot;</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;YAML configuration string for the</span>
+<span class="sd">                       training metrics to use.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Name of the model class.</span>
+<span class="sd">                       Can be either a fully-qualified name, or the name</span>
+<span class="sd">                       of a class defined in `seq2seq.models`.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;model_param&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;YAML configuration string for the model</span>
+<span class="sd">                       parameters.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;input_pipeline_train&quot;</span><span class="p">,</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;YAML configuration string for the training</span>
+<span class="sd">                       data input pipeline.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;input_pipeline_dev&quot;</span><span class="p">,</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;YAML configuration string for the development</span>
+<span class="sd">                       data input pipeline.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;buckets&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Buckets input sequences according to these length.</span>
+<span class="sd">                       A comma-separated list of sequence length buckets, e.g.</span>
+<span class="sd">                       &quot;10,20,30&quot; would result in 4 buckets:</span>
+<span class="sd">                       &lt;10, 10-20, 20-30, &gt;30. None disabled bucketing. &quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;batch&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Batch size used for training and evaluation.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;output_dir&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;The directory to write model checkpoints and summaries</span>
+<span class="sd">                       to. If None, a local temporary directory is created.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># Training parameters</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;schedule&quot;</span><span class="p">,</span> <span class="s2">&quot;continuous_train_and_eval&quot;</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Estimator function to call, defaults to</span>
+<span class="sd">                       continuous_train_and_eval for local run&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;train_steps&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Maximum number of training steps to run.</span>
+<span class="sd">                         If None, train forever.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;eval_every_n_steps&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span>
+                        <span class="s2">&quot;Run evaluation on validation data every N steps.&quot;</span><span class="p">)</span>
+
+<span class="c1"># RunConfig Flags</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;tf_random_seed&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Random seed for TensorFlow initializers. Setting</span>
+<span class="sd">                        this value allows consistency between reruns.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;save_checkpoints_secs&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Save checkpoints every this many seconds.</span>
+<span class="sd">                        Can not be specified with save_checkpoints_steps.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;save_checkpoints_steps&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Save checkpoints every this many steps.</span>
+<span class="sd">                        Can not be specified with save_checkpoints_secs.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;keep_checkpoint_max&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Maximum number of recent checkpoint files to keep.</span>
+<span class="sd">                        As new files are created, older files are deleted.</span>
+<span class="sd">                        If None or 0, all checkpoint files are kept.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;keep_checkpoint_every_n_hours&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;In addition to keeping the most recent checkpoint</span>
+<span class="sd">                        files, keep one checkpoint file for every N hours of</span>
+<span class="sd">                        training.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_float</span><span class="p">(</span><span class="s2">&quot;gpu_memory_fraction&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span>
+                      <span class="sd">&quot;&quot;&quot;Fraction of GPU memory used by the process on</span>
+<span class="sd">                      each GPU uniformly on the same machine.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_boolean</span><span class="p">(</span><span class="s2">&quot;gpu_allow_growth&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Allow GPU memory allocation to grow</span>
+<span class="sd">                        dynamically.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_boolean</span><span class="p">(</span><span class="s2">&quot;log_device_placement&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span>
+                        <span class="sd">&quot;&quot;&quot;Log the op placement to devices&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+<div class="viewcode-block" id="create_experiment"><a class="viewcode-back" href="../../bin.html#bin.train.create_experiment">[docs]</a><span class="k">def</span> <span class="nf">create_experiment</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Creates a new Experiment instance.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    output_dir: Output directory for model checkpoints and summaries.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">config</span> <span class="o">=</span> <span class="n">run_config</span><span class="o">.</span><span class="n">RunConfig</span><span class="p">(</span>
+      <span class="n">tf_random_seed</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">tf_random_seed</span><span class="p">,</span>
+      <span class="n">save_checkpoints_secs</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_secs</span><span class="p">,</span>
+      <span class="n">save_checkpoints_steps</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_steps</span><span class="p">,</span>
+      <span class="n">keep_checkpoint_max</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">keep_checkpoint_max</span><span class="p">,</span>
+      <span class="n">keep_checkpoint_every_n_hours</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">keep_checkpoint_every_n_hours</span><span class="p">,</span>
+      <span class="n">gpu_memory_fraction</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">gpu_memory_fraction</span><span class="p">)</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">tf_config</span><span class="o">.</span><span class="n">gpu_options</span><span class="o">.</span><span class="n">allow_growth</span> <span class="o">=</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">gpu_allow_growth</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">tf_config</span><span class="o">.</span><span class="n">log_device_placement</span> <span class="o">=</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">log_device_placement</span>
+
+  <span class="n">train_options</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">TrainOptions</span><span class="p">(</span>
+      <span class="n">model_class</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+      <span class="n">model_params</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+  <span class="c1"># On the main worker, save training options</span>
+  <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">is_chief</span><span class="p">:</span>
+    <span class="n">gfile</span><span class="o">.</span><span class="n">MakeDirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">train_options</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+  <span class="n">bucket_boundaries</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">if</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">buckets</span><span class="p">:</span>
+    <span class="n">bucket_boundaries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">buckets</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)))</span>
+
+  <span class="c1"># Training data input pipeline</span>
+  <span class="n">train_input_pipeline</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">make_input_pipeline_from_def</span><span class="p">(</span>
+      <span class="n">def_dict</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_train</span><span class="p">,</span>
+      <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+
+  <span class="c1"># Create training input function</span>
+  <span class="n">train_input_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_input_fn</span><span class="p">(</span>
+      <span class="n">pipeline</span><span class="o">=</span><span class="n">train_input_pipeline</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">bucket_boundaries</span><span class="o">=</span><span class="n">bucket_boundaries</span><span class="p">,</span>
+      <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;train_input_fn&quot;</span><span class="p">)</span>
+
+  <span class="c1"># Development data input pipeline</span>
+  <span class="n">dev_input_pipeline</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">make_input_pipeline_from_def</span><span class="p">(</span>
+      <span class="n">def_dict</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_dev</span><span class="p">,</span>
+      <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
+      <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="c1"># Create eval input function</span>
+  <span class="n">eval_input_fn</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">create_input_fn</span><span class="p">(</span>
+      <span class="n">pipeline</span><span class="o">=</span><span class="n">dev_input_pipeline</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">allow_smaller_final_batch</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+      <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;dev_input_fn&quot;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the model graph&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_create_from_dict</span><span class="p">({</span>
+        <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_class</span><span class="p">,</span>
+        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_params</span>
+    <span class="p">},</span> <span class="n">models</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+  <span class="n">estimator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">Estimator</span><span class="p">(</span>
+      <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+      <span class="n">model_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+      <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+      <span class="n">params</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+
+  <span class="c1"># Create hooks</span>
+  <span class="n">train_hooks</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">dict_</span> <span class="ow">in</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">hooks</span><span class="p">:</span>
+    <span class="n">hook</span> <span class="o">=</span> <span class="n">_create_from_dict</span><span class="p">(</span>
+        <span class="n">dict_</span><span class="p">,</span> <span class="n">hooks</span><span class="p">,</span>
+        <span class="n">model_dir</span><span class="o">=</span><span class="n">estimator</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span>
+        <span class="n">run_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">train_hooks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
+
+  <span class="c1"># Create metrics</span>
+  <span class="n">eval_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">dict_</span> <span class="ow">in</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">_create_from_dict</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">metric_specs</span><span class="p">)</span>
+    <span class="n">eval_metrics</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
+
+  <span class="n">experiment</span> <span class="o">=</span> <span class="n">PatchedExperiment</span><span class="p">(</span>
+      <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+      <span class="n">train_input_fn</span><span class="o">=</span><span class="n">train_input_fn</span><span class="p">,</span>
+      <span class="n">eval_input_fn</span><span class="o">=</span><span class="n">eval_input_fn</span><span class="p">,</span>
+      <span class="n">min_eval_frequency</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">eval_every_n_steps</span><span class="p">,</span>
+      <span class="n">train_steps</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">train_steps</span><span class="p">,</span>
+      <span class="n">eval_steps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+      <span class="n">eval_metrics</span><span class="o">=</span><span class="n">eval_metrics</span><span class="p">,</span>
+      <span class="n">train_monitors</span><span class="o">=</span><span class="n">train_hooks</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">experiment</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../bin.html#bin.train.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">_argv</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;The entrypoint for the script&quot;&quot;&quot;</span>
+
+  <span class="c1"># Parse YAML FLAGS</span>
+  <span class="n">FLAGS</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">hooks</span><span class="p">)</span>
+  <span class="n">FLAGS</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
+  <span class="n">FLAGS</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+  <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_train</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_train</span><span class="p">)</span>
+  <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_dev</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_dev</span><span class="p">)</span>
+
+  <span class="c1"># Load flags from config file</span>
+  <span class="n">final_config</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">if</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">config_paths</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">config_path</span> <span class="ow">in</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">config_paths</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+      <span class="n">config_path</span> <span class="o">=</span> <span class="n">config_path</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">config_path</span><span class="p">:</span>
+        <span class="k">continue</span>
+      <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading config from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">config_path</span><span class="p">)</span>
+      <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">config_path</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">as</span> <span class="n">config_file</span><span class="p">:</span>
+        <span class="n">config_flags</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="n">final_config</span> <span class="o">=</span> <span class="n">_deep_merge_dict</span><span class="p">(</span><span class="n">final_config</span><span class="p">,</span> <span class="n">config_flags</span><span class="p">)</span>
+
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Final Config:</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">final_config</span><span class="p">))</span>
+
+  <span class="c1"># Merge flags with config values</span>
+  <span class="k">for</span> <span class="n">flag_key</span><span class="p">,</span> <span class="n">flag_value</span> <span class="ow">in</span> <span class="n">final_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="n">merged_value</span> <span class="o">=</span> <span class="n">_deep_merge_dict</span><span class="p">(</span><span class="n">flag_value</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">))</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">,</span> <span class="n">merged_value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">):</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">,</span> <span class="n">flag_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring config flag: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_secs</span> <span class="ow">is</span> <span class="bp">None</span> \
+    <span class="ow">and</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_steps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_secs</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting save_checkpoints_secs to </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">FLAGS</span><span class="o">.</span><span class="n">save_checkpoints_secs</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">output_dir</span><span class="p">:</span>
+    <span class="n">FLAGS</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_train</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must specify input_pipeline_train&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline_dev</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must specify input_pipeline_dev&quot;</span><span class="p">)</span>
+
+  <span class="n">learn_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+      <span class="n">experiment_fn</span><span class="o">=</span><span class="n">create_experiment</span><span class="p">,</span>
+      <span class="n">output_dir</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
+      <span class="n">schedule</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">schedule</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

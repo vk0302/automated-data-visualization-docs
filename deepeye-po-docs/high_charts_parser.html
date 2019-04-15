@@ -1,0 +1,1252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>high_charts_parser module &mdash; Automated Data Visualization - POC - Process_po  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_po  1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/high_charts_parser.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-high_charts_parser">
+<span id="high-charts-parser-module"></span><h1>high_charts_parser module<a class="headerlink" href="#module-high_charts_parser" title="Permalink to this headline">¶</a></h1>
+<p>Filename: high_chart_parser.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2018</p>
+<p>Description:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Parser functions to convert vega-lite charts into high charts</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="high_charts_parser.bar_chart_get_sub_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_chart_get_sub_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_chart_get_sub_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_chart_get_sub_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given bar type chart</li>
+<li><dl class="first docutils">
+<dt>Find the chart subtype from</dt>
+<dd><ul class="first last">
+<li>bar_grouped (grouped bar chart)</li>
+<li>bar_simple (simple bar chart)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Sub-chart type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_grouped_category_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_grouped_category_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_grouped_category_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_grouped_category_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</li>
+<li>find get x, y and grouped axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x, y and grouped axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_grouped_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_grouped_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_grouped_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_grouped_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_grouped_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_grouped_category_get_values</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_grouped_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_grouped_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</li>
+<li>find get x, y and grouping axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes data
+- column_values
+- x_values
+- y_values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_grouped_get_x_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_grouped_get_x_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_grouped_get_x_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_grouped_get_x_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Grouped,</li>
+<li><dl class="first docutils">
+<dt>Find data type of elemnts representing x-axis</dt>
+<dd><ul class="first last">
+<li>date_type (Date type data on x-axis)</li>
+<li>category_type (Categorical data on x-axis)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data type of elemnts representing x-axis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_simple_category_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_simple_category_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_simple_category_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_simple_category_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Simple</li>
+<li>find get x and y axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_simple_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_simple_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_simple_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_simple_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Simple</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_simple_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_simple_category_get_values</code><span class="sig-paren">(</span><em>data</em>, <em>x_axis_name</em>, <em>y_axis_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_simple_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_simple_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Simple</li>
+<li>find get x and y axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</li>
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns x and y axes data
+- x_values
+- y_values</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.bar_simple_get_x_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">bar_simple_get_x_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#bar_simple_get_x_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.bar_simple_get_x_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Simple,</li>
+<li><dl class="first docutils">
+<dt>Find data type of elemnts representing x-axis</dt>
+<dd><ul class="first last">
+<li>date_type (Date type data on x-axis)</li>
+<li>category_type (Categorical data on x-axis)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data type of elemnts representing x-axis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_bar_grouped_category">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_bar_grouped_category</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>column_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>column_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_bar_grouped_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_bar_grouped_category" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Grouped</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>column_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing grouped-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>column_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values for grouped axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_bar_simple_category">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_bar_simple_category</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_bar_simple_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_bar_simple_category" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Bar, Sub-type -&gt; Simple</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for graph</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_line_multi_chart_category">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_line_multi_chart_category</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>color_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_line_multi_chart_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_line_multi_chart_category" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple, x_axis data type -&gt; Category</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>color_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Categorical values</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_line_multi_chart_date">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_line_multi_chart_date</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>color_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_line_multi_chart_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_line_multi_chart_date" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple, x_axis data type -&gt; Datetime</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>color_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Datetime values</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_line_single_chart_category">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_line_single_chart_category</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_line_single_chart_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_line_single_chart_category" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single, data_type on x-axis - Categorical</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for graph</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_line_single_chart_date">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_line_single_chart_date</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_line_single_chart_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_line_single_chart_date" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single, data_type on x-axis - DateTime</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for graph</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_pie">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_pie</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>x_values</em>, <em>y_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_pie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_pie" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Pie</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>x_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on X axis</li>
+<li><strong>y_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values on Y axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_scatter_multi">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_scatter_multi</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>color_axis_name</em>, <em>x_y_value_pair</em>, <em>color_values</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_scatter_multi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_scatter_multi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>color_axes_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; 3rd axis name.</li>
+<li><strong>x_y_value_pair</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; X-Y Value pair axis</li>
+<li><strong>color_values</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Values for 3rd axis.</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.create_scatter_single">
+<code class="descclassname">high_charts_parser.</code><code class="descname">create_scatter_single</code><span class="sig-paren">(</span><em>x_axis_name</em>, <em>y_axis_name</em>, <em>class_name</em>, <em>x_y_value_pair</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#create_scatter_single"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.create_scatter_single" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Single</li>
+<li>Parse dictionary to create high-chart compatible graph.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+<li><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing data attributes.</li>
+<li><strong>x_y_value_pair</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; X-Y Value pair axis</li>
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Title for the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Jsonified data encoded to make it high-charts compatible.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.get_chart_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">get_chart_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#get_chart_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.get_chart_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><dl class="first last docutils">
+<dt>Get chart type</dt>
+<dd><ul class="first last simple">
+<li>bar (bar chart)</li>
+<li>scatter (scatter plot)</li>
+<li>pie (pie chart)</li>
+<li>line (line chart)</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Chart type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_chart_get_sub_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_chart_get_sub_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_chart_get_sub_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_chart_get_sub_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given bar type chart</li>
+<li><dl class="first docutils">
+<dt>Find the chart subtype from</dt>
+<dd><ul class="first last">
+<li>line_multi (Multiple Line chart)</li>
+<li>line_single (Single Line chart)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Sub-chart type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_multi_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_multi_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_multi_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_multi_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_multi_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_multi_category_get_values</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_multi_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_multi_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple</li>
+<li>find get x, y and grouping axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns axes data
+- x_values
+- y_values
+- category_values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_multi_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_multi_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_multi_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_multi_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple</li>
+<li>find get x, y axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x, y axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_multi_get_x_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_multi_get_x_type</code><span class="sig-paren">(</span><em>x_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_multi_get_x_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_multi_get_x_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Multiple,</li>
+<li><dl class="first docutils">
+<dt>Find data type of elemnts representing x-axis</dt>
+<dd><ul class="first last">
+<li>date (Date type data on x-axis)</li>
+<li>category (Categorical data on x-axis)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x_val</strong> (<em>datetime/str</em>) &#8211; An element from x-axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data type of elemnts representing x-axis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_simple_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_simple_category_get_values</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_simple_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_simple_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single</li>
+<li>find get x and y axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes data
+- x_values
+- y_values</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_simple_get_x_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_simple_get_x_type</code><span class="sig-paren">(</span><em>x_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_simple_get_x_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_simple_get_x_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single,</li>
+<li><dl class="first docutils">
+<dt>Find data type of elemnts representing x-axis</dt>
+<dd><ul class="first last">
+<li>date (Date type data on x-axis)</li>
+<li>category (Categorical data on x-axis)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x_val</strong> (<em>datetime/str</em>) &#8211; An element from x-axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data type of elemnts representing x-axis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_single_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_single_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_single_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_single_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.line_single_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">line_single_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#line_single_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.line_single_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Line, Sub-type -&gt; Single</li>
+<li>find get x and y axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.pie_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">pie_get_axes_names</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#pie_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.pie_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Pie</li>
+<li>find get x and y axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.pie_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">pie_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#pie_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.pie_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Pie</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.pie_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">pie_get_values</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#pie_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.pie_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Pie</li>
+<li>find get axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns axes data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.read_data">
+<code class="descclassname">high_charts_parser.</code><code class="descname">read_data</code><span class="sig-paren">(</span><em>in_file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Read structured data from file and jsonify it</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file_name</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Input file path.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Jsoinified data in from of key-value pairs</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_chart_get_sub_type">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_chart_get_sub_type</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_chart_get_sub_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_chart_get_sub_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given scatter type chart</li>
+<li><dl class="first docutils">
+<dt>Find the chart subtype</dt>
+<dd><ul class="first last">
+<li>scatter_multi (3D data)</li>
+<li>scatter_single (2D data)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Sub-chart type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_multi_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_multi_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_multi_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_multi_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_multi_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_multi_category_get_values</code><span class="sig-paren">(</span><em>sub_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_multi_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_multi_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</li>
+<li>find get all axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data from pre vega-lite encoded data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns
+- x-y axes data in terms of corresponding pairs
+- 3rd axes data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_multi_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_multi_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_multi_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_multi_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Multiple</li>
+<li>find get all axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns all axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_single_category_get_title">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_single_category_get_title</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_single_category_get_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_single_category_get_title" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Single</li>
+<li>Find graph title</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph Title.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_single_category_get_values">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_single_category_get_values</code><span class="sig-paren">(</span><em>data</em>, <em>x_axis_name</em>, <em>y_axis_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_single_category_get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_single_category_get_values" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Single</li>
+<li>find get x and y axes data</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</li>
+<li><strong>x_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing x-axis</li>
+<li><strong>y_axis_name</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Unique name representing y-axis</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns x and y axes data in terms of corresponding pairs</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="high_charts_parser.scatter_single_get_axes_names">
+<code class="descclassname">high_charts_parser.</code><code class="descname">scatter_single_get_axes_names</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/high_charts_parser.html#scatter_single_get_axes_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#high_charts_parser.scatter_single_get_axes_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Given Chart type -&gt; Scatter, Sub-type -&gt; Single</li>
+<li>find get x and y axes names</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Jsonified data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns x and y axes names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_po  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

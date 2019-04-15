@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.metrics.metric_specs &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.metrics.metric_specs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;Collection of MetricSpecs for training and evaluation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pydoc</span> <span class="kn">import</span> <span class="n">locate</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib</span> <span class="kn">import</span> <span class="n">metrics</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.learn</span> <span class="kn">import</span> <span class="n">MetricSpec</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">postproc</span>
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">Configurable</span>
+<span class="kn">from</span> <span class="nn">seq2seq.metrics</span> <span class="kn">import</span> <span class="n">rouge</span>
+<span class="kn">from</span> <span class="nn">seq2seq.metrics</span> <span class="kn">import</span> <span class="n">bleu</span>
+
+
+<div class="viewcode-block" id="accumulate_strings"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.accumulate_strings">[docs]</a><span class="k">def</span> <span class="nf">accumulate_strings</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;strings&quot;</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Accumulates strings into a vector.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    values: A 1-d string tensor that contains values to add to the accumulator.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple (value_tensor, update_op).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">assert_type</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
+  <span class="n">strings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+      <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+      <span class="n">initial_value</span><span class="o">=</span><span class="p">[],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span>
+      <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+      <span class="n">collections</span><span class="o">=</span><span class="p">[],</span>
+      <span class="n">validate_shape</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="n">value_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
+  <span class="n">update_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+      <span class="n">ref</span><span class="o">=</span><span class="n">strings</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">strings</span><span class="p">,</span> <span class="n">values</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span> <span class="n">validate_shape</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">value_tensor</span><span class="p">,</span> <span class="n">update_op</span></div>
+
+
+<span class="nd">@six.add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<div class="viewcode-block" id="TextMetricSpec"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.TextMetricSpec">[docs]</a><span class="k">class</span> <span class="nc">TextMetricSpec</span><span class="p">(</span><span class="n">Configurable</span><span class="p">,</span> <span class="n">MetricSpec</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Abstract class for text-based metrics calculated based on</span>
+<span class="sd">  hypotheses and references. Subclasses must implement `metric_fn`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    name: A name for the metric</span>
+<span class="sd">    separator: A separator used to join predicted tokens. Default to space.</span>
+<span class="sd">    eos_token: A string token used to find the end of a sequence. Hypotheses</span>
+<span class="sd">      and references will be slcied until this token is found.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="c1"># We don&#39;t call the super constructor on purpose</span>
+    <span class="c1">#pylint: disable=W0231</span>
+    <span class="sd">&quot;&quot;&quot;Initializer&quot;&quot;&quot;</span>
+    <span class="n">Configurable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">EVAL</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_eos_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;eos_token&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sos_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;sos_token&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;separator&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;postproc_fn&quot;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;postproc_fn&quot;</span><span class="p">])</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;postproc_fn not found: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;postproc_fn&quot;</span><span class="p">]))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Name of the metric&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TextMetricSpec.default_params"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.TextMetricSpec.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;sos_token&quot;</span><span class="p">:</span> <span class="s2">&quot;SEQUENCE_START&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;eos_token&quot;</span><span class="p">:</span> <span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;separator&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;postproc_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="TextMetricSpec.create_metric_ops"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.TextMetricSpec.create_metric_ops">[docs]</a>  <span class="k">def</span> <span class="nf">create_metric_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_inputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates (value, update_op) tensors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">):</span>
+
+      <span class="c1"># Join tokens into single strings</span>
+      <span class="n">predictions_flat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_join</span><span class="p">(</span>
+          <span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;predicted_tokens&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_separator</span><span class="p">)</span>
+      <span class="n">labels_flat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_join</span><span class="p">(</span>
+          <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_tokens&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_separator</span><span class="p">)</span>
+
+      <span class="n">sources_value</span><span class="p">,</span> <span class="n">sources_update</span> <span class="o">=</span> <span class="n">accumulate_strings</span><span class="p">(</span>
+          <span class="n">values</span><span class="o">=</span><span class="n">predictions_flat</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sources&quot;</span><span class="p">)</span>
+      <span class="n">targets_value</span><span class="p">,</span> <span class="n">targets_update</span> <span class="o">=</span> <span class="n">accumulate_strings</span><span class="p">(</span>
+          <span class="n">values</span><span class="o">=</span><span class="n">labels_flat</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;targets&quot;</span><span class="p">)</span>
+
+      <span class="n">metric_value</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span>
+          <span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_func</span><span class="p">,</span>
+          <span class="n">inp</span><span class="o">=</span><span class="p">[</span><span class="n">sources_value</span><span class="p">,</span> <span class="n">targets_value</span><span class="p">],</span>
+          <span class="n">Tout</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+          <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([</span><span class="n">sources_update</span><span class="p">,</span> <span class="n">targets_update</span><span class="p">]):</span>
+      <span class="n">update_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">metric_value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;update_op&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">update_op</span></div>
+
+  <span class="k">def</span> <span class="nf">_py_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper function that converts tensors to unicode and slices</span>
+<span class="sd">      them until the EOS token is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Deal with byte chars</span>
+    <span class="k">if</span> <span class="n">hypotheses</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">):</span>
+      <span class="n">hypotheses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">hypotheses</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">references</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">):</span>
+      <span class="n">references</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">references</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert back to unicode object</span>
+    <span class="n">hypotheses</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hypotheses</span><span class="p">]</span>
+    <span class="n">references</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">references</span><span class="p">]</span>
+
+    <span class="c1"># Slice all hypotheses and references up to SOS -&gt; EOS</span>
+    <span class="n">sliced_hypotheses</span> <span class="o">=</span> <span class="p">[</span><span class="n">postproc</span><span class="o">.</span><span class="n">slice_text</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sos_token</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hypotheses</span><span class="p">]</span>
+    <span class="n">sliced_references</span> <span class="o">=</span> <span class="p">[</span><span class="n">postproc</span><span class="o">.</span><span class="n">slice_text</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sos_token</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">references</span><span class="p">]</span>
+
+    <span class="c1"># Apply postprocessing function</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span><span class="p">:</span>
+      <span class="n">sliced_hypotheses</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sliced_hypotheses</span><span class="p">]</span>
+      <span class="n">sliced_references</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_postproc_fn</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sliced_references</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_fn</span><span class="p">(</span><span class="n">sliced_hypotheses</span><span class="p">,</span> <span class="n">sliced_references</span><span class="p">)</span> <span class="c1">#pylint: disable=E1102</span>
+
+<div class="viewcode-block" id="TextMetricSpec.metric_fn"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.TextMetricSpec.metric_fn">[docs]</a>  <span class="k">def</span> <span class="nf">metric_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the value of the metric.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      hypotheses: A python list of strings, each corresponding to a</span>
+<span class="sd">        single hypothesis/example.</span>
+<span class="sd">      references: A python list of strings, each corresponds to a single</span>
+<span class="sd">        reference. Must have the same number of elements of `hypotheses`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A float value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="BleuMetricSpec"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.BleuMetricSpec">[docs]</a><span class="k">class</span> <span class="nc">BleuMetricSpec</span><span class="p">(</span><span class="n">TextMetricSpec</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculates BLEU score using the Moses multi-bleu.perl script.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BleuMetricSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">&quot;bleu&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BleuMetricSpec.metric_fn"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.BleuMetricSpec.metric_fn">[docs]</a>  <span class="k">def</span> <span class="nf">metric_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">bleu</span><span class="o">.</span><span class="n">moses_multi_bleu</span><span class="p">(</span><span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="RougeMetricSpec"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.RougeMetricSpec">[docs]</a><span class="k">class</span> <span class="nc">RougeMetricSpec</span><span class="p">(</span><span class="n">TextMetricSpec</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculates BLEU score using the Moses multi-bleu.perl script.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;rouge_type&quot;</span><span class="p">]:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must provide a rouge_type for ROUGE&quot;</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">RougeMetricSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">params</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;rouge_type&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rouge_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rouge_type&quot;</span><span class="p">]</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="RougeMetricSpec.default_params"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.RougeMetricSpec.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">TextMetricSpec</span><span class="o">.</span><span class="n">default_params</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;rouge_type&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="RougeMetricSpec.metric_fn"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.RougeMetricSpec.metric_fn">[docs]</a>  <span class="k">def</span> <span class="nf">metric_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hypotheses</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">references</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">rouge</span><span class="o">.</span><span class="n">rouge</span><span class="p">(</span><span class="n">hypotheses</span><span class="p">,</span> <span class="n">references</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">_rouge_type</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="LogPerplexityMetricSpec"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec">[docs]</a><span class="k">class</span> <span class="nc">LogPerplexityMetricSpec</span><span class="p">(</span><span class="n">MetricSpec</span><span class="p">,</span> <span class="n">Configurable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A MetricSpec to calculate straming log perplexity&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer&quot;&quot;&quot;</span>
+    <span class="c1"># We don&#39;t call the super constructor on purpose</span>
+    <span class="c1">#pylint: disable=W0231</span>
+    <span class="n">Configurable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">EVAL</span><span class="p">)</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogPerplexityMetricSpec.default_params"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Name of the metric&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;log_perplexity&quot;</span>
+
+<div class="viewcode-block" id="LogPerplexityMetricSpec.create_metric_ops"><a class="viewcode-back" href="../../../seq2seq.metrics.html#seq2seq.metrics.metric_specs.LogPerplexityMetricSpec.create_metric_ops">[docs]</a>  <span class="k">def</span> <span class="nf">create_metric_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_inputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates the metric op&quot;&quot;&quot;</span>
+    <span class="n">loss_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
+        <span class="n">lengths</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">maxlen</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;losses&quot;</span><span class="p">])[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">metrics</span><span class="o">.</span><span class="n">streaming_mean</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;losses&quot;</span><span class="p">],</span> <span class="n">loss_mask</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

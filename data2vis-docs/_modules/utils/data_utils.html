@@ -1,0 +1,958 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>utils.data_utils &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utils.data_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Filename: data_gen.py\n</span>
+<span class="sd">Author: Tessellate Imaging Pvt Ltd\n</span>
+<span class="sd">Date: 14/03/2019\n</span>
+<span class="sd">Description: Data processing/utility script for parsing input/output data\n</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span><span class="p">,</span> <span class="n">shuffle</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pandas.compat</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">json.decoder</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">JSONDecodeError</span> <span class="o">=</span> <span class="ne">ValueError</span>
+
+<span class="n">data_prefix</span> <span class="o">=</span> <span class="s2">&quot;examplesdata/&quot;</span>
+<span class="n">examples_directory</span> <span class="o">=</span> <span class="s2">&quot;examples&quot;</span>
+<span class="n">vl_data_filename</span> <span class="o">=</span> <span class="s2">&quot;examples/vldata.json&quot;</span>
+<span class="n">test_dataset_directory</span> <span class="o">=</span> <span class="s2">&quot;testdata&quot;</span>
+
+<span class="n">test_data_list</span> <span class="o">=</span> <span class="s2">&quot;testdata/tdatalsit.json&quot;</span>
+
+<span class="n">train_data_output_directory</span> <span class="o">=</span> <span class="s2">&quot;sourcedata&quot;</span>
+<span class="n">max_file_size</span> <span class="o">=</span> <span class="mi">1219853</span>
+<span class="n">max_testdata_file_size</span> <span class="o">=</span> <span class="mi">59853</span>
+<span class="n">max_data_slice_size</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">datapair_slice_size</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">max_test_data_length</span> <span class="o">=</span> <span class="mi">150</span>
+<span class="n">max_source_seq_length</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">max_target_seq_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">num_samples_per_example</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">data_split_params</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;percentage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]</span>
+<span class="p">},</span> <span class="p">{</span>
+    <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;percentage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]</span>
+<span class="p">},</span> <span class="p">{</span>
+    <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;percentage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">}]</span>
+
+<span class="n">test_100_file_path</span> <span class="o">=</span> <span class="s2">&quot;utils/testlist.json&quot;</span>
+
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">test_100_file_path</span><span class="p">):</span>
+    <span class="n">test_100_list</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">test_100_file_path</span><span class="p">))</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">test_100_list</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Unable to load test file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="shuffle_elements"><a class="viewcode-back" href="../../utils.html#utils.data_utils.shuffle_elements">[docs]</a><span class="k">def</span> <span class="nf">shuffle_elements</span><span class="p">(</span><span class="n">rand_order</span><span class="p">,</span> <span class="n">source_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Shuffle elements in an array according to given order</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rand_order (list): Order in which to shuffle the input array</span>
+<span class="sd">        source_list (list): Input array to be shuffled</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: result_list - Shuffled array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r_order</span> <span class="ow">in</span> <span class="n">rand_order</span><span class="p">:</span>
+        <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source_list</span><span class="p">[</span><span class="n">r_order</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">result_list</span></div>
+
+<div class="viewcode-block" id="isfloat"><a class="viewcode-back" href="../../utils.html#utils.data_utils.isfloat">[docs]</a><span class="k">def</span> <span class="nf">isfloat</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Check if the input argument is float</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (variable): Variable to check</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span></div>
+
+<div class="viewcode-block" id="isint"><a class="viewcode-back" href="../../utils.html#utils.data_utils.isint">[docs]</a><span class="k">def</span> <span class="nf">isint</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Check if the input argument is integer</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (variable): Variable to check</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span></div>
+
+<div class="viewcode-block" id="is_date"><a class="viewcode-back" href="../../utils.html#utils.data_utils.is_date">[docs]</a><span class="k">def</span> <span class="nf">is_date</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Check if the input argument is date</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (variable): Variable to check</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">isint</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="ow">or</span> <span class="n">isfloat</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># print(string)</span>
+        <span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span></div>
+
+<span class="sd">&quot;&quot;&quot;[Check other members of the array to learn field type]</span>
+<span class="sd">Returns:</span>
+<span class="sd">    [type] -- [description]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="non_null_label"><a class="viewcode-back" href="../../utils.html#utils.data_utils.non_null_label">[docs]</a><span class="k">def</span> <span class="nf">non_null_label</span><span class="p">(</span><span class="n">full_array</span><span class="p">,</span> <span class="n">label_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Get the non null label value for the given array</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        full_array (list): Column in the input data</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        variable: result_val - Non null value in the given column array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">full_array</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">result_val</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">result_val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result_val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">result_val</span></div>
+
+<div class="viewcode-block" id="generate_field_types"><a class="viewcode-back" href="../../utils.html#utils.data_utils.generate_field_types">[docs]</a><span class="k">def</span> <span class="nf">generate_field_types</span><span class="p">(</span><span class="n">t_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Generate an array of field types for a given input data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        t_data (data table): Input data</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list mapping column names to the field-type normalized names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># print (t_data[0])</span>
+    <span class="n">data_labels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;str&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;num&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;dt&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">field_name_types</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">field_name_types_array</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">t_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">current_label</span> <span class="o">=</span> <span class="n">non_null_label</span><span class="p">(</span><span class="n">t_data</span><span class="p">,</span>
+                                       <span class="n">field_name</span><span class="p">)</span>  <span class="c1"># t_data[0][field_name]</span>
+        <span class="c1"># print(&quot;=====&quot;, current_label, field_name)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">is_date</span><span class="p">(</span><span class="n">current_label</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="n">current_label</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">isfloat</span><span class="p">(</span><span class="n">current_label</span><span class="p">))):</span>
+            <span class="n">replace_num_var</span> <span class="o">=</span> <span class="s2">&quot;dt&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">])</span>
+            <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">field_name_types</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_num_var</span>
+            <span class="n">field_name_types_array</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">field_name</span><span class="p">:</span> <span class="n">replace_num_var</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="n">current_label</span><span class="p">)</span> <span class="ow">or</span> <span class="n">isfloat</span><span class="p">(</span><span class="n">current_label</span><span class="p">)):</span>
+            <span class="n">replace_num_var</span> <span class="o">=</span> <span class="s2">&quot;num&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;num&quot;</span><span class="p">])</span>
+            <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;num&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">field_name_types</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_num_var</span>
+            <span class="n">field_name_types_array</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">field_name</span><span class="p">:</span> <span class="n">replace_num_var</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">replace_str_var</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;str&quot;</span><span class="p">])</span>
+            <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;str&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_labels</span><span class="p">[</span><span class="s2">&quot;str&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">field_name_types</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_str_var</span>
+            <span class="n">field_name_types_array</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">field_name</span><span class="p">:</span> <span class="n">replace_str_var</span><span class="p">})</span>
+    <span class="c1"># print(field_name_types_array)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">field_name_types_array</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="replace_fieldnames"><a class="viewcode-back" href="../../utils.html#utils.data_utils.replace_fieldnames">[docs]</a><span class="k">def</span> <span class="nf">replace_fieldnames</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">field_name_types</span><span class="p">,</span> <span class="n">replace_direction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Replace field names with normalized names based on field type</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_data (string): Input data</span>
+<span class="sd">        field_name_types (list): A list mapping column names to the field-type normalized names</span>
+<span class="sd">        replace_direction (boolean): Direction of normalization to be applied. True for replacing\n</span>
+<span class="sd">            column names with the field-type normalized names &amp; False for vice-versa.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: source_data - Forward/Backward normalized input data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># for field_name in field_name_types:</span>
+    <span class="c1">#     if (replace_direction):</span>
+    <span class="c1">#         source_data = str(source_data).replace(</span>
+    <span class="c1">#             str(field_name), field_name_types[field_name])</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         source_data = str(source_data).replace(</span>
+    <span class="c1">#             str(field_name_types[field_name]), field_name)</span>
+    <span class="c1"># return source_data</span>
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">field_name_types</span><span class="p">:</span>
+        <span class="c1"># print(field_name)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">field_name</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="c1"># print(field, value)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">replace_direction</span><span class="p">):</span>
+            <span class="n">source_data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source_data</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source_data</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">source_data</span></div>
+
+
+<div class="viewcode-block" id="generate_data_pairs"><a class="viewcode-back" href="../../utils.html#utils.data_utils.generate_data_pairs">[docs]</a><span class="k">def</span> <span class="nf">generate_data_pairs</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">train_data_output_directory</span><span class="p">,</span>
+                        <span class="n">data_split_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Generate a training data key pair for seq2seq model.</span>
+<span class="sd">        - Source: 3 random data points sampled from the dataset for each vegaspec\n</span>
+<span class="sd">        - Target: A valid vegalite spec for the sampled data\n</span>
+<span class="sd">        - Note: The data portion of the vegalite spec is replaced with an empty space\n</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        examples_directory (string): Path to directory containing vegalite examples</span>
+<span class="sd">        train_data_output_directory (list): Train/text/dev data split configuration</span>
+<span class="sd">        data_split_params (string): Path to directory containing generated train/dev/test source files and vocabularies</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_sources_hold</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_target_hold</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">max_source_seq_length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_target_seq_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Generating source and target pairs ======&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;vl.json&quot;</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;url&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]):</span>
+
+                    <span class="n">data_file_url</span> <span class="o">=</span> <span class="n">data_prefix</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span>
+                        <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;_info&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;_any&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]):</span>
+                        <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;_any&quot;</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span>
+                            <span class="ow">and</span> <span class="s2">&quot;scale&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]):</span>
+                        <span class="c1"># print(data[&quot;encoding&quot;][&quot;x&quot;][&quot;scale&quot;])</span>
+                        <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">]</span>
+                            <span class="ow">and</span> <span class="s2">&quot;scale&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]):</span>
+                        <span class="c1"># print(&quot;y&quot;, data[&quot;encoding&quot;][&quot;y&quot;][&quot;scale&quot;])</span>
+                        <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+
+                    <span class="n">target_vega_spec</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                    <span class="n">target_vega_spec</span> <span class="o">=</span> <span class="n">target_vega_spec</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="s1">&#39;, &quot;_any&quot;: false&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># keep track of max targe sequence length</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_vega_spec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_target_seq_length</span><span class="p">:</span>
+                        <span class="n">max_target_seq_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_vega_spec</span><span class="p">)</span>
+
+                    <span class="k">print</span><span class="p">(</span><span class="n">data_file_url</span><span class="p">)</span>
+                    <span class="n">data_content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">data_file_url</span><span class="p">))</span>
+                    <span class="c1"># print(&quot;Content lenght&quot;, len(data_content), data_file_url)</span>
+                    <span class="n">data_holder</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datapair_slice_size</span><span class="p">):</span>
+                        <span class="n">selected_index</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_content</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">data_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_content</span><span class="p">[</span><span class="n">selected_index</span><span class="p">])</span>
+                    <span class="n">source_data_spec</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data_holder</span><span class="p">))</span>
+
+                    <span class="c1"># Generate field name types</span>
+                    <span class="n">t_data</span> <span class="o">=</span> <span class="n">data_content</span>
+                    <span class="c1"># # print (t_data[0])</span>
+                    <span class="c1"># data_labels = {&quot;str&quot;:0,&quot;num&quot;:0}</span>
+                    <span class="c1"># field_name_types = {}</span>
+                    <span class="n">field_name_types</span> <span class="o">=</span> <span class="n">generate_field_types</span><span class="p">(</span><span class="n">t_data</span><span class="p">)</span>
+
+                    <span class="c1"># Sample each example file a few times</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_samples_per_example</span><span class="p">):</span>
+                        <span class="n">data_holder</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datapair_slice_size</span><span class="p">):</span>
+                            <span class="n">selected_index</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_content</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="n">data_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_content</span><span class="p">[</span><span class="n">selected_index</span><span class="p">])</span>
+                        <span class="n">source_data_spec</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data_holder</span><span class="p">))</span>
+
+                        <span class="c1"># Replace filednames with normalized string and norm values</span>
+                        <span class="n">target_vega_spec</span> <span class="o">=</span> <span class="n">replace_fieldnames</span><span class="p">(</span>
+                            <span class="n">target_vega_spec</span><span class="p">,</span> <span class="n">field_name_types</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+                        <span class="n">source_data_spec</span> <span class="o">=</span> <span class="n">replace_fieldnames</span><span class="p">(</span>
+                            <span class="n">source_data_spec</span><span class="p">,</span> <span class="n">field_name_types</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+                        <span class="c1"># for field_name in field_name_types:</span>
+                        <span class="c1">#     target_vega_spec = target_vega_spec.replace(</span>
+                        <span class="c1">#         str(field_name), field_name_types[field_name])</span>
+                        <span class="c1">#     source_data_spec = source_data_spec.replace(</span>
+                        <span class="c1">#         str(field_name), field_name_types[field_name])</span>
+
+                        <span class="c1"># print(source_data_spec, &quot;=****=&quot;, target_vega_spec,</span>
+                        <span class="c1">#       &quot;==========\n&quot;)</span>
+
+                        <span class="c1"># Keep track of maximum source sequence length</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_data_spec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_source_seq_length</span><span class="p">:</span>
+                            <span class="n">max_source_seq_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_data_spec</span><span class="p">)</span>
+
+                        <span class="n">all_sources_hold</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source_data_spec</span><span class="p">)</span>
+                        <span class="n">all_target_hold</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_vega_spec</span><span class="p">)</span>
+                    <span class="c1"># break</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/all_train.sources&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/all_train.sources&quot;</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">all_sources_hold</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Could not edit training source file&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/all_train.targets&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/all_train.targets&quot;</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">all_target_hold</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Could not edit training target file&quot;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;size of all files&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_sources_hold</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_target_hold</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Max Source Seq Lenght&quot;</span><span class="p">,</span> <span class="n">max_source_seq_length</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Max Target Seq Lenght&quot;</span><span class="p">,</span> <span class="n">max_target_seq_length</span><span class="p">)</span>
+
+    <span class="c1"># Uniformly shuffle source and target sequence pair lists</span>
+    <span class="n">rand_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_sources_hold</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">shuffle</span><span class="p">(</span><span class="n">rand_list</span><span class="p">)</span>
+    <span class="c1"># print(rand_list)</span>
+    <span class="n">all_sources_hold</span> <span class="o">=</span> <span class="n">shuffle_elements</span><span class="p">(</span><span class="n">rand_list</span><span class="p">,</span> <span class="n">all_sources_hold</span><span class="p">)</span>
+    <span class="n">all_target_hold</span> <span class="o">=</span> <span class="n">shuffle_elements</span><span class="p">(</span><span class="n">rand_list</span><span class="p">,</span> <span class="n">all_target_hold</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">data_split_params</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.sources&quot;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.sources&quot;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">all_sources_hold</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span>
+                        <span class="n">param</span><span class="p">[</span><span class="s2">&quot;percentage&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_sources_hold</span><span class="p">)):</span><span class="nb">int</span><span class="p">(</span>
+                            <span class="n">param</span><span class="p">[</span><span class="s2">&quot;percentage&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_sources_hold</span><span class="p">))]))</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;  &gt; Saved &quot;</span><span class="p">,</span>
+                <span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.sources&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Could not edit source files&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.targets&quot;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.targets&quot;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">all_target_hold</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span>
+                        <span class="n">param</span><span class="p">[</span><span class="s2">&quot;percentage&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_target_hold</span><span class="p">)):</span><span class="nb">int</span><span class="p">(</span>
+                            <span class="n">param</span><span class="p">[</span><span class="s2">&quot;percentage&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_target_hold</span><span class="p">))]))</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;  &gt; Saved &quot;</span><span class="p">,</span>
+                <span class="n">train_data_output_directory</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;tag&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.targets&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Could not edit source files&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clean_examples_directory"><a class="viewcode-back" href="../../utils.html#utils.data_utils.clean_examples_directory">[docs]</a><span class="k">def</span> <span class="nf">clean_examples_directory</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Cleaning example files. Removing png, csv and other file types from example directory.\n</span>
+<span class="sd">        - Delete none vl spec files from examples directory, generate a list of datafiles\n</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        examples_directory (string): Path to directory containing vegalite examples</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span>
+        <span class="s2">&quot;Cleaning example files. Removing png, csv and other file types from example directory.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">vl_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;vl.json&quot;</span><span class="p">):</span>
+                <span class="c1"># print (filepath)</span>
+                <span class="n">vl_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">vl_data_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;writing vldata.json to file&quot;</span><span class="p">)</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">vl_data_list</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+    <span class="c1"># stuff_in_data()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Example file cleaning complete.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../utils.html#utils.data_utils.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Read CSV file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (string): Filename to read</span>
+<span class="sd">        json_file (string): JSON filename</span>
+<span class="sd">        format (string): format type for the JSON file created</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">csv_rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">fieldnames</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">csv_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[{</span><span class="n">title</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">row</span><span class="p">[</span><span class="n">title</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">title</span><span class="p">))}])</span>
+        <span class="n">write_json</span><span class="p">(</span><span class="n">csv_rows</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span></div>
+
+<span class="c1"># </span>
+<div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../utils.html#utils.data_utils.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Convert csv data into json and write it</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (string): Filename to read</span>
+<span class="sd">        json_file (string): JSON filename</span>
+<span class="sd">        format (string): format type for the JSON file created</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="s2">&quot;pretty&quot;</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span>
+                    <span class="n">sort_keys</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                    <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">),</span>
+                    <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+                    <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="transform_csv_json"><a class="viewcode-back" href="../../utils.html#utils.data_utils.transform_csv_json">[docs]</a><span class="k">def</span> <span class="nf">transform_csv_json</span><span class="p">(</span><span class="n">csv_directory</span><span class="p">,</span> <span class="n">delete_after_convert</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Convert csv files in the given directory into json and write it.</span>
+<span class="sd">        Helps having a unified dataformat that RNN can learn from</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        csv_directory (string): Directory with all the CSV files to be converted</span>
+<span class="sd">        delete_after_convert (boolean): True to delete the CSV files after converting them to JSON</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">csv_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">):</span>
+                <span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">filepath</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">),</span> <span class="n">format</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">delete_after_convert</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_train_dataset_properties"><a class="viewcode-back" href="../../utils.html#utils.data_utils.get_train_dataset_properties">[docs]</a><span class="k">def</span> <span class="nf">get_train_dataset_properties</span><span class="p">(</span><span class="n">train_data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Get the training dataset properties</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        train_data_path (string): Directory with all the training data files</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_used</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;population.json&quot;</span><span class="p">,</span> <span class="s2">&quot;movies.json&quot;</span><span class="p">,</span> <span class="s2">&quot;jobs.json&quot;</span><span class="p">,</span> <span class="s2">&quot;iris.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;driving.json&quot;</span><span class="p">,</span> <span class="s2">&quot;crimea.json&quot;</span><span class="p">,</span> <span class="s2">&quot;cars.json&quot;</span><span class="p">,</span> <span class="s2">&quot;weball26.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;burtin.json&quot;</span><span class="p">,</span> <span class="s2">&quot;barley.json&quot;</span><span class="p">,</span> <span class="s2">&quot;birdstrikes.json&quot;</span>
+    <span class="p">]</span>
+    <span class="n">property_holder</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">datafile</span> <span class="ow">in</span> <span class="n">data_used</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">train_data_path</span> <span class="o">+</span> <span class="n">datafile</span>
+        <span class="n">data_content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="c1"># print(&quot;Num columns:&quot;, (data_content[0]), filepath)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_content</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+            <span class="n">property_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+            <span class="k">break</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;mean: &quot;</span><span class="p">,</span>
+          <span class="nb">sum</span><span class="p">(</span><span class="n">property_holder</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="s2">&quot; min&quot;</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">property_holder</span><span class="p">),</span>
+          <span class="s2">&quot; max&quot;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">property_holder</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="get_test100_data"><a class="viewcode-back" href="../../utils.html#utils.data_utils.get_test100_data">[docs]</a><span class="k">def</span> <span class="nf">get_test100_data</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Get the required testing dataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        index (list): List of indices for the required testing data</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string: data - JSONified testing dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">test_100_list</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="get_test_dataset_properties"><a class="viewcode-back" href="../../utils.html#utils.data_utils.get_test_dataset_properties">[docs]</a><span class="k">def</span> <span class="nf">get_test_dataset_properties</span><span class="p">(</span><span class="n">test_data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Get the testing dataset properties</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        test_data_path (string): Directory with all the testing data files</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">property_holder</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">list_holder</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">test_data_path</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+                <span class="n">data_content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_content</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">):</span>
+                        <span class="c1"># print(filepath, len(row))</span>
+                        <span class="n">property_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+                        <span class="n">list_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                    <span class="k">break</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Num valunes&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">property_holder</span><span class="p">),</span> <span class="s2">&quot;mean: &quot;</span><span class="p">,</span>
+          <span class="nb">sum</span><span class="p">(</span><span class="n">property_holder</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="s2">&quot; min&quot;</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">property_holder</span><span class="p">),</span>
+          <span class="s2">&quot; max&quot;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">property_holder</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_100_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">list_holder</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reduce_dataset_size"><a class="viewcode-back" href="../../utils.html#utils.data_utils.reduce_dataset_size">[docs]</a><span class="k">def</span> <span class="nf">reduce_dataset_size</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Reduce datset size to a threshold. Also delete datasets with less than 7 items</span>
+<span class="sd">        they usually have non-standard fields/structure that may disrupt learning</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">data_prefix</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+                <span class="n">data_content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_content</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="n">data_holder</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data_content</span><span class="p">:</span>
+                    <span class="n">data_holder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">max_data_slice_size</span><span class="p">):</span>
+                        <span class="k">break</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;=======&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_content</span><span class="p">),</span>
+                      <span class="n">max_data_slice_size</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_holder</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="load_test_dataset"><a class="viewcode-back" href="../../utils.html#utils.data_utils.load_test_dataset">[docs]</a><span class="k">def</span> <span class="nf">load_test_dataset</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Load a random dataset for testing the Data2vis algorithm</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: data - List of records in a random test dataset. The records are in the\n</span>
+<span class="sd">            form of dictionaries where the column names are keys and the corresponding\n</span>
+<span class="sd">            data points are values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">test_data_list</span><span class="p">)):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Test data list does not exists. Creating it now at&quot;</span><span class="p">,</span>
+              <span class="n">test_data_list</span><span class="p">)</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">test_dataset_directory</span><span class="p">):</span>
+            <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+                <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+                    <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_data_list</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;writing test data file list to file&quot;</span><span class="p">)</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">file_list</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+    <span class="n">all_json_files</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">test_data_list</span><span class="p">))</span>
+    <span class="c1"># print(&quot;Selecting a dataset at random from &quot;, len(all_json_files))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">all_json_files</span><span class="p">[</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_json_files</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clean_test_dataset_remove_periods"><a class="viewcode-back" href="../../utils.html#utils.data_utils.clean_test_dataset_remove_periods">[docs]</a><span class="k">def</span> <span class="nf">clean_test_dataset_remove_periods</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC:</span>
+<span class="sd">        - Process test dataset. Remove periods from field names.\n</span>
+<span class="sd">        - Vegalite fails if field names contain periods. This makes Data2Vis look bad.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">test_dataset_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                    <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;lsit.json&quot;</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+                            <span class="k">print</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                        <span class="n">field_holder</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                        <span class="n">new_field_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                                                       <span class="s2">&quot;_&quot;</span><span class="p">)</span>  <span class="c1"># remove periods</span>
+                        <span class="k">del</span> <span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                        <span class="n">row</span><span class="p">[</span><span class="n">new_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_holder</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clean_test_dataset"><a class="viewcode-back" href="../../utils.html#utils.data_utils.clean_test_dataset">[docs]</a><span class="k">def</span> <span class="nf">clean_test_dataset</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Perform preprocessing on datasets used to test predictions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">test_dataset_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="nb">file</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                    <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;lsit.json&quot;</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+
+                <span class="c1"># delete empy datasets</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;====== Deleting: Empty Dataset ========&quot;</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># delete datasets with less than 4 fields</span>
+                    <span class="n">first_row</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_row</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">):</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;====== Deleting: less than 4 fields ========&quot;</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">):</span>
+                                <span class="k">del</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;default&quot;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">):</span>
+                                <span class="k">del</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_test_data_length</span><span class="p">):</span>
+                            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;File has more than &quot;</span><span class="p">,</span> <span class="n">max_test_data_length</span><span class="p">,</span>
+                                  <span class="s2">&quot; elements. Reducing ..&quot;</span><span class="p">)</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">max_test_data_length</span><span class="p">]</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+                        <span class="c1"># remove large files</span>
+                        <span class="n">data_file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">data_file_size</span> <span class="o">&gt;</span> <span class="n">max_testdata_file_size</span><span class="p">):</span>
+                            <span class="k">print</span><span class="p">(</span>
+                                <span class="s2">&quot;Data file greater than max. Deleting Example&quot;</span><span class="p">,</span>
+                                <span class="n">data_file_size</span><span class="p">)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+                        <span class="c1"># save only a fraction of data to reduce load time in demo</span>
+
+<div class="viewcode-block" id="get_count_freqs"><a class="viewcode-back" href="../../utils.html#utils.data_utils.get_count_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_count_freqs</span><span class="p">(</span><span class="n">input_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Get the frequency of each element in the given array</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_array (list): Input array</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: counts_marks, freqs_marks - Returns a list of frequency values of every\n</span>
+<span class="sd">            unique element along with the list of the elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">counted_marks</span> <span class="o">=</span> <span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">input_array</span><span class="p">))</span>
+    <span class="n">counted_marks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">counted_marks</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="n">counts_marks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">freqs_marks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">counted_marks</span><span class="p">:</span>
+        <span class="n">counts_marks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">freqs_marks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">counts_marks</span><span class="p">,</span> <span class="n">freqs_marks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="profile_dataset_vegaspec"><a class="viewcode-back" href="../../utils.html#utils.data_utils.profile_dataset_vegaspec">[docs]</a><span class="k">def</span> <span class="nf">profile_dataset_vegaspec</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Generate some statistics on source dataset used</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        examples_directory (string): Path to directory containing vegalite examples</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mark_types</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">transformation_types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;bin&quot;</span><span class="p">,</span> <span class="s2">&quot;aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;calculate&quot;</span><span class="p">,</span> <span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="s2">&quot;timeUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;sort&quot;</span>
+    <span class="p">]</span>
+    <span class="n">transform_counts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;vl.json&quot;</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                <span class="n">mark_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">])</span>
+                <span class="n">data_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">transform_val</span> <span class="ow">in</span> <span class="n">transformation_types</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">transform_val</span> <span class="ow">in</span> <span class="n">data_string</span><span class="p">):</span>
+                        <span class="n">transform_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transform_val</span><span class="p">)</span>
+
+    <span class="n">counts_marks</span><span class="p">,</span> <span class="n">freqs_marks</span> <span class="o">=</span> <span class="n">get_count_freqs</span><span class="p">(</span><span class="n">mark_types</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">freqs_marks</span><span class="p">,</span> <span class="n">counts_marks</span><span class="p">)</span>
+    <span class="c1"># plt.hist(counted_marks)</span>
+
+    <span class="n">counts_transform</span><span class="p">,</span> <span class="n">freqs_transform</span> <span class="o">=</span> <span class="n">get_count_freqs</span><span class="p">(</span><span class="n">transform_counts</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">counts_transform</span><span class="p">,</span> <span class="n">freqs_transform</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">freqs_transform</span><span class="p">,</span> <span class="n">counts_transform</span><span class="p">)</span>
+    <span class="c1"># fig = plt.figure(figsize=(8, 4))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+        <span class="s1">&#39;docs/datasetcharacteristics.eps&#39;</span><span class="p">,</span>
+        <span class="n">format</span><span class="o">=</span><span class="s1">&#39;eps&#39;</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="c1"># plt.show()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Total examples&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mark_types</span><span class="p">))</span></div>
+    <span class="c1"># plt.show()</span>
+
+<div class="viewcode-block" id="write_data_to_file"><a class="viewcode-back" href="../../utils.html#utils.data_utils.write_data_to_file">[docs]</a><span class="k">def</span> <span class="nf">write_data_to_file</span><span class="p">(</span><span class="n">destination_file</span><span class="p">,</span> <span class="n">source_data_first_sample</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Write normalized JSON to file for seq2seq model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        destination_file (string): Filename for writing the sample data</span>
+<span class="sd">        source_data_first_sample (list): Record(s) to be written to the file</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># print(&quot;Writing data to file:&quot;, source_data_first_sample)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">source_data_file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">source_data_first_sample</span><span class="p">,</span> <span class="n">source_data_file</span><span class="p">)</span></div>
+        <span class="c1"># source_data_file.write((json.dumps(source_data)))</span>
+
+
+<div class="viewcode-block" id="forward_norm"><a class="viewcode-back" href="../../utils.html#utils.data_utils.forward_norm">[docs]</a><span class="k">def</span> <span class="nf">forward_norm</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">,</span> <span class="n">f_names</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Normalize source json data fieldnames before visualization prediction</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_data (list): Record(s) to be normalized</span>
+<span class="sd">        destination_file (string): Filename for writing the sample data</span>
+<span class="sd">        f_names (list): A list mapping fieldnames to the field-type normalized names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean: True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">source_data_first_sample</span> <span class="o">=</span> <span class="n">source_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">source_data_first_sample</span> <span class="o">=</span> <span class="n">replace_fieldnames</span><span class="p">(</span><span class="n">source_data_first_sample</span><span class="p">,</span>
+                                                  <span class="n">f_names</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">source_data_first_sample</span> <span class="o">=</span> <span class="n">source_data_first_sample</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+    <span class="c1"># print(&quot;************&quot;,  source_data_first_sample )</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">source_data_first_sample</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">source_data_first_sample</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># Write normalized JSON to file for seq2seq model</span>
+    <span class="c1"># print(&quot;Writing data to file:&quot;, source_data_first_sample)</span>
+    <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">destination_file</span><span class="p">,</span> <span class="n">source_data_first_sample</span><span class="p">)</span>
+    <span class="c1"># with open(destination_file, &#39;w&#39;) as source_data_file:</span>
+    <span class="c1">#     json.dump(source_data_first_sample, source_data_file)</span>
+    <span class="c1">#     # source_data_file.write((json.dumps(source_data)))</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="backward_norm"><a class="viewcode-back" href="../../utils.html#utils.data_utils.backward_norm">[docs]</a><span class="k">def</span> <span class="nf">backward_norm</span><span class="p">(</span><span class="n">decoded_string</span><span class="p">,</span> <span class="n">f_names</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Normalize output/source data after prediction. Replace field-type normalized values with actual fieldnames</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        decoded_string (string): Data/Prediction from the algorithm that needs to be backward normalized</span>
+<span class="sd">        f_names (list): A list mapping fieldnames to the field-type normalized names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string: Backward normalized data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">replace_fieldnames</span><span class="p">(</span><span class="n">decoded_string</span><span class="p">,</span> <span class="n">f_names</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_test_results"><a class="viewcode-back" href="../../utils.html#utils.data_utils.save_test_results">[docs]</a><span class="k">def</span> <span class="nf">save_test_results</span><span class="p">(</span><span class="n">input_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Save the details of the test results</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data (dict): Dictionary with all the relevant details of the test run as key-value pairs</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">saved_result_path</span> <span class="o">=</span> <span class="s2">&quot;utils/testresults/&quot;</span> <span class="o">+</span> <span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+        <span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;beamwidth&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">saved_result_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;writing test results to file&quot;</span><span class="p">)</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="parse_csv"><a class="viewcode-back" href="../../utils.html#utils.data_utils.parse_csv">[docs]</a><span class="k">def</span> <span class="nf">parse_csv</span><span class="p">(</span><span class="n">input_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    FUNC: Parse CSV content to algorithm consumable format</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data (string): Raw comma-delimited contents read from a csv/txt file</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: parsed_data - List of records in a random test dataset. The records are in the\n</span>
+<span class="sd">            form of dictionaries where the column names are keys and the corresponding\n</span>
+<span class="sd">            data points are values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parsed_data</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

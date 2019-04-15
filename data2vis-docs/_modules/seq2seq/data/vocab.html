@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.data.vocab &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.data.vocab</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;Vocabulary related functions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">gfile</span>
+
+<span class="n">SpecialVocab</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;SpecialVocab&quot;</span><span class="p">,</span>
+                                      <span class="p">[</span><span class="s2">&quot;UNK&quot;</span><span class="p">,</span> <span class="s2">&quot;SEQUENCE_START&quot;</span><span class="p">,</span> <span class="s2">&quot;SEQUENCE_END&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="VocabInfo"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.vocab.VocabInfo">[docs]</a><span class="k">class</span> <span class="nc">VocabInfo</span><span class="p">(</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;VocbabInfo&quot;</span><span class="p">,</span>
+                           <span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;vocab_size&quot;</span><span class="p">,</span> <span class="s2">&quot;special_vocab&quot;</span><span class="p">])):</span>
+  <span class="sd">&quot;&quot;&quot;Convenience structure for vocabulary information.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">total_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns size the the base vocabulary plus the size of extra vocabulary&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">special_vocab</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_vocab_info"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.vocab.get_vocab_info">[docs]</a><span class="k">def</span> <span class="nf">get_vocab_info</span><span class="p">(</span><span class="n">vocab_path</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Creates a `VocabInfo` instance that contains the vocabulary size and</span>
+<span class="sd">    the special vocabulary for the given file.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    vocab_path: Path to a vocabulary file with one word per line.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A VocabInfo tuple.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">vocab_path</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+    <span class="n">vocab_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">)</span>
+  <span class="n">special_vocab</span> <span class="o">=</span> <span class="n">get_special_vocab</span><span class="p">(</span><span class="n">vocab_size</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">VocabInfo</span><span class="p">(</span><span class="n">vocab_path</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">special_vocab</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_special_vocab"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.vocab.get_special_vocab">[docs]</a><span class="k">def</span> <span class="nf">get_special_vocab</span><span class="p">(</span><span class="n">vocabulary_size</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns the `SpecialVocab` instance for a given vocabulary size.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">SpecialVocab</span><span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">vocabulary_size</span><span class="p">,</span> <span class="n">vocabulary_size</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="create_vocabulary_lookup_table"><a class="viewcode-back" href="../../../seq2seq.data.html#seq2seq.data.vocab.create_vocabulary_lookup_table">[docs]</a><span class="k">def</span> <span class="nf">create_vocabulary_lookup_table</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Creates a lookup table for a vocabulary file.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    filename: Path to a vocabulary file containg one word per line.</span>
+<span class="sd">      Each word is mapped to its line number.</span>
+<span class="sd">    default_value: UNK tokens will be mapped to this id.</span>
+<span class="sd">      If None, UNK tokens will be mapped to [vocab_size]</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tuple (vocab_to_id_table, id_to_vocab_table,</span>
+<span class="sd">      word_to_count_table, vocab_size). The vocab size does not include</span>
+<span class="sd">      the UNK token.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">gfile</span><span class="o">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File does not exist: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+  <span class="c1"># Load vocabulary into memory</span>
+  <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+    <span class="n">vocab</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">)</span>
+  <span class="n">vocab_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+
+  <span class="n">has_counts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>
+  <span class="k">if</span> <span class="n">has_counts</span><span class="p">:</span>
+    <span class="n">vocab</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">])</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+    <span class="n">vocab</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">]</span>
+
+  <span class="c1"># Add special vocabulary items</span>
+  <span class="n">special_vocab</span> <span class="o">=</span> <span class="n">get_special_vocab</span><span class="p">(</span><span class="n">vocab_size</span><span class="p">)</span>
+  <span class="n">vocab</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">special_vocab</span><span class="o">.</span><span class="n">_fields</span><span class="p">)</span>
+  <span class="n">vocab_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">special_vocab</span><span class="p">)</span>
+  <span class="n">counts</span> <span class="o">+=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">special_vocab</span><span class="o">.</span><span class="n">_fields</span><span class="p">)]</span>
+
+  <span class="k">if</span> <span class="n">default_value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">default_value</span> <span class="o">=</span> <span class="n">special_vocab</span><span class="o">.</span><span class="n">UNK</span>
+
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating vocabulary lookup table of size </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">)</span>
+
+  <span class="n">vocab_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+  <span class="n">count_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+  <span class="n">vocab_idx_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+  <span class="c1"># Create ID -&gt; word mapping</span>
+  <span class="n">id_to_vocab_init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">KeyValueTensorInitializer</span><span class="p">(</span>
+      <span class="n">vocab_idx_tensor</span><span class="p">,</span> <span class="n">vocab_tensor</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
+  <span class="n">id_to_vocab_table</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">HashTable</span><span class="p">(</span><span class="n">id_to_vocab_init</span><span class="p">,</span> <span class="s2">&quot;UNK&quot;</span><span class="p">)</span>
+
+  <span class="c1"># Create word -&gt; id mapping</span>
+  <span class="n">vocab_to_id_init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">KeyValueTensorInitializer</span><span class="p">(</span>
+      <span class="n">vocab_tensor</span><span class="p">,</span> <span class="n">vocab_idx_tensor</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+  <span class="n">vocab_to_id_table</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">HashTable</span><span class="p">(</span><span class="n">vocab_to_id_init</span><span class="p">,</span>
+                                                  <span class="n">default_value</span><span class="p">)</span>
+
+  <span class="c1"># Create word -&gt; count mapping</span>
+  <span class="n">word_to_count_init</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">KeyValueTensorInitializer</span><span class="p">(</span>
+      <span class="n">vocab_tensor</span><span class="p">,</span> <span class="n">count_tensor</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+  <span class="n">word_to_count_table</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">lookup</span><span class="o">.</span><span class="n">HashTable</span><span class="p">(</span><span class="n">word_to_count_init</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">vocab_to_id_table</span><span class="p">,</span> <span class="n">id_to_vocab_table</span><span class="p">,</span> <span class="n">word_to_count_table</span><span class="p">,</span> <span class="n">vocab_size</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.training.hooks &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.training.hooks</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot; Collection of tf.train.SessionRunHooks</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.training.basic_session_run_hooks</span> <span class="kn">import</span> <span class="n">SecondOrStepTimer</span>  <span class="c1"># pylint: disable=E0611</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.training</span> <span class="kn">import</span> <span class="n">session_manager</span> <span class="c1"># pylint: disable=E0611</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.client</span> <span class="kn">import</span> <span class="n">timeline</span>  <span class="c1"># pylint: disable=E0611</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">gfile</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">Configurable</span><span class="p">,</span> <span class="n">abstractstaticmethod</span>
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">graph_utils</span><span class="p">,</span> <span class="n">global_vars</span>
+
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+
+<span class="nd">@six.add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<div class="viewcode-block" id="TrainingHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainingHook">[docs]</a><span class="k">class</span> <span class="nc">TrainingHook</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunHook</span><span class="p">,</span> <span class="n">Configurable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Abstract base class for training hooks.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunHook</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">Configurable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_model_dir</span> <span class="o">=</span> <span class="n">model_dir</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_run_config</span> <span class="o">=</span> <span class="n">run_config</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">model_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the directory model checkpoints are written to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_dir</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_chief</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true if and only if the current process is the chief.</span>
+<span class="sd">    This is used for distributed training.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_config</span><span class="o">.</span><span class="n">is_chief</span>
+
+  <span class="nd">@abstractstaticmethod</span>
+<div class="viewcode-block" id="TrainingHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainingHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="MetadataCaptureHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.MetadataCaptureHook">[docs]</a><span class="k">class</span> <span class="nc">MetadataCaptureHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A hook to capture metadata for a single step.</span>
+<span class="sd">  Useful for performance debugging. It performs a full trace and saves</span>
+<span class="sd">  run_metadata and Chrome timeline information to a file.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    step: The step number to trace. The hook is only enable for this step.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MetadataCaptureHook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MetadataCaptureHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.MetadataCaptureHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="MetadataCaptureHook.begin"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.MetadataCaptureHook.begin">[docs]</a>  <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_global_step</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MetadataCaptureHook.before_run"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.MetadataCaptureHook.before_run">[docs]</a>  <span class="k">def</span> <span class="nf">before_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_run_context</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_chief</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing full trace on next step.&quot;</span><span class="p">)</span>
+      <span class="n">run_options</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">RunOptions</span><span class="p">(</span><span class="n">trace_level</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">RunOptions</span><span class="o">.</span><span class="n">FULL_TRACE</span><span class="p">)</span> <span class="c1">#pylint: disable=E1101</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">run_options</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MetadataCaptureHook.after_run"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.MetadataCaptureHook.after_run">[docs]</a>  <span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_run_context</span><span class="p">,</span> <span class="n">run_values</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_chief</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="n">step_done</span> <span class="o">=</span> <span class="n">run_values</span><span class="o">.</span><span class="n">results</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Captured full trace at step </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">step_done</span><span class="p">)</span>
+      <span class="c1"># Create output directory</span>
+      <span class="n">gfile</span><span class="o">.</span><span class="n">MakeDirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">)</span>
+
+      <span class="c1"># Save run metadata</span>
+      <span class="n">trace_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">,</span> <span class="s2">&quot;run_meta&quot;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">trace_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">trace_file</span><span class="p">:</span>
+        <span class="n">trace_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">run_values</span><span class="o">.</span><span class="n">run_metadata</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">())</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saved run_metadata to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">trace_path</span><span class="p">)</span>
+
+      <span class="c1"># Save timeline</span>
+      <span class="n">timeline_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">,</span> <span class="s2">&quot;timeline.json&quot;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">timeline_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">timeline_file</span><span class="p">:</span>
+        <span class="n">tl_info</span> <span class="o">=</span> <span class="n">timeline</span><span class="o">.</span><span class="n">Timeline</span><span class="p">(</span><span class="n">run_values</span><span class="o">.</span><span class="n">run_metadata</span><span class="o">.</span><span class="n">step_stats</span><span class="p">)</span>
+        <span class="n">tl_chrome</span> <span class="o">=</span> <span class="n">tl_info</span><span class="o">.</span><span class="n">generate_chrome_trace_format</span><span class="p">(</span><span class="n">show_memory</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">timeline_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tl_chrome</span><span class="p">)</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saved timeline to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeline_path</span><span class="p">)</span>
+
+      <span class="c1"># Save tfprof op log</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">tfprof</span><span class="o">.</span><span class="n">tfprof_logger</span><span class="o">.</span><span class="n">write_op_log</span><span class="p">(</span>
+          <span class="n">graph</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">(),</span>
+          <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">,</span>
+          <span class="n">run_meta</span><span class="o">=</span><span class="n">run_values</span><span class="o">.</span><span class="n">run_metadata</span><span class="p">)</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saved op log to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="p">(</span><span class="n">step_done</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="TrainSampleHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainSampleHook">[docs]</a><span class="k">class</span> <span class="nc">TrainSampleHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Occasionally samples predictions from the training run and prints them.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    every_n_secs: Sample predictions every N seconds.</span>
+<span class="sd">      If set, `every_n_steps` must be None.</span>
+<span class="sd">    every_n_steps: Sample predictions every N steps.</span>
+<span class="sd">      If set, `every_n_secs` must be None.</span>
+<span class="sd">    sample_dir: Optional, a directory to write samples to.</span>
+<span class="sd">    delimiter: Join tokens on this delimiter. Defaults to space.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1">#pylint: disable=missing-docstring</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TrainSampleHook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sample_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">SecondOrStepTimer</span><span class="p">(</span>
+        <span class="n">every_secs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;every_n_secs&quot;</span><span class="p">],</span>
+        <span class="n">every_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;every_n_steps&quot;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_should_trigger</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_iter_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_source_delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;source_delimiter&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_target_delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;target_delimiter&quot;</span><span class="p">]</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TrainSampleHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainSampleHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;every_n_secs&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="s2">&quot;every_n_steps&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="s2">&quot;source_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target_delimiter&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span>
+    <span class="p">}</span></div>
+
+<div class="viewcode-block" id="TrainSampleHook.begin"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainSampleHook.begin">[docs]</a>  <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_iter_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_global_step</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span> <span class="o">=</span> <span class="n">graph_utils</span><span class="o">.</span><span class="n">get_dict_from_collection</span><span class="p">(</span><span class="s2">&quot;predictions&quot;</span><span class="p">)</span>
+    <span class="c1"># Create the sample directory</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">gfile</span><span class="o">.</span><span class="n">MakeDirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_dir</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TrainSampleHook.before_run"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainSampleHook.before_run">[docs]</a>  <span class="k">def</span> <span class="nf">before_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_run_context</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_should_trigger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">should_trigger_for_step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter_count</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_trigger</span><span class="p">:</span>
+      <span class="n">fetches</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="s2">&quot;predicted_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span><span class="p">[</span><span class="s2">&quot;predicted_tokens&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;target_words&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span><span class="p">[</span><span class="s2">&quot;labels.target_tokens&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;target_len&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span><span class="p">[</span><span class="s2">&quot;labels.target_len&quot;</span><span class="p">]</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">([</span><span class="n">fetches</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">([{},</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="TrainSampleHook.after_run"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.TrainSampleHook.after_run">[docs]</a>  <span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_run_context</span><span class="p">,</span> <span class="n">run_values</span><span class="p">):</span>
+    <span class="n">result_dict</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">run_values</span><span class="o">.</span><span class="n">results</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_iter_count</span> <span class="o">=</span> <span class="n">step</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_trigger</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># Convert dict of lists to list of dicts</span>
+    <span class="n">result_dicts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">result_dict</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Print results</span>
+    <span class="n">result_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">result_str</span> <span class="o">+=</span> <span class="s2">&quot;Prediction followed by Target @ Step {}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+    <span class="n">result_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">result_dicts</span><span class="p">:</span>
+      <span class="n">target_len</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;target_len&quot;</span><span class="p">]</span>
+      <span class="n">predicted_slice</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;predicted_tokens&quot;</span><span class="p">][:</span><span class="n">target_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+      <span class="n">target_slice</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;target_words&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="n">target_len</span><span class="p">]</span>
+      <span class="n">result_str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_delimiter</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+          <span class="n">predicted_slice</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+      <span class="n">result_str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_delimiter</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+          <span class="n">target_slice</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="n">result_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">result_str</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_dir</span><span class="p">:</span>
+      <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_dir</span><span class="p">,</span>
+                              <span class="s2">&quot;samples_{:06d}.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>
+      <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">result_str</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">update_last_triggered_step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PrintModelAnalysisHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.PrintModelAnalysisHook">[docs]</a><span class="k">class</span> <span class="nc">PrintModelAnalysisHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Writes the parameters of the model to a file and stdout.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1">#pylint: disable=missing-docstring</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PrintModelAnalysisHook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="s2">&quot;model_analysis.txt&quot;</span><span class="p">)</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="PrintModelAnalysisHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.PrintModelAnalysisHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="PrintModelAnalysisHook.begin"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.PrintModelAnalysisHook.begin">[docs]</a>  <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Dump to file on the chief worker</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_chief</span><span class="p">:</span>
+      <span class="n">opts</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">tfprof</span><span class="o">.</span><span class="n">model_analyzer</span><span class="o">.</span><span class="n">TRAINABLE_VARS_PARAMS_STAT_OPTIONS</span>
+      <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;dump_to_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">tfprof</span><span class="o">.</span><span class="n">model_analyzer</span><span class="o">.</span><span class="n">print_model_analysis</span><span class="p">(</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">(),</span> <span class="n">tfprof_options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
+
+    <span class="c1"># Print the model analysis</span>
+    <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="VariableRestoreHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.VariableRestoreHook">[docs]</a><span class="k">class</span> <span class="nc">VariableRestoreHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A hooks that restored variables from a given checkpoints.</span>
+
+<span class="sd">  Params:</span>
+<span class="sd">    prefix: Variables matching this prefix are restored.</span>
+<span class="sd">    checkpoint_path: Path to the checkpoint to restore variables from.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">VariableRestoreHook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VariableRestoreHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.VariableRestoreHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;checkpoint_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="VariableRestoreHook.begin"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.VariableRestoreHook.begin">[docs]</a>  <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">varname_in_checkpoint</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Removes the prefix from the variable name.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">prefix_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+      <span class="n">checkpoint_prefix</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prefix_parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+      <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">checkpoint_prefix</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">target_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">varname_in_checkpoint</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
+    <span class="n">restore_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">target_names</span><span class="p">,</span> <span class="n">variables</span><span class="p">)}</span>
+
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Restoring variables: </span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span>
+                               <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">restore_map</span><span class="o">.</span><span class="n">items</span><span class="p">()}))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">restore_map</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariableRestoreHook.after_create_session"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.VariableRestoreHook.after_create_session">[docs]</a>  <span class="k">def</span> <span class="nf">after_create_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">])</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully restored all variables&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DelayStartHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.DelayStartHook">[docs]</a><span class="k">class</span> <span class="nc">DelayStartHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">GlobalStepWaiterHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Delays the start of the current worker process until global step</span>
+<span class="sd">  K * task_id is reached. K is a parameter.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="n">TrainingHook</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_config</span><span class="o">.</span><span class="n">task_id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_delay_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;delay_k&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wait_until_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_delay_k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_id</span><span class="p">)</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">GlobalStepWaiterHook</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_until_step</span><span class="p">)</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DelayStartHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.DelayStartHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;delay_k&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="SyncReplicasOptimizerHook"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.SyncReplicasOptimizerHook">[docs]</a><span class="k">class</span> <span class="nc">SyncReplicasOptimizerHook</span><span class="p">(</span><span class="n">TrainingHook</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A SessionRunHook handles ops related to SyncReplicasOptimizer.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SyncReplicasOptimizerHook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">params</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">run_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_tokens</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_local_init_op</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ready_for_local_init_op</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_q_runner</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_init_tokens_op</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SyncReplicasOptimizerHook.default_params"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.SyncReplicasOptimizerHook.default_params">[docs]</a>  <span class="k">def</span> <span class="nf">default_params</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="SyncReplicasOptimizerHook.begin"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.SyncReplicasOptimizerHook.begin">[docs]</a>  <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">global_vars</span><span class="o">.</span><span class="n">SYNC_REPLICAS_OPTIMIZER</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span> <span class="o">=</span> <span class="n">global_vars</span><span class="o">.</span><span class="n">SYNC_REPLICAS_OPTIMIZER</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">_gradients_applied</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>  <span class="c1"># pylint: disable=protected-access</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;SyncReplicasOptimizer.apply_gradient should be called before using &quot;</span>
+          <span class="s2">&quot;the hook.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_chief</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_local_init_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">chief_init_op</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_ready_for_local_init_op</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">ready_for_local_init_op</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_q_runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">get_chief_queue_runner</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_init_tokens_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">get_init_tokens_op</span><span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_num_tokens</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_local_init_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">local_step_init_op</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_ready_for_local_init_op</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="o">.</span><span class="n">ready_for_local_init_op</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_q_runner</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_init_tokens_op</span> <span class="o">=</span> <span class="bp">None</span></div>
+
+<div class="viewcode-block" id="SyncReplicasOptimizerHook.after_create_session"><a class="viewcode-back" href="../../../seq2seq.training.html#seq2seq.training.hooks.SyncReplicasOptimizerHook.after_create_session">[docs]</a>  <span class="k">def</span> <span class="nf">after_create_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs SyncReplicasOptimizer initialization ops.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_optimizer</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Found SyncReplicasOptimizer. Initializing.&quot;</span><span class="p">)</span>
+
+    <span class="n">local_init_success</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">session_manager</span><span class="o">.</span><span class="n">_ready</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ready_for_local_init_op</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+        <span class="s2">&quot;Model is not ready for SyncReplicasOptimizer local init.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">local_init_success</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+          <span class="s2">&quot;Init operations did not make model ready for SyncReplicasOptimizer &quot;</span>
+          <span class="s2">&quot;local_init. Init op: </span><span class="si">%s</span><span class="s2">, error: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_init_op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_init_op</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_tokens_op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_tokens_op</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q_runner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_q_runner</span><span class="o">.</span><span class="n">create_threads</span><span class="p">(</span>
+          <span class="n">session</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

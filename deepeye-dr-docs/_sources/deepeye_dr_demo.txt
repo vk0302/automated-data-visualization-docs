@@ -1,0 +1,7 @@
+deepeye_dr_demo module
+======================
+
+.. automodule:: deepeye_dr_demo
+    :members:
+    :undoc-members:
+    :show-inheritance:

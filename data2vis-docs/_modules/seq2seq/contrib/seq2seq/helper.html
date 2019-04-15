@@ -1,0 +1,607 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.contrib.seq2seq.helper &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for seq2seq.contrib.seq2seq.helper</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2016 The TensorFlow Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ==============================================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">IMPORTANT: This code is taken directly from Tensorflow</span>
+<span class="sd">(https://github.com/tensorflow/tensorflow) and is copied temporarily</span>
+<span class="sd">until it is available in a packaged Tensorflow version on pypi.</span>
+
+<span class="sd">TODO(dennybritz): Delete this code when it becomes available in TF.</span>
+
+<span class="sd">A library of helpers for use with SamplingDecoders.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># pylint: skip-file</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="kn">import</span> <span class="n">bernoulli</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.distributions.python.ops</span> <span class="kn">import</span> <span class="n">categorical</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.layers</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">layers_base</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">control_flow_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">embedding_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">math_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">random_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">tensor_array_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="kn">import</span> <span class="n">nest</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq.contrib.seq2seq</span> <span class="kn">import</span> <span class="n">decoder</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;Helper&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TrainingHelper&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GreedyEmbeddingHelper&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CustomHelper&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ScheduledEmbeddingTrainingHelper&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ScheduledOutputTrainingHelper&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">_transpose_batch_time</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">_transpose_batch_time</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+
+<span class="k">def</span> <span class="nf">_unstack_ta</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">tensor_array_ops</span><span class="o">.</span><span class="n">TensorArray</span><span class="p">(</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">array_ops</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inp</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+      <span class="n">element_shape</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+
+<span class="nd">@six.add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<div class="viewcode-block" id="Helper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.Helper">[docs]</a><span class="k">class</span> <span class="nc">Helper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Helper interface.  Helper instances are used by SamplingDecoder.&quot;&quot;&quot;</span>
+
+  <span class="nd">@abc.abstractproperty</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a scalar int32 tensor.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;batch_size has not been implemented&quot;</span><span class="p">)</span>
+
+  <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Helper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.Helper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns `(initial_finished, initial_inputs)`.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+  <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Helper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.Helper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns `sample_ids`.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+  <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Helper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.Helper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns `(finished, next_inputs, next_state)`.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="CustomHelper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.CustomHelper">[docs]</a><span class="k">class</span> <span class="nc">CustomHelper</span><span class="p">(</span><span class="n">Helper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base abstract class that allows the user to customize sampling.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialize_fn</span><span class="p">,</span> <span class="n">sample_fn</span><span class="p">,</span> <span class="n">next_inputs_fn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      initialize_fn: callable that returns `(finished, next_inputs)`</span>
+<span class="sd">        for the first iteration.</span>
+<span class="sd">      sample_fn: callable that takes `(time, outputs, state)`</span>
+<span class="sd">        and emits tensor `sample_ids`.</span>
+<span class="sd">      next_inputs_fn: callable that takes `(time, outputs, state, sample_ids)`</span>
+<span class="sd">        and emits `(finished, next_inputs, next_state)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_fn</span> <span class="o">=</span> <span class="n">initialize_fn</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sample_fn</span> <span class="o">=</span> <span class="n">sample_fn</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_next_inputs_fn</span> <span class="o">=</span> <span class="n">next_inputs_fn</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;batch_size accessed before initialize was called&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
+
+<div class="viewcode-block" id="CustomHelper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.CustomHelper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Initialize&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
+      <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_fn</span><span class="p">()</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomHelper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.CustomHelper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Sample&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_fn</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomHelper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.CustomHelper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">NextInputs&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_inputs_fn</span><span class="p">(</span>
+          <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="o">=</span><span class="n">sample_ids</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TrainingHelper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.TrainingHelper">[docs]</a><span class="k">class</span> <span class="nc">TrainingHelper</span><span class="p">(</span><span class="n">Helper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A helper for use during training.  Only reads inputs.</span>
+
+<span class="sd">  Returned sample_ids are the argmax of the RNN output logits.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">,</span> <span class="n">time_major</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A (structure of) input tensors.</span>
+<span class="sd">      sequence_length: An int32 vector tensor.</span>
+<span class="sd">      time_major: Python bool.  Whether the tensors in `inputs` are time major.</span>
+<span class="sd">        If `False` (default), they are assumed to be batch major.</span>
+<span class="sd">      name: Name scope for any created operations.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if `sequence_length` is not a 1D tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;TrainingHelper&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">]):</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">time_major</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_transpose_batch_time</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_input_tas</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_unstack_ta</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_length</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+          <span class="n">sequence_length</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sequence_length&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_length</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Expected sequence_length to be a vector, but received shape: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_length</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_zero_inputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+          <span class="k">lambda</span> <span class="n">inp</span><span class="p">:</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">inputs</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
+
+<div class="viewcode-block" id="TrainingHelper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.TrainingHelper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;TrainingHelperInitialize&quot;</span><span class="p">):</span>
+      <span class="n">finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_length</span><span class="p">)</span>
+      <span class="n">all_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+      <span class="n">next_inputs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+          <span class="n">all_finished</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zero_inputs</span><span class="p">,</span>
+          <span class="k">lambda</span><span class="p">:</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">inp</span><span class="p">:</span> <span class="n">inp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_tas</span><span class="p">))</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TrainingHelper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.TrainingHelper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">unused_kwargs</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;TrainingHelperSample&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">]):</span>
+      <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+          <span class="n">math_ops</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">sample_ids</span></div>
+
+<div class="viewcode-block" id="TrainingHelper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.TrainingHelper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">unused_kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;next_inputs_fn for TrainingHelper.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;TrainingHelperNextInputs&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">]):</span>
+      <span class="n">next_time</span> <span class="o">=</span> <span class="n">time</span> <span class="o">+</span> <span class="mi">1</span>
+      <span class="n">finished</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_length</span><span class="p">)</span>
+      <span class="n">all_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+      <span class="k">def</span> <span class="nf">read_from_ta</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">inp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">next_time</span><span class="p">)</span>
+      <span class="n">next_inputs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+          <span class="n">all_finished</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zero_inputs</span><span class="p">,</span>
+          <span class="k">lambda</span><span class="p">:</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">read_from_ta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_tas</span><span class="p">))</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ScheduledEmbeddingTrainingHelper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledEmbeddingTrainingHelper">[docs]</a><span class="k">class</span> <span class="nc">ScheduledEmbeddingTrainingHelper</span><span class="p">(</span><span class="n">TrainingHelper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A training helper that adds scheduled sampling.</span>
+
+<span class="sd">  Returns -1s for sample_ids where no sampling took place; valid sample id</span>
+<span class="sd">  values elsewhere.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">,</span> <span class="n">embedding</span><span class="p">,</span> <span class="n">sampling_probability</span><span class="p">,</span>
+               <span class="n">time_major</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scheduling_seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A (structure of) input tensors.</span>
+<span class="sd">      sequence_length: An int32 vector tensor.</span>
+<span class="sd">      embedding: A callable that takes a vector tensor of `ids` (argmax ids),</span>
+<span class="sd">        or the `params` argument for `embedding_lookup`.</span>
+<span class="sd">      sampling_probability: A 0D `float32` tensor: the probability of sampling</span>
+<span class="sd">        categorically from the output ids instead of reading directly from the</span>
+<span class="sd">        inputs.</span>
+<span class="sd">      time_major: Python bool.  Whether the tensors in `inputs` are time major.</span>
+<span class="sd">        If `False` (default), they are assumed to be batch major.</span>
+<span class="sd">      seed: The sampling seed.</span>
+<span class="sd">      scheduling_seed: The schedule decision rule sampling seed.</span>
+<span class="sd">      name: Name scope for any created operations.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if `sampling_probability` is not a scalar or vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledEmbeddingSamplingWrapper&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">embedding</span><span class="p">,</span> <span class="n">sampling_probability</span><span class="p">]):</span>
+      <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">embedding</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span> <span class="o">=</span> <span class="n">embedding</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">ids</span><span class="p">:</span> <span class="n">embedding_ops</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">ids</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+          <span class="n">sampling_probability</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sampling_probability&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;sampling_probability must be either a scalar or a vector. &quot;</span>
+            <span class="s2">&quot;saw shape: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_scheduling_seed</span> <span class="o">=</span> <span class="n">scheduling_seed</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledEmbeddingTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+          <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+          <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">,</span>
+          <span class="n">time_major</span><span class="o">=</span><span class="n">time_major</span><span class="p">,</span>
+          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScheduledEmbeddingTrainingHelper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledEmbeddingTrainingHelper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledEmbeddingTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScheduledEmbeddingTrainingHelper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledEmbeddingTrainingHelper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledEmbeddingTrainingHelperSample&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">]):</span>
+      <span class="c1"># Return -1s where we did not sample, and sample_ids elsewhere</span>
+      <span class="n">select_sample_noise</span> <span class="o">=</span> <span class="n">random_ops</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span>
+          <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduling_seed</span><span class="p">)</span>
+      <span class="n">select_sample</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span> <span class="o">&gt;</span> <span class="n">select_sample_noise</span><span class="p">)</span>
+      <span class="n">sample_id_sampler</span> <span class="o">=</span> <span class="n">categorical</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+          <span class="n">select_sample</span><span class="p">,</span>
+          <span class="n">sample_id_sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">),</span>
+          <span class="n">array_ops</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="ScheduledEmbeddingTrainingHelper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledEmbeddingTrainingHelper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledEmbeddingTrainingHelperSample&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">]):</span>
+      <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">base_next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledEmbeddingTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">next_inputs</span><span class="p">(</span>
+              <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+              <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+              <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+              <span class="n">sample_ids</span><span class="o">=</span><span class="n">sample_ids</span><span class="p">,</span>
+              <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+
+      <span class="k">def</span> <span class="nf">maybe_sample</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Perform scheduled sampling.&quot;&quot;&quot;</span>
+        <span class="n">where_sampling</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+            <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sample_ids</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">where_not_sampling</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+            <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sample_ids</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">where_sampling_flat</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">where_sampling</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">where_not_sampling_flat</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">where_not_sampling</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">sample_ids_sampling</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">,</span> <span class="n">where_sampling_flat</span><span class="p">)</span>
+        <span class="n">inputs_not_sampling</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+            <span class="n">base_next_inputs</span><span class="p">,</span> <span class="n">where_not_sampling_flat</span><span class="p">)</span>
+        <span class="n">sampled_next_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span><span class="p">(</span><span class="n">sample_ids_sampling</span><span class="p">)</span>
+        <span class="n">base_shape</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">base_next_inputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">array_ops</span><span class="o">.</span><span class="n">scatter_nd</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">where_sampling</span><span class="p">,</span>
+                                     <span class="n">updates</span><span class="o">=</span><span class="n">sampled_next_inputs</span><span class="p">,</span>
+                                     <span class="n">shape</span><span class="o">=</span><span class="n">base_shape</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">scatter_nd</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">where_not_sampling</span><span class="p">,</span>
+                                       <span class="n">updates</span><span class="o">=</span><span class="n">inputs_not_sampling</span><span class="p">,</span>
+                                       <span class="n">shape</span><span class="o">=</span><span class="n">base_shape</span><span class="p">))</span>
+
+      <span class="n">all_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+      <span class="n">next_inputs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+          <span class="n">all_finished</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">base_next_inputs</span><span class="p">,</span> <span class="n">maybe_sample</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ScheduledOutputTrainingHelper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledOutputTrainingHelper">[docs]</a><span class="k">class</span> <span class="nc">ScheduledOutputTrainingHelper</span><span class="p">(</span><span class="n">TrainingHelper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A training helper that adds scheduled sampling directly to outputs.</span>
+
+<span class="sd">  Returns False for sample_ids where no sampling took place; True elsewhere.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">,</span> <span class="n">sampling_probability</span><span class="p">,</span>
+               <span class="n">time_major</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">next_input_layer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">auxiliary_inputs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A (structure) of input tensors.</span>
+<span class="sd">      sequence_length: An int32 vector tensor.</span>
+<span class="sd">      sampling_probability: A 0D `float32` tensor: the probability of sampling</span>
+<span class="sd">        from the outputs instead of reading directly from the inputs.</span>
+<span class="sd">      time_major: Python bool.  Whether the tensors in `inputs` are time major.</span>
+<span class="sd">        If `False` (default), they are assumed to be batch major.</span>
+<span class="sd">      seed: The sampling seed.</span>
+<span class="sd">      next_input_layer: (Optional) An instance of `tf.layers.Layer`, i.e.,</span>
+<span class="sd">        `tf.layers.Dense`.  Optional layer to apply to the RNN output to create</span>
+<span class="sd">        the next input.</span>
+<span class="sd">      auxiliary_inputs: An optional (structure of) auxiliary input tensors with</span>
+<span class="sd">        a shape that matches `inputs` in all but (potentially) the final</span>
+<span class="sd">        dimension. These tensors will be concatenated to the sampled output or</span>
+<span class="sd">        the `inputs` when not sampling for use as the next input.</span>
+<span class="sd">      name: Name scope for any created operations.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if `sampling_probability` is not a scalar or vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledOutputTrainingHelper&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">inputs</span><span class="p">,</span> <span class="n">auxiliary_inputs</span><span class="p">,</span> <span class="n">sampling_probability</span><span class="p">]):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+          <span class="n">sampling_probability</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sampling_probability&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;sampling_probability must be either a scalar or a vector. &quot;</span>
+            <span class="s2">&quot;saw shape: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()))</span>
+
+      <span class="k">if</span> <span class="n">auxiliary_inputs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">maybe_concatenated_inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
+        <span class="n">auxiliary_inputs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">auxiliary_inputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;auxiliary_inputs&quot;</span><span class="p">)</span>
+        <span class="n">maybe_concatenated_inputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">inputs</span><span class="p">,</span> <span class="n">auxiliary_inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">time_major</span><span class="p">:</span>
+          <span class="n">auxiliary_inputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+              <span class="n">_transpose_batch_time</span><span class="p">,</span> <span class="n">auxiliary_inputs</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_input_tas</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_unstack_ta</span><span class="p">,</span> <span class="n">auxiliary_inputs</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">auxiliary_inputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">next_input_layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_input_layer</span><span class="p">,</span>
+                                                          <span class="n">layers_base</span><span class="o">.</span><span class="n">_Layer</span><span class="p">)):</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;next_input_layer must be a Layer, received: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">next_input_layer</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_next_input_layer</span> <span class="o">=</span> <span class="n">next_input_layer</span>
+
+      <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledOutputTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+          <span class="n">inputs</span><span class="o">=</span><span class="n">maybe_concatenated_inputs</span><span class="p">,</span>
+          <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">,</span>
+          <span class="n">time_major</span><span class="o">=</span><span class="n">time_major</span><span class="p">,</span>
+          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScheduledOutputTrainingHelper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledOutputTrainingHelper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledOutputTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScheduledOutputTrainingHelper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledOutputTrainingHelper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledOutputTrainingHelperSample&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">]):</span>
+      <span class="n">sampler</span> <span class="o">=</span> <span class="n">bernoulli</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_probability</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+          <span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sample_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">),</span>
+          <span class="n">dtypes</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScheduledOutputTrainingHelper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.ScheduledOutputTrainingHelper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;ScheduledOutputTrainingHelperNextInputs&quot;</span><span class="p">,</span>
+                        <span class="p">[</span><span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">]):</span>
+      <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">base_next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="nb">super</span><span class="p">(</span><span class="n">ScheduledOutputTrainingHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">next_inputs</span><span class="p">(</span>
+              <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+              <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+              <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+              <span class="n">sample_ids</span><span class="o">=</span><span class="n">sample_ids</span><span class="p">,</span>
+              <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+
+      <span class="k">def</span> <span class="nf">maybe_sample</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Perform scheduled sampling.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">maybe_concatenate_auxiliary_inputs</span><span class="p">(</span><span class="n">outputs_</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+          <span class="sd">&quot;&quot;&quot;Concatenate outputs with auxiliary inputs, if they exist.&quot;&quot;&quot;</span>
+          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_input_tas</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">outputs_</span>
+
+          <span class="n">next_time</span> <span class="o">=</span> <span class="n">time</span> <span class="o">+</span> <span class="mi">1</span>
+          <span class="n">auxiliary_inputs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+              <span class="k">lambda</span> <span class="n">ta</span><span class="p">:</span> <span class="n">ta</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">next_time</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_input_tas</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">auxiliary_inputs</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">gather_nd</span><span class="p">(</span><span class="n">auxiliary_inputs</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+          <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+              <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+              <span class="n">outputs_</span><span class="p">,</span> <span class="n">auxiliary_inputs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_input_layer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+              <span class="n">sample_ids</span><span class="p">,</span> <span class="n">maybe_concatenate_auxiliary_inputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">),</span>
+              <span class="n">base_next_inputs</span><span class="p">)</span>
+
+        <span class="n">where_sampling</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+            <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">where_not_sampling</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+            <span class="n">array_ops</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">math_ops</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">)),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">outputs_sampling</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">gather_nd</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">where_sampling</span><span class="p">)</span>
+        <span class="n">inputs_not_sampling</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">gather_nd</span><span class="p">(</span><span class="n">base_next_inputs</span><span class="p">,</span>
+                                                  <span class="n">where_not_sampling</span><span class="p">)</span>
+        <span class="n">sampled_next_inputs</span> <span class="o">=</span> <span class="n">maybe_concatenate_auxiliary_inputs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_input_layer</span><span class="p">(</span><span class="n">outputs_sampling</span><span class="p">),</span> <span class="n">where_sampling</span><span class="p">)</span>
+
+        <span class="n">base_shape</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">base_next_inputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">array_ops</span><span class="o">.</span><span class="n">scatter_nd</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">where_sampling</span><span class="p">,</span>
+                                     <span class="n">updates</span><span class="o">=</span><span class="n">sampled_next_inputs</span><span class="p">,</span>
+                                     <span class="n">shape</span><span class="o">=</span><span class="n">base_shape</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">scatter_nd</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">where_not_sampling</span><span class="p">,</span>
+                                       <span class="n">updates</span><span class="o">=</span><span class="n">inputs_not_sampling</span><span class="p">,</span>
+                                       <span class="n">shape</span><span class="o">=</span><span class="n">base_shape</span><span class="p">))</span>
+
+      <span class="n">all_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+      <span class="n">next_inputs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+          <span class="n">all_finished</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">base_next_inputs</span><span class="p">,</span> <span class="n">maybe_sample</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GreedyEmbeddingHelper"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.GreedyEmbeddingHelper">[docs]</a><span class="k">class</span> <span class="nc">GreedyEmbeddingHelper</span><span class="p">(</span><span class="n">Helper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A helper for use during inference.</span>
+
+<span class="sd">  Uses the argmax of the output (treated as logits) and passes the</span>
+<span class="sd">  result through an embedding layer to get the next input.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embedding</span><span class="p">,</span> <span class="n">start_tokens</span><span class="p">,</span> <span class="n">end_token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      embedding: A callable that takes a vector tensor of `ids` (argmax ids),</span>
+<span class="sd">        or the `params` argument for `embedding_lookup`.</span>
+<span class="sd">      start_tokens: `int32` vector shaped `[batch_size]`, the start tokens.</span>
+<span class="sd">      end_token: `int32` scalar, the token that marks end of decoding.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if `sequence_length` is not a 1D tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">embedding</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span> <span class="o">=</span> <span class="n">embedding</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="k">lambda</span> <span class="n">ids</span><span class="p">:</span> <span class="n">embedding_ops</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">ids</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_start_tokens</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+        <span class="n">start_tokens</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;start_tokens&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_end_token</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+        <span class="n">end_token</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;end_token&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tokens</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;start_tokens must be a vector&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">start_tokens</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_token</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;end_token must be a scalar&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_start_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_tokens</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
+
+<div class="viewcode-block" id="GreedyEmbeddingHelper.initialize"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.GreedyEmbeddingHelper.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">finished</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="bp">False</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_inputs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GreedyEmbeddingHelper.sample"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.GreedyEmbeddingHelper.sample">[docs]</a>  <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sample for GreedyEmbeddingHelper.&quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">time</span><span class="p">,</span> <span class="n">state</span>  <span class="c1"># unused by sample_fn</span>
+    <span class="c1"># Outputs are logits, use argmax to get the most probable id</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected outputs to be a single Tensor, got: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                      <span class="nb">type</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+        <span class="n">math_ops</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sample_ids</span></div>
+
+<div class="viewcode-block" id="GreedyEmbeddingHelper.next_inputs"><a class="viewcode-back" href="../../../../seq2seq.contrib.seq2seq.html#seq2seq.contrib.seq2seq.helper.GreedyEmbeddingHelper.next_inputs">[docs]</a>  <span class="k">def</span> <span class="nf">next_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;next_inputs_fn for GreedyEmbeddingHelper.&quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">time</span><span class="p">,</span> <span class="n">outputs</span>  <span class="c1"># unused by next_inputs_fn</span>
+    <span class="n">finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_token</span><span class="p">)</span>
+    <span class="n">all_finished</span> <span class="o">=</span> <span class="n">math_ops</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+    <span class="n">next_inputs</span> <span class="o">=</span> <span class="n">control_flow_ops</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+        <span class="n">all_finished</span><span class="p">,</span>
+        <span class="c1"># If we&#39;re finished, the next_inputs value doesn&#39;t matter</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_inputs</span><span class="p">,</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_fn</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

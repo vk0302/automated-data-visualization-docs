@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>table module &mdash; Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Automated Data Visualization - POC - Process_l2r  1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/table.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-table">
+<span id="table-module"></span><h1>table module<a class="headerlink" href="#module-table" title="Permalink to this headline">¶</a></h1>
+<p>Filename: table.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2018</p>
+<p>Description:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><dl class="first docutils">
+<dt>Class to:</dt>
+<dd><ul class="first last">
+<li>Handle main data and create/manipulate sub-tables.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<dl class="class">
+<dt id="table.Table">
+<em class="property">class </em><code class="descclassname">table.</code><code class="descname">Table</code><span class="sig-paren">(</span><em>instance</em>, <em>transformed</em>, <em>describe1</em>, <em>describe2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="docutils">
+<dt>Class:</dt>
+<dd><ul class="first last simple">
+<li>Create bins in data</li>
+<li>Generate views as per matching quality and transformation grade.</li>
+<li><dl class="first docutils">
+<dt>Manage binnin by</dt>
+<dd><ul class="first last">
+<li>hour</li>
+<li>week</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>Classify and manipulate tables.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>instance</strong> (<em>Instance class object</em>) &#8211; An object from Instance class.</li>
+<li><strong>transformed</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to represent data transformation</li>
+<li><strong>describe1</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Main Description for table-data</li>
+<li><strong>describe2</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) &#8211; Auxiliary description for table-data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="table.Table.dealWithGroup">
+<code class="descname">dealWithGroup</code><span class="sig-paren">(</span><em>column_id</em>, <em>begin</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithGroup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Handles Data Grouping.</p>
+<dl class="docutils">
+<dt>Data Grouping is clubbing the data as per</dt>
+<dd><ul class="first last simple">
+<li>Count</li>
+<li>Average</li>
+<li>Sum</li>
+</ul>
+</dd>
+</dl>
+<p class="last">Aggregating data for better visualization.
+Creates a sub-table as per grouped data.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; ID of column from which data is under consideration.</li>
+<li><strong>begin</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Starting index to filter out data.</li>
+<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Ending index to filter out data.</li>
+<li><strong>get_head</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if on current table head generated or not</li>
+<li><strong>get_data</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if data under consdieration for grouping available or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.dealWithHourBin">
+<code class="descname">dealWithHourBin</code><span class="sig-paren">(</span><em>column_id</em>, <em>begin</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithHourBin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithHourBin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Handles data binning by hour and grouping.</p>
+<dl class="docutils">
+<dt>Data Grouping is clubbing the data as per</dt>
+<dd><ul class="first last simple">
+<li>Count</li>
+<li>Average</li>
+<li>Sum</li>
+</ul>
+</dd>
+</dl>
+<p class="last">Aggregating data for better visualization.
+Creates a sub-table as per grouped data.
+Activated when data type is temporal and time data is available.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; ID of column from which data is under consideration.</li>
+<li><strong>begin</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Starting index to filter out data.</li>
+<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Ending index to filter out data.</li>
+<li><strong>get_head</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if on current table head generated or not</li>
+<li><strong>get_data</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if data under consdieration for grouping available or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.dealWithIntervalBin">
+<code class="descname">dealWithIntervalBin</code><span class="sig-paren">(</span><em>column_id</em>, <em>begin</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithIntervalBin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithIntervalBin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Handles data binning in general and grouping.</p>
+<dl class="docutils">
+<dt>Data Grouping is clubbing the data as per</dt>
+<dd><ul class="first last simple">
+<li>Count</li>
+<li>Average</li>
+<li>Sum</li>
+</ul>
+</dd>
+</dl>
+<p class="last">Aggregating data for better visualization.
+Creates a sub-table as per grouped data.
+Activated when data type is temporal.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; ID of column from which data is under consideration.</li>
+<li><strong>begin</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Starting index to filter out data.</li>
+<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Ending index to filter out data.</li>
+<li><strong>get_head</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if on current table head generated or not</li>
+<li><strong>get_data</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if data under consdieration for grouping available or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.dealWithPNBin">
+<code class="descname">dealWithPNBin</code><span class="sig-paren">(</span><em>column_id</em>, <em>begin</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithPNBin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithPNBin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Handles data binning in case of Pie Charts and grouping.</p>
+<dl class="docutils">
+<dt>Data Grouping is clubbing the data as per</dt>
+<dd><ul class="first last simple">
+<li>Count</li>
+<li>Average</li>
+<li>Sum</li>
+</ul>
+</dd>
+</dl>
+<p class="last">Aggregating data for better visualization.
+Creates a sub-table as per grouped data.
+Activated when data type is numerical</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; ID of column from which data is under consideration.</li>
+<li><strong>begin</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Starting index to filter out data.</li>
+<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Ending index to filter out data.</li>
+<li><strong>get_head</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if on current table head generated or not</li>
+<li><strong>get_data</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if data under consdieration for grouping available or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.dealWithTable">
+<code class="descname">dealWithTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithTable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><dl class="first last docutils">
+<dt>A master function of Table class to:</dt>
+<dd><ol class="first last arabic simple">
+<li>General all possible tables.</li>
+<li>Apply plausible transformations as per the rules set.</li>
+<li>Filter out as per Grouping and Binning.</li>
+<li>Categorize each generated table.</li>
+</ol>
+</dd>
+</dl>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new_tables - List of table instance objects</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.dealWithWeekBin">
+<code class="descname">dealWithWeekBin</code><span class="sig-paren">(</span><em>column_id</em>, <em>begin</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.dealWithWeekBin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.dealWithWeekBin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">Handles data binning by week and grouping.</p>
+<dl class="docutils">
+<dt>Data Grouping is clubbing the data as per</dt>
+<dd><ul class="first last simple">
+<li>Count</li>
+<li>Average</li>
+<li>Sum</li>
+</ul>
+</dd>
+</dl>
+<p class="last">Aggregating data for better visualization.
+Creates a sub-table as per grouped data.
+Activated when data type is temporal and date data is available.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; ID of column from which data is under consideration.</li>
+<li><strong>begin</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Starting index to filter out data.</li>
+<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Ending index to filter out data.</li>
+<li><strong>get_head</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if on current table head generated or not</li>
+<li><strong>get_data</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Flag to check if data under consdieration for grouping available or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.generateViews">
+<code class="descname">generateViews</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.generateViews"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.generateViews" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><p class="first">General a list of all possible graphs (views) based on partial order rules.</p>
+<p>These views are then assessed as per the quality and ranked.</p>
+<p class="last">Generate both 2D and 3D views.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None.</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.getClassifyTable">
+<code class="descname">getClassifyTable</code><span class="sig-paren">(</span><em>classify_id</em>, <em>x_id</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.getClassifyTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.getClassifyTable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><dl class="first last docutils">
+<dt>Classify Table as per:</dt>
+<dd><ul class="first last simple">
+<li>Grouping</li>
+<li>Binning</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classify_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Unique ID given to classified table.</li>
+<li><strong>x_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) &#8211; Unique ID given to classified table as per x-axis data.</li>
+<li><strong>f</strong> (<em>Feature class object/bool</em>) &#8211; Either a feature class object instance or boolean flag to idenity grouping/binning type.</li>
+<li><strong>agg</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) &#8211; Boolean flag to enable aggregation in case not already aggregated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Table instance object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="table.Table.getIntervalBins">
+<code class="descname">getIntervalBins</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/table.html#Table.getIntervalBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#table.Table.getIntervalBins" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd>Apply Binning algorithms to data selected for X-Axis.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Feature class object</em>) &#8211; Represent data type values, and intricate features of the data in consideration</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization - POC - Process_l2r  1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt Ltd.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bin.infer &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bin.infer</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1"># Copyright 2017 Google Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#      http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot; Generates model predictions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pydoc</span> <span class="kn">import</span> <span class="n">locate</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">string_types</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">gfile</span>
+
+<span class="kn">from</span> <span class="nn">seq2seq</span> <span class="kn">import</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">seq2seq.configurable</span> <span class="kn">import</span> <span class="n">_maybe_load_yaml</span><span class="p">,</span> <span class="n">_deep_merge_dict</span>
+<span class="kn">from</span> <span class="nn">seq2seq.data</span> <span class="kn">import</span> <span class="n">input_pipeline</span>
+<span class="kn">from</span> <span class="nn">seq2seq.inference</span> <span class="kn">import</span> <span class="n">create_inference_graph</span>
+<span class="kn">from</span> <span class="nn">seq2seq.training</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">training_utils</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;tasks&quot;</span><span class="p">,</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span> <span class="s2">&quot;List of inference tasks to run.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;model_params&quot;</span><span class="p">,</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Optionally overwrite model</span>
+<span class="s2">                        parameters for inference&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;config_path&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Path to a YAML configuration file defining FLAG</span>
+<span class="sd">                       values and hyperparameters. Refer to the documentation</span>
+<span class="sd">                       for more details.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;input_pipeline&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Defines how input data should be loaded.</span>
+<span class="sd">                       A YAML string.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;model_dir&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;directory to load model from&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="sd">&quot;&quot;&quot;Full path to the checkpoint to be loaded. If None,</span>
+<span class="sd">                       the latest checkpoint in the model dir is used.&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;batch_size&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;the train/dev batch size&quot;</span><span class="p">)</span>
+
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../bin.html#bin.infer.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">_argv</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Program entry point.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Load flags from config file</span>
+  <span class="k">if</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">config_path</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">config_file</span><span class="p">:</span>
+      <span class="n">config_flags</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">flag_key</span><span class="p">,</span> <span class="n">flag_value</span> <span class="ow">in</span> <span class="n">config_flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">FLAGS</span><span class="p">,</span> <span class="n">flag_key</span><span class="p">,</span> <span class="n">flag_value</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+    <span class="n">FLAGS</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">tasks</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+    <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline</span> <span class="o">=</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline</span><span class="p">)</span>
+
+  <span class="n">input_pipeline_infer</span> <span class="o">=</span> <span class="n">input_pipeline</span><span class="o">.</span><span class="n">make_input_pipeline_from_def</span><span class="p">(</span>
+      <span class="n">FLAGS</span><span class="o">.</span><span class="n">input_pipeline</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">,</span>
+      <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="c1"># Load saved training options</span>
+  <span class="n">train_options</span> <span class="o">=</span> <span class="n">training_utils</span><span class="o">.</span><span class="n">TrainOptions</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+  <span class="c1"># Create the model</span>
+  <span class="n">model_cls</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="n">train_options</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span> <span class="ow">or</span> \
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span>
+  <span class="n">model_params</span> <span class="o">=</span> <span class="n">train_options</span><span class="o">.</span><span class="n">model_params</span>
+  <span class="n">model_params</span> <span class="o">=</span> <span class="n">_deep_merge_dict</span><span class="p">(</span>
+      <span class="n">model_params</span><span class="p">,</span> <span class="n">_maybe_load_yaml</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_params</span><span class="p">))</span>
+  <span class="n">model</span> <span class="o">=</span> <span class="n">model_cls</span><span class="p">(</span>
+      <span class="n">params</span><span class="o">=</span><span class="n">model_params</span><span class="p">,</span>
+      <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">INFER</span><span class="p">)</span>
+
+  <span class="c1"># Load inference tasks</span>
+  <span class="n">hooks</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">tdict</span> <span class="ow">in</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;params&quot;</span> <span class="ow">in</span> <span class="n">tdict</span><span class="p">:</span>
+      <span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">task_cls</span> <span class="o">=</span> <span class="n">locate</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">])</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">task_cls</span><span class="p">(</span><span class="n">tdict</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span>
+    <span class="n">hooks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+  <span class="c1"># Create the graph used for inference</span>
+  <span class="n">predictions</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_inference_graph</span><span class="p">(</span>
+      <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+      <span class="n">input_pipeline</span><span class="o">=</span><span class="n">input_pipeline_infer</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+
+  <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">()</span>
+  <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">checkpoint_path</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+    <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">latest_checkpoint</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">session_init_op</span><span class="p">(</span><span class="n">_scaffold</span><span class="p">,</span> <span class="n">sess</span><span class="p">):</span>
+    <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Restored model from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span>
+
+  <span class="n">scaffold</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Scaffold</span><span class="p">(</span><span class="n">init_fn</span><span class="o">=</span><span class="n">session_init_op</span><span class="p">)</span>
+  <span class="n">session_creator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">ChiefSessionCreator</span><span class="p">(</span><span class="n">scaffold</span><span class="o">=</span><span class="n">scaffold</span><span class="p">)</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">MonitoredSession</span><span class="p">(</span>
+      <span class="n">session_creator</span><span class="o">=</span><span class="n">session_creator</span><span class="p">,</span>
+      <span class="n">hooks</span><span class="o">=</span><span class="n">hooks</span><span class="p">)</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+
+    <span class="c1"># Run until the inputs are exhausted</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">sess</span><span class="o">.</span><span class="n">should_stop</span><span class="p">():</span>
+      <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([])</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+seq2seq package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    seq2seq.contrib
+    seq2seq.data
+    seq2seq.decoders
+    seq2seq.encoders
+    seq2seq.inference
+    seq2seq.metrics
+    seq2seq.models
+    seq2seq.tasks
+    seq2seq.test
+    seq2seq.training
+
+Submodules
+----------
+
+seq2seq.configurable module
+---------------------------
+
+.. automodule:: seq2seq.configurable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.global_vars module
+--------------------------
+
+.. automodule:: seq2seq.global_vars
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.graph_module module
+---------------------------
+
+.. automodule:: seq2seq.graph_module
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.graph_utils module
+--------------------------
+
+.. automodule:: seq2seq.graph_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.losses module
+---------------------
+
+.. automodule:: seq2seq.losses
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq
+    :members:
+    :undoc-members:
+    :show-inheritance:

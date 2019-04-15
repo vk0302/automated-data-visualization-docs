@@ -1,0 +1,7 @@
+data2vis_demo module
+====================
+
+.. automodule:: data2vis_demo
+    :members:
+    :undoc-members:
+    :show-inheritance:

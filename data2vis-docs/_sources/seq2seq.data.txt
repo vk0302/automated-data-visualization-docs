@@ -1,0 +1,62 @@
+seq2seq.data package
+====================
+
+Submodules
+----------
+
+seq2seq.data.input_pipeline module
+----------------------------------
+
+.. automodule:: seq2seq.data.input_pipeline
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.data.parallel_data_provider module
+------------------------------------------
+
+.. automodule:: seq2seq.data.parallel_data_provider
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.data.postproc module
+----------------------------
+
+.. automodule:: seq2seq.data.postproc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.data.sequence_example_decoder module
+--------------------------------------------
+
+.. automodule:: seq2seq.data.sequence_example_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.data.split_tokens_decoder module
+----------------------------------------
+
+.. automodule:: seq2seq.data.split_tokens_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.data.vocab module
+-------------------------
+
+.. automodule:: seq2seq.data.vocab
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.data
+    :members:
+    :undoc-members:
+    :show-inheritance:

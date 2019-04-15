@@ -1,0 +1,864 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>utils package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">utils package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-utils.data_gen">utils.data_gen module</a></li>
+<li><a class="reference internal" href="#module-utils.data_utils">utils.data_utils module</a></li>
+<li><a class="reference internal" href="#module-utils.hc_parser">utils.hc_parser module</a></li>
+<li><a class="reference internal" href="#utils-model-utils-module">utils.model_utils module</a></li>
+<li><a class="reference internal" href="#module-utils.test_analysis">utils.test_analysis module</a></li>
+<li><a class="reference internal" href="#module-utils.visualize_attention">utils.visualize_attention module</a></li>
+<li><a class="reference internal" href="#module-utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/utils.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="utils-package">
+<h1>utils package<a class="headerlink" href="#utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-utils.data_gen">
+<span id="utils-data-gen-module"></span><h2>utils.data_gen module<a class="headerlink" href="#module-utils.data_gen" title="Permalink to this headline">¶</a></h2>
+<p>Filename: data_gen.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2019</p>
+<p>Description: Generate training data splits. Input:</p>
+<blockquote>
+<div><ul class="simple">
+<li>source_directory - path to directory containing vegalite examples</li>
+<li>data_split_params - train/text/dev data split configuration</li>
+<li>output_directory - path to directory containing generated train/dev/test source files and vocabularies</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="module-utils.data_utils">
+<span id="utils-data-utils-module"></span><h2>utils.data_utils module<a class="headerlink" href="#module-utils.data_utils" title="Permalink to this headline">¶</a></h2>
+<p>Filename: data_gen.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2019</p>
+<p>Description: Data processing/utility script for parsing input/output data</p>
+<dl class="function">
+<dt id="utils.data_utils.backward_norm">
+<code class="descclassname">utils.data_utils.</code><code class="descname">backward_norm</code><span class="sig-paren">(</span><em>decoded_string</em>, <em>f_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#backward_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.backward_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Normalize output/source data after prediction. Replace field-type normalized values with actual fieldnames</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>decoded_string</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Data/Prediction from the algorithm that needs to be backward normalized</li>
+<li><strong>f_names</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; A list mapping fieldnames to the field-type normalized names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Backward normalized data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.clean_examples_directory">
+<code class="descclassname">utils.data_utils.</code><code class="descname">clean_examples_directory</code><span class="sig-paren">(</span><em>examples_directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#clean_examples_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.clean_examples_directory" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Cleaning example files. Removing png, csv and other file types from example directory.</li>
+<li>Delete none vl spec files from examples directory, generate a list of datafiles</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples_directory</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to directory containing vegalite examples</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.clean_test_dataset">
+<code class="descclassname">utils.data_utils.</code><code class="descname">clean_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#clean_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.clean_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Perform preprocessing on datasets used to test predictions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.clean_test_dataset_remove_periods">
+<code class="descclassname">utils.data_utils.</code><code class="descname">clean_test_dataset_remove_periods</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#clean_test_dataset_remove_periods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.clean_test_dataset_remove_periods" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC:</dt>
+<dd><ul class="first last simple">
+<li>Process test dataset. Remove periods from field names.</li>
+<li>Vegalite fails if field names contain periods. This makes Data2Vis look bad.</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.forward_norm">
+<code class="descclassname">utils.data_utils.</code><code class="descname">forward_norm</code><span class="sig-paren">(</span><em>source_data</em>, <em>destination_file</em>, <em>f_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#forward_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.forward_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Normalize source json data fieldnames before visualization prediction</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Record(s) to be normalized</li>
+<li><strong>destination_file</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Filename for writing the sample data</li>
+<li><strong>f_names</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; A list mapping fieldnames to the field-type normalized names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.generate_data_pairs">
+<code class="descclassname">utils.data_utils.</code><code class="descname">generate_data_pairs</code><span class="sig-paren">(</span><em>examples_directory</em>, <em>train_data_output_directory</em>, <em>data_split_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#generate_data_pairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.generate_data_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC: Generate a training data key pair for seq2seq model.</dt>
+<dd><ul class="first last simple">
+<li>Source: 3 random data points sampled from the dataset for each vegaspec</li>
+<li>Target: A valid vegalite spec for the sampled data</li>
+<li>Note: The data portion of the vegalite spec is replaced with an empty space</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>examples_directory</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to directory containing vegalite examples</li>
+<li><strong>train_data_output_directory</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Train/text/dev data split configuration</li>
+<li><strong>data_split_params</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to directory containing generated train/dev/test source files and vocabularies</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.generate_field_types">
+<code class="descclassname">utils.data_utils.</code><code class="descname">generate_field_types</code><span class="sig-paren">(</span><em>t_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#generate_field_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.generate_field_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Generate an array of field types for a given input data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t_data</strong> (<em>data table</em>) &#8211; Input data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list mapping column names to the field-type normalized names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.get_count_freqs">
+<code class="descclassname">utils.data_utils.</code><code class="descname">get_count_freqs</code><span class="sig-paren">(</span><em>input_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#get_count_freqs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.get_count_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Get the frequency of each element in the given array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input_array</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Input array</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">counts_marks, freqs_marks - Returns a list of frequency values of every<p>unique element along with the list of the elements</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.get_test100_data">
+<code class="descclassname">utils.data_utils.</code><code class="descname">get_test100_data</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#get_test100_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.get_test100_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Get the required testing dataset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; List of indices for the required testing data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data - JSONified testing dataset</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.get_test_dataset_properties">
+<code class="descclassname">utils.data_utils.</code><code class="descname">get_test_dataset_properties</code><span class="sig-paren">(</span><em>test_data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#get_test_dataset_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.get_test_dataset_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Get the testing dataset properties</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>test_data_path</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Directory with all the testing data files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.get_train_dataset_properties">
+<code class="descclassname">utils.data_utils.</code><code class="descname">get_train_dataset_properties</code><span class="sig-paren">(</span><em>train_data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#get_train_dataset_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.get_train_dataset_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Get the training dataset properties</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>train_data_path</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Directory with all the training data files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.is_date">
+<code class="descclassname">utils.data_utils.</code><code class="descname">is_date</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#is_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.is_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Check if the input argument is date</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>variable</em>) &#8211; Variable to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.isfloat">
+<code class="descclassname">utils.data_utils.</code><code class="descname">isfloat</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#isfloat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.isfloat" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Check if the input argument is float</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>variable</em>) &#8211; Variable to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.isint">
+<code class="descclassname">utils.data_utils.</code><code class="descname">isint</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#isint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.isint" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Check if the input argument is integer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>variable</em>) &#8211; Variable to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.load_test_dataset">
+<code class="descclassname">utils.data_utils.</code><code class="descname">load_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#load_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.load_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Load a random dataset for testing the Data2vis algorithm</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">data - List of records in a random test dataset. The records are in the<p>form of dictionaries where the column names are keys and the corresponding</p>
+<p>data points are values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.non_null_label">
+<code class="descclassname">utils.data_utils.</code><code class="descname">non_null_label</code><span class="sig-paren">(</span><em>full_array</em>, <em>label_key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#non_null_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.non_null_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Get the non null label value for the given array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>full_array</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Column in the input data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">result_val - Non null value in the given column array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">variable</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.parse_csv">
+<code class="descclassname">utils.data_utils.</code><code class="descname">parse_csv</code><span class="sig-paren">(</span><em>input_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#parse_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.parse_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Parse CSV content to algorithm consumable format</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input_data</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Raw comma-delimited contents read from a csv/txt file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">parsed_data - List of records in a random test dataset. The records are in the<p>form of dictionaries where the column names are keys and the corresponding</p>
+<p>data points are values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.profile_dataset_vegaspec">
+<code class="descclassname">utils.data_utils.</code><code class="descname">profile_dataset_vegaspec</code><span class="sig-paren">(</span><em>examples_directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#profile_dataset_vegaspec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.profile_dataset_vegaspec" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Generate some statistics on source dataset used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples_directory</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to directory containing vegalite examples</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.read_csv">
+<code class="descclassname">utils.data_utils.</code><code class="descname">read_csv</code><span class="sig-paren">(</span><em>file</em>, <em>json_file</em>, <em>format</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#read_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.read_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Read CSV file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Filename to read</li>
+<li><strong>json_file</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; JSON filename</li>
+<li><strong>format</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; format type for the JSON file created</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.reduce_dataset_size">
+<code class="descclassname">utils.data_utils.</code><code class="descname">reduce_dataset_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#reduce_dataset_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.reduce_dataset_size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC: Reduce datset size to a threshold. Also delete datasets with less than 7 items</dt>
+<dd>they usually have non-standard fields/structure that may disrupt learning</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.replace_fieldnames">
+<code class="descclassname">utils.data_utils.</code><code class="descname">replace_fieldnames</code><span class="sig-paren">(</span><em>source_data</em>, <em>field_name_types</em>, <em>replace_direction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#replace_fieldnames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.replace_fieldnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Replace field names with normalized names based on field type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source_data</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Input data</li>
+<li><strong>field_name_types</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; A list mapping column names to the field-type normalized names</li>
+<li><strong>replace_direction</strong> (<em>boolean</em>) &#8211; <p>Direction of normalization to be applied. True for replacing</p>
+<p>column names with the field-type normalized names &amp; False for vice-versa.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">source_data - Forward/Backward normalized input data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.save_test_results">
+<code class="descclassname">utils.data_utils.</code><code class="descname">save_test_results</code><span class="sig-paren">(</span><em>input_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#save_test_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.save_test_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Save the details of the test results</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; Dictionary with all the relevant details of the test run as key-value pairs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.shuffle_elements">
+<code class="descclassname">utils.data_utils.</code><code class="descname">shuffle_elements</code><span class="sig-paren">(</span><em>rand_order</em>, <em>source_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#shuffle_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.shuffle_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Shuffle elements in an array according to given order</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rand_order</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Order in which to shuffle the input array</li>
+<li><strong>source_list</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Input array to be shuffled</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result_list - Shuffled array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.transform_csv_json">
+<code class="descclassname">utils.data_utils.</code><code class="descname">transform_csv_json</code><span class="sig-paren">(</span><em>csv_directory</em>, <em>delete_after_convert</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#transform_csv_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.transform_csv_json" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC: Convert csv files in the given directory into json and write it.</dt>
+<dd>Helps having a unified dataformat that RNN can learn from</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>csv_directory</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Directory with all the CSV files to be converted</li>
+<li><strong>delete_after_convert</strong> (<em>boolean</em>) &#8211; True to delete the CSV files after converting them to JSON</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.write_data_to_file">
+<code class="descclassname">utils.data_utils.</code><code class="descname">write_data_to_file</code><span class="sig-paren">(</span><em>destination_file</em>, <em>source_data_first_sample</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#write_data_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.write_data_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Write normalized JSON to file for seq2seq model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>destination_file</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Filename for writing the sample data</li>
+<li><strong>source_data_first_sample</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; Record(s) to be written to the file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.data_utils.write_json">
+<code class="descclassname">utils.data_utils.</code><code class="descname">write_json</code><span class="sig-paren">(</span><em>data</em>, <em>json_file</em>, <em>format</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/data_utils.html#write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.data_utils.write_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Convert csv data into json and write it</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Filename to read</li>
+<li><strong>json_file</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; JSON filename</li>
+<li><strong>format</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; format type for the JSON file created</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils.hc_parser">
+<span id="utils-hc-parser-module"></span><h2>utils.hc_parser module<a class="headerlink" href="#module-utils.hc_parser" title="Permalink to this headline">¶</a></h2>
+<p>Filename: hc_parser.py</p>
+<p>Author: Tessellate Imaging Pvt Ltd</p>
+<p>Date: 14/03/2019</p>
+<dl class="docutils">
+<dt>Description: Scripts to decode the Vega-lite specifications generated and</dt>
+<dd>converting them to Highcharts specifications.</dd>
+</dl>
+<dl class="function">
+<dt id="utils.hc_parser.convert_vl_to_hc">
+<code class="descclassname">utils.hc_parser.</code><code class="descname">convert_vl_to_hc</code><span class="sig-paren">(</span><em>decoded_post</em>, <em>source_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/hc_parser.html#convert_vl_to_hc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.hc_parser.convert_vl_to_hc" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Convert Vega-lite JSON specs to Highcharts specs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>decoded_post</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; The JSONified Vega-lite specification</li>
+<li><strong>source_data</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) &#8211; List of records in dataset.
+The records are in the form of dictionaries where the column names
+are keys and the corresponding data points are values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">hc_specs - The JSONified Highcharts specification</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.hc_parser.create_hc_specs">
+<code class="descclassname">utils.hc_parser.</code><code class="descname">create_hc_specs</code><span class="sig-paren">(</span><em>decoded_specs</em>, <em>intermediary_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/hc_parser.html#create_hc_specs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.hc_parser.create_hc_specs" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Generating the Highcharts specifications from the decoded specs and intermediary dataset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>decoded_specs</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) &#8211; Extracted components of the Vega-lite specifications</li>
+<li><strong>intermediary_data</strong> (<em>DataFrame</em>) &#8211; Intermediary data that actually needs to be plotted</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">temp - JSONified Highcharts specifications</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)">string</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.hc_parser.decode_vega_specs">
+<code class="descclassname">utils.hc_parser.</code><code class="descname">decode_vega_specs</code><span class="sig-paren">(</span><em>specification</em>, <em>source_data_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/hc_parser.html#decode_vega_specs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.hc_parser.decode_vega_specs" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Decode the vega-lite specifications generated. Find binned values of fields if required</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>specification</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) &#8211; The Vega-lite specification</li>
+<li><strong>source_data_df</strong> (<em>DataFrame</em>) &#8211; Input dataset</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple: decoded_specs - Extracted components of the Vega-lite specifications</p>
+<p>DataFrame: source_data_df - Updated DataFrame with binned values of certain fields (if any)</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.hc_parser.find_bins">
+<code class="descclassname">utils.hc_parser.</code><code class="descname">find_bins</code><span class="sig-paren">(</span><em>input_data</em>, <em>field_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/hc_parser.html#find_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.hc_parser.find_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Bin the field into appropriate number of buckets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_data</strong> (<em>DataFrame</em>) &#8211; Input source data</li>
+<li><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Field that needs to be binned</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">input_data - Updated inupt data with additional binned field</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.hc_parser.get_intermediary_data">
+<code class="descclassname">utils.hc_parser.</code><code class="descname">get_intermediary_data</code><span class="sig-paren">(</span><em>decoded_specs</em>, <em>source_data_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/hc_parser.html#get_intermediary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.hc_parser.get_intermediary_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>FUNC: Getting the intermediary data from the source data. The intermediary data is computed based on</dt>
+<dd>all the aggregation and binning of the relevant fields mentioned in the generated specification</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>decoded_specs</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) &#8211; Extracted components of the Vega-lite specifications</li>
+<li><strong>source_data_df</strong> (<em>DataFrame</em>) &#8211; Processed input dataset</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple: decoded_specs - Extracted components of the Vega-lite specifications</p>
+<p>DataFrame: intermediary_data - Intermediary data that needs to be plotted</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)">tuple</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="utils-model-utils-module">
+<h2>utils.model_utils module<a class="headerlink" href="#utils-model-utils-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-utils.test_analysis">
+<span id="utils-test-analysis-module"></span><h2>utils.test_analysis module<a class="headerlink" href="#module-utils.test_analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="utils.test_analysis.analyze_data">
+<code class="descclassname">utils.test_analysis.</code><code class="descname">analyze_data</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/test_analysis.html#analyze_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.test_analysis.analyze_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Analyze the test result and print summary of the same</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to the file with the test result</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.test_analysis.analyze_test_suite">
+<code class="descclassname">utils.test_analysis.</code><code class="descname">analyze_test_suite</code><span class="sig-paren">(</span><em>test_dataset_directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/test_analysis.html#analyze_test_suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.test_analysis.analyze_test_suite" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Analyze the test results available and provide summary of results generated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>test_dataset_directory</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; Path to the directory with all the test results</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.test_analysis.is_valid_aggregate">
+<code class="descclassname">utils.test_analysis.</code><code class="descname">is_valid_aggregate</code><span class="sig-paren">(</span><em>agg_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/test_analysis.html#is_valid_aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.test_analysis.is_valid_aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>FUNC: Check if the aggragation in the generated visualization specification is valid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>agg_val</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) &#8211; The aggregation function in the generated visualization specification</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils.visualize_attention">
+<span id="utils-visualize-attention-module"></span><h2>utils.visualize_attention module<a class="headerlink" href="#module-utils.visualize_attention" title="Permalink to this headline">¶</a></h2>
+<p>This script helps generate plots from saved attention scores.
+Scores are saved in the attention_scores_path variable.</p>
+</div>
+<div class="section" id="module-utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

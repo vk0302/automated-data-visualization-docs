@@ -1,0 +1,7 @@
+high_charts_parser module
+=========================
+
+.. automodule:: high_charts_parser
+    :members:
+    :undoc-members:
+    :show-inheritance:

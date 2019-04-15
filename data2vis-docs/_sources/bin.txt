@@ -1,0 +1,30 @@
+bin package
+===========
+
+Submodules
+----------
+
+bin.infer module
+----------------
+
+.. automodule:: bin.infer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bin.train module
+----------------
+
+.. automodule:: bin.train
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bin
+    :members:
+    :undoc-members:
+    :show-inheritance:

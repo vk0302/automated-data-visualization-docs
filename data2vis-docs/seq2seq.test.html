@@ -1,0 +1,1155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq2seq.test package &mdash; Automated Data Visualization (Data2Vis) POC v1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Automated Data Visualization (Data2Vis) POC v1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">seq2seq.test package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.attention_test">seq2seq.test.attention_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.beam_search_test">seq2seq.test.beam_search_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.bridges_test">seq2seq.test.bridges_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.conv_encoder_test">seq2seq.test.conv_encoder_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.data_test">seq2seq.test.data_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.decoder_test">seq2seq.test.decoder_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.example_config_test">seq2seq.test.example_config_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.hooks_test">seq2seq.test.hooks_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.input_pipeline_test">seq2seq.test.input_pipeline_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.losses_test">seq2seq.test.losses_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.metrics_test">seq2seq.test.metrics_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.models_test">seq2seq.test.models_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.pipeline_test">seq2seq.test.pipeline_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.pooling_encoder_test">seq2seq.test.pooling_encoder_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.rnn_cell_test">seq2seq.test.rnn_cell_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.rnn_encoder_test">seq2seq.test.rnn_encoder_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.train_utils_test">seq2seq.test.train_utils_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.utils">seq2seq.test.utils module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test.vocab_test">seq2seq.test.vocab_test module</a></li>
+<li><a class="reference internal" href="#module-seq2seq.test">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/seq2seq.test.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seq2seq-test-package">
+<h1>seq2seq.test package<a class="headerlink" href="#seq2seq-test-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-seq2seq.test.attention_test">
+<span id="seq2seq-test-attention-test-module"></span><h2>seq2seq.test.attention_test module<a class="headerlink" href="#module-seq2seq.test.attention_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for attention functions.</p>
+<dl class="class">
+<dt id="seq2seq.test.attention_test.AttentionLayerBahdanauTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.attention_test.</code><code class="descname">AttentionLayerBahdanauTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerBahdanauTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerBahdanauTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.attention_test.AttentionLayerTest" title="seq2seq.test.attention_test.AttentionLayerTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.attention_test.AttentionLayerTest</span></code></a></p>
+<p>Tests the AttentionLayerBahdanau class</p>
+<dl class="method">
+<dt id="seq2seq.test.attention_test.AttentionLayerBahdanauTest.test_layer">
+<code class="descname">test_layer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerBahdanauTest.test_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerBahdanauTest.test_layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.attention_test.AttentionLayerDotTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.attention_test.</code><code class="descname">AttentionLayerDotTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerDotTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerDotTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.attention_test.AttentionLayerTest" title="seq2seq.test.attention_test.AttentionLayerTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.attention_test.AttentionLayerTest</span></code></a></p>
+<p>Tests the AttentionLayerDot class</p>
+<dl class="method">
+<dt id="seq2seq.test.attention_test.AttentionLayerDotTest.test_layer">
+<code class="descname">test_layer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerDotTest.test_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerDotTest.test_layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.attention_test.AttentionLayerTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.attention_test.</code><code class="descname">AttentionLayerTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the AttentionLayer module.</p>
+<dl class="method">
+<dt id="seq2seq.test.attention_test.AttentionLayerTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/attention_test.html#AttentionLayerTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.attention_test.AttentionLayerTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.beam_search_test">
+<span id="seq2seq-test-beam-search-test-module"></span><h2>seq2seq.test.beam_search_test module<a class="headerlink" href="#module-seq2seq.test.beam_search_test" title="Permalink to this headline">¶</a></h2>
+<p>Tests for Beam Search and related functions.</p>
+<dl class="class">
+<dt id="seq2seq.test.beam_search_test.TestBeamStep">
+<em class="property">class </em><code class="descclassname">seq2seq.test.beam_search_test.</code><code class="descname">TestBeamStep</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestBeamStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestBeamStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests a single step of beam search</p>
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestBeamStep.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestBeamStep.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestBeamStep.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestBeamStep.test_step">
+<code class="descname">test_step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestBeamStep.test_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestBeamStep.test_step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestBeamStep.test_step_with_eos">
+<code class="descname">test_step_with_eos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestBeamStep.test_step_with_eos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestBeamStep.test_step_with_eos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestBeamStep.test_step_with_new_eos">
+<code class="descname">test_step_with_new_eos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestBeamStep.test_step_with_new_eos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestBeamStep.test_step_with_new_eos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.beam_search_test.TestEosMasking">
+<em class="property">class </em><code class="descclassname">seq2seq.test.beam_search_test.</code><code class="descname">TestEosMasking</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestEosMasking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestEosMasking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests EOS masking used in beam search</p>
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestEosMasking.test_eos_masking">
+<code class="descname">test_eos_masking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestEosMasking.test_eos_masking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestEosMasking.test_eos_masking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.beam_search_test.TestGatherTree">
+<em class="property">class </em><code class="descclassname">seq2seq.test.beam_search_test.</code><code class="descname">TestGatherTree</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestGatherTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestGatherTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the gather_tree function</p>
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestGatherTree.test_gather_tree">
+<code class="descname">test_gather_tree</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestGatherTree.test_gather_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestGatherTree.test_gather_tree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.beam_search_test.TestLengthNorm">
+<em class="property">class </em><code class="descclassname">seq2seq.test.beam_search_test.</code><code class="descname">TestLengthNorm</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestLengthNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestLengthNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the length normalization score</p>
+<dl class="method">
+<dt id="seq2seq.test.beam_search_test.TestLengthNorm.test_length_norm">
+<code class="descname">test_length_norm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/beam_search_test.html#TestLengthNorm.test_length_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.beam_search_test.TestLengthNorm.test_length_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.bridges_test">
+<span id="seq2seq-test-bridges-test-module"></span><h2>seq2seq.test.bridges_test module<a class="headerlink" href="#module-seq2seq.test.bridges_test" title="Permalink to this headline">¶</a></h2>
+<p>Tests for Encoder-Decoder bridges.</p>
+<dl class="class">
+<dt id="seq2seq.test.bridges_test.BridgeTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.bridges_test.</code><code class="descname">BridgeTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#BridgeTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.BridgeTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Abstract class for bridge tests</p>
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.BridgeTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#BridgeTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.BridgeTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.bridges_test.DecoderOutput">
+<em class="property">class </em><code class="descclassname">seq2seq.test.bridges_test.</code><code class="descname">DecoderOutput</code><span class="sig-paren">(</span><em>predicted_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.test.bridges_test.DecoderOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.DecoderOutput.__getnewargs__">
+<code class="descname">__getnewargs__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.test.bridges_test.DecoderOutput.__getnewargs__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self as a plain tuple.  Used by copy and pickle.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="seq2seq.test.bridges_test.DecoderOutput.__new__">
+<em class="property">static </em><code class="descname">__new__</code><span class="sig-paren">(</span><em>_cls</em>, <em>predicted_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.test.bridges_test.DecoderOutput.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new instance of DecoderOutput(predicted_ids,)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.DecoderOutput.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seq2seq.test.bridges_test.DecoderOutput.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a nicely formatted representation string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="seq2seq.test.bridges_test.DecoderOutput.predicted_ids">
+<code class="descname">predicted_ids</code><a class="headerlink" href="#seq2seq.test.bridges_test.DecoderOutput.predicted_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.bridges_test.TestInitialStateBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.test.bridges_test.</code><code class="descname">TestInitialStateBridge</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestInitialStateBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestInitialStateBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.bridges_test.BridgeTest" title="seq2seq.test.bridges_test.BridgeTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.bridges_test.BridgeTest</span></code></a></p>
+<p>Tests for the InitialStateBridge class</p>
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.TestInitialStateBridge.test_with_activation_fn">
+<code class="descname">test_with_activation_fn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestInitialStateBridge.test_with_activation_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_activation_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.TestInitialStateBridge.test_with_final_state">
+<code class="descname">test_with_final_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestInitialStateBridge.test_with_final_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_final_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.TestInitialStateBridge.test_with_outputs">
+<code class="descname">test_with_outputs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestInitialStateBridge.test_with_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestInitialStateBridge.test_with_outputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.bridges_test.TestPassThroughBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.test.bridges_test.</code><code class="descname">TestPassThroughBridge</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestPassThroughBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestPassThroughBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.bridges_test.BridgeTest" title="seq2seq.test.bridges_test.BridgeTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.bridges_test.BridgeTest</span></code></a></p>
+<p>Tests for the ZeroBridge class</p>
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.TestPassThroughBridge.test_passthrough_bridge">
+<code class="descname">test_passthrough_bridge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestPassThroughBridge.test_passthrough_bridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestPassThroughBridge.test_passthrough_bridge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.bridges_test.TestZeroBridge">
+<em class="property">class </em><code class="descclassname">seq2seq.test.bridges_test.</code><code class="descname">TestZeroBridge</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestZeroBridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestZeroBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.bridges_test.BridgeTest" title="seq2seq.test.bridges_test.BridgeTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.bridges_test.BridgeTest</span></code></a></p>
+<p>Tests for the ZeroBridge class</p>
+<dl class="method">
+<dt id="seq2seq.test.bridges_test.TestZeroBridge.test_zero_bridge">
+<code class="descname">test_zero_bridge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/bridges_test.html#TestZeroBridge.test_zero_bridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.bridges_test.TestZeroBridge.test_zero_bridge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.conv_encoder_test">
+<span id="seq2seq-test-conv-encoder-test-module"></span><h2>seq2seq.test.conv_encoder_test module<a class="headerlink" href="#module-seq2seq.test.conv_encoder_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for PoolingEncoder.</p>
+<dl class="class">
+<dt id="seq2seq.test.conv_encoder_test.ConvEncoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.conv_encoder_test.</code><code class="descname">ConvEncoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/conv_encoder_test.html#ConvEncoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.conv_encoder_test.ConvEncoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the ConvEncoder class.</p>
+<dl class="method">
+<dt id="seq2seq.test.conv_encoder_test.ConvEncoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/conv_encoder_test.html#ConvEncoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.conv_encoder_test.ConvEncoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.conv_encoder_test.ConvEncoderTest.test_encode_with_pos">
+<code class="descname">test_encode_with_pos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/conv_encoder_test.html#ConvEncoderTest.test_encode_with_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.conv_encoder_test.ConvEncoderTest.test_encode_with_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.data_test">
+<span id="seq2seq-test-data-test-module"></span><h2>seq2seq.test.data_test module<a class="headerlink" href="#module-seq2seq.test.data_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for input-related operations.</p>
+<dl class="class">
+<dt id="seq2seq.test.data_test.ParallelDataProviderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.data_test.</code><code class="descname">ParallelDataProviderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#ParallelDataProviderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.ParallelDataProviderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the ParallelDataProvider class</p>
+<dl class="method">
+<dt id="seq2seq.test.data_test.ParallelDataProviderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#ParallelDataProviderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.ParallelDataProviderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.data_test.ParallelDataProviderTest.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#ParallelDataProviderTest.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.ParallelDataProviderTest.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.data_test.ParallelDataProviderTest.test_reading">
+<code class="descname">test_reading</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#ParallelDataProviderTest.test_reading"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.ParallelDataProviderTest.test_reading" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.data_test.ParallelDataProviderTest.test_reading_without_targets">
+<code class="descname">test_reading_without_targets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#ParallelDataProviderTest.test_reading_without_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.ParallelDataProviderTest.test_reading_without_targets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.data_test.SplitTokensDecoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.data_test.</code><code class="descname">SplitTokensDecoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#SplitTokensDecoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.SplitTokensDecoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the SplitTokensDecoder class</p>
+<dl class="method">
+<dt id="seq2seq.test.data_test.SplitTokensDecoderTest.test_decode">
+<code class="descname">test_decode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/data_test.html#SplitTokensDecoderTest.test_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.data_test.SplitTokensDecoderTest.test_decode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.decoder_test">
+<span id="seq2seq-test-decoder-test-module"></span><h2>seq2seq.test.decoder_test module<a class="headerlink" href="#module-seq2seq.test.decoder_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for decoders.</p>
+<dl class="class">
+<dt id="seq2seq.test.decoder_test.AttentionDecoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.decoder_test.</code><code class="descname">AttentionDecoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#AttentionDecoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.AttentionDecoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code>, <a class="reference internal" href="#seq2seq.test.decoder_test.DecoderTests" title="seq2seq.test.decoder_test.DecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.decoder_test.DecoderTests</span></code></a></p>
+<p>Tests the <cite>AttentionDecoder</cite> class.</p>
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.AttentionDecoderTest.create_decoder">
+<code class="descname">create_decoder</code><span class="sig-paren">(</span><em>helper</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#AttentionDecoderTest.create_decoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.AttentionDecoderTest.create_decoder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.AttentionDecoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#AttentionDecoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.AttentionDecoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.AttentionDecoderTest.test_attention_scores">
+<code class="descname">test_attention_scores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#AttentionDecoderTest.test_attention_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.AttentionDecoderTest.test_attention_scores" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.decoder_test.BasicDecoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.decoder_test.</code><code class="descname">BasicDecoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#BasicDecoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.BasicDecoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code>, <a class="reference internal" href="#seq2seq.test.decoder_test.DecoderTests" title="seq2seq.test.decoder_test.DecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.decoder_test.DecoderTests</span></code></a></p>
+<p>Tests the <cite>BasicDecoder</cite> class.</p>
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.BasicDecoderTest.create_decoder">
+<code class="descname">create_decoder</code><span class="sig-paren">(</span><em>helper</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#BasicDecoderTest.create_decoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.BasicDecoderTest.create_decoder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.BasicDecoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#BasicDecoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.BasicDecoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.decoder_test.DecoderTests">
+<em class="property">class </em><code class="descclassname">seq2seq.test.decoder_test.</code><code class="descname">DecoderTests</code><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A collection of decoder tests. This class should be inherited together with
+<cite>tf.test.TestCase</cite>.</p>
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.DecoderTests.create_decoder">
+<code class="descname">create_decoder</code><span class="sig-paren">(</span><em>helper</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests.create_decoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests.create_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the decoder module.</p>
+<p>This must be implemented by child classes and instantiate the appropriate
+decoder to be tested.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.DecoderTests.test_gradients">
+<code class="descname">test_gradients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests.test_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests.test_gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.DecoderTests.test_with_beam_search">
+<code class="descname">test_with_beam_search</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests.test_with_beam_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests.test_with_beam_search" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.DecoderTests.test_with_dynamic_inputs">
+<code class="descname">test_with_dynamic_inputs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests.test_with_dynamic_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests.test_with_dynamic_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.decoder_test.DecoderTests.test_with_fixed_inputs">
+<code class="descname">test_with_fixed_inputs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/decoder_test.html#DecoderTests.test_with_fixed_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.decoder_test.DecoderTests.test_with_fixed_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.example_config_test">
+<span id="seq2seq-test-example-config-test-module"></span><h2>seq2seq.test.example_config_test module<a class="headerlink" href="#module-seq2seq.test.example_config_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for example configuration files.</p>
+<dl class="class">
+<dt id="seq2seq.test.example_config_test.ExampleConfigTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.example_config_test.</code><code class="descname">ExampleConfigTest</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#ExampleConfigTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.ExampleConfigTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Interface for configuration-based tests</p>
+<dl class="method">
+<dt id="seq2seq.test.example_config_test.ExampleConfigTest.create_model">
+<code class="descname">create_model</code><span class="sig-paren">(</span><em>mode</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#ExampleConfigTest.create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.ExampleConfigTest.create_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.example_config_test.TestNMTConv">
+<em class="property">class </em><code class="descclassname">seq2seq.test.example_config_test.</code><code class="descname">TestNMTConv</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#TestNMTConv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.TestNMTConv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.example_config_test.ExampleConfigTest" title="seq2seq.test.example_config_test.ExampleConfigTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.example_config_test.ExampleConfigTest</span></code></a>, <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests nmt_small.yml</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.example_config_test.TestNMTLarge">
+<em class="property">class </em><code class="descclassname">seq2seq.test.example_config_test.</code><code class="descname">TestNMTLarge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#TestNMTLarge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.TestNMTLarge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.example_config_test.ExampleConfigTest" title="seq2seq.test.example_config_test.ExampleConfigTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.example_config_test.ExampleConfigTest</span></code></a>, <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests nmt_large.yml</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.example_config_test.TestNMTMedium">
+<em class="property">class </em><code class="descclassname">seq2seq.test.example_config_test.</code><code class="descname">TestNMTMedium</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#TestNMTMedium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.TestNMTMedium" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.example_config_test.ExampleConfigTest" title="seq2seq.test.example_config_test.ExampleConfigTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.example_config_test.ExampleConfigTest</span></code></a>, <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests nmt_medium.yml</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.example_config_test.TestNMTSmall">
+<em class="property">class </em><code class="descclassname">seq2seq.test.example_config_test.</code><code class="descname">TestNMTSmall</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/example_config_test.html#TestNMTSmall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.example_config_test.TestNMTSmall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.example_config_test.ExampleConfigTest" title="seq2seq.test.example_config_test.ExampleConfigTest"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.example_config_test.ExampleConfigTest</span></code></a>, <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests nmt_small.yml</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.hooks_test">
+<span id="seq2seq-test-hooks-test-module"></span><h2>seq2seq.test.hooks_test module<a class="headerlink" href="#module-seq2seq.test.hooks_test" title="Permalink to this headline">¶</a></h2>
+<p>Tests for SessionRunHooks.</p>
+<dl class="class">
+<dt id="seq2seq.test.hooks_test.TestMetadataCaptureHook">
+<em class="property">class </em><code class="descclassname">seq2seq.test.hooks_test.</code><code class="descname">TestMetadataCaptureHook</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestMetadataCaptureHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestMetadataCaptureHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Test for the MetadataCaptureHook</p>
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestMetadataCaptureHook.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestMetadataCaptureHook.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestMetadataCaptureHook.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestMetadataCaptureHook.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestMetadataCaptureHook.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestMetadataCaptureHook.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestMetadataCaptureHook.test_capture">
+<code class="descname">test_capture</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestMetadataCaptureHook.test_capture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestMetadataCaptureHook.test_capture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.hooks_test.TestPrintModelAnalysisHook">
+<em class="property">class </em><code class="descclassname">seq2seq.test.hooks_test.</code><code class="descname">TestPrintModelAnalysisHook</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestPrintModelAnalysisHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestPrintModelAnalysisHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the <cite>PrintModelAnalysisHook</cite> hook</p>
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestPrintModelAnalysisHook.test_begin">
+<code class="descname">test_begin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestPrintModelAnalysisHook.test_begin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestPrintModelAnalysisHook.test_begin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.hooks_test.TestTrainSampleHook">
+<em class="property">class </em><code class="descclassname">seq2seq.test.hooks_test.</code><code class="descname">TestTrainSampleHook</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestTrainSampleHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestTrainSampleHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests <cite>TrainSampleHook</cite> class.</p>
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestTrainSampleHook.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestTrainSampleHook.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestTrainSampleHook.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestTrainSampleHook.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestTrainSampleHook.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestTrainSampleHook.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.hooks_test.TestTrainSampleHook.test_sampling">
+<code class="descname">test_sampling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/hooks_test.html#TestTrainSampleHook.test_sampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.hooks_test.TestTrainSampleHook.test_sampling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.input_pipeline_test">
+<span id="seq2seq-test-input-pipeline-test-module"></span><h2>seq2seq.test.input_pipeline_test module<a class="headerlink" href="#module-seq2seq.test.input_pipeline_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for input-related operations.</p>
+<dl class="class">
+<dt id="seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.input_pipeline_test.</code><code class="descname">ParallelTextInputPipelineTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#ParallelTextInputPipelineTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests Data Provider operations.</p>
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#ParallelTextInputPipelineTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest.test_pipeline">
+<code class="descname">test_pipeline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#ParallelTextInputPipelineTest.test_pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.ParallelTextInputPipelineTest.test_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.input_pipeline_test.</code><code class="descname">TFRecordsInputPipelineTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TFRecordsInputPipelineTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests Data Provider operations.</p>
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TFRecordsInputPipelineTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest.test_pipeline">
+<code class="descname">test_pipeline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TFRecordsInputPipelineTest.test_pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TFRecordsInputPipelineTest.test_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.input_pipeline_test.TestInputPipelineDef">
+<em class="property">class </em><code class="descclassname">seq2seq.test.input_pipeline_test.</code><code class="descname">TestInputPipelineDef</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TestInputPipelineDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TestInputPipelineDef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests InputPipeline string definitions</p>
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.TestInputPipelineDef.test_with_extra_args">
+<code class="descname">test_with_extra_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TestInputPipelineDef.test_with_extra_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TestInputPipelineDef.test_with_extra_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.input_pipeline_test.TestInputPipelineDef.test_without_extra_args">
+<code class="descname">test_without_extra_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/input_pipeline_test.html#TestInputPipelineDef.test_without_extra_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.input_pipeline_test.TestInputPipelineDef.test_without_extra_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.losses_test">
+<span id="seq2seq-test-losses-test-module"></span><h2>seq2seq.test.losses_test module<a class="headerlink" href="#module-seq2seq.test.losses_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for loss-related operations.</p>
+<dl class="class">
+<dt id="seq2seq.test.losses_test.CrossEntropySequenceLossTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.losses_test.</code><code class="descname">CrossEntropySequenceLossTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/losses_test.html#CrossEntropySequenceLossTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.losses_test.CrossEntropySequenceLossTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Test for <cite>sqe2seq.losses.sequence_mask</cite>.</p>
+<dl class="method">
+<dt id="seq2seq.test.losses_test.CrossEntropySequenceLossTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/losses_test.html#CrossEntropySequenceLossTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.losses_test.CrossEntropySequenceLossTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.losses_test.CrossEntropySequenceLossTest.test_op">
+<code class="descname">test_op</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/losses_test.html#CrossEntropySequenceLossTest.test_op"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.losses_test.CrossEntropySequenceLossTest.test_op" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.metrics_test">
+<span id="seq2seq-test-metrics-test-module"></span><h2>seq2seq.test.metrics_test module<a class="headerlink" href="#module-seq2seq.test.metrics_test" title="Permalink to this headline">¶</a></h2>
+<p>Tests for Metrics.</p>
+<dl class="class">
+<dt id="seq2seq.test.metrics_test.TestBleuMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.test.metrics_test.</code><code class="descname">TestBleuMetricSpec</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestBleuMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestBleuMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.metrics_test.TestTextMetricSpec" title="seq2seq.test.metrics_test.TestTextMetricSpec"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.metrics_test.TestTextMetricSpec</span></code></a></p>
+<p>Tests the <cite>BleuMetricSpec</cite></p>
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestBleuMetricSpec.test_bleu">
+<code class="descname">test_bleu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestBleuMetricSpec.test_bleu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestBleuMetricSpec.test_bleu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.metrics_test.TestMosesBleu">
+<em class="property">class </em><code class="descclassname">seq2seq.test.metrics_test.</code><code class="descname">TestMosesBleu</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestMosesBleu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestMosesBleu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests using the Moses multi-bleu script to calcualte BLEU score</p>
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestMosesBleu.test_empty">
+<code class="descname">test_empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestMosesBleu.test_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestMosesBleu.test_empty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestMosesBleu.test_multi_bleu">
+<code class="descname">test_multi_bleu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestMosesBleu.test_multi_bleu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestMosesBleu.test_multi_bleu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestMosesBleu.test_multi_bleu_lowercase">
+<code class="descname">test_multi_bleu_lowercase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestMosesBleu.test_multi_bleu_lowercase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestMosesBleu.test_multi_bleu_lowercase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.metrics_test.TestRougeMetric">
+<em class="property">class </em><code class="descclassname">seq2seq.test.metrics_test.</code><code class="descname">TestRougeMetric</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the RougeMetric</p>
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestRougeMetric.test_rouge">
+<code class="descname">test_rouge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetric.test_rouge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetric.test_rouge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.metrics_test.TestRougeMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.test.metrics_test.</code><code class="descname">TestRougeMetricSpec</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.metrics_test.TestTextMetricSpec" title="seq2seq.test.metrics_test.TestTextMetricSpec"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.metrics_test.TestTextMetricSpec</span></code></a></p>
+<p>Tests the <cite>RougeMetricSpec</cite></p>
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_1_f_score">
+<code class="descname">test_rouge_1_f_score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetricSpec.test_rouge_1_f_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_1_f_score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_2_f_score">
+<code class="descname">test_rouge_2_f_score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetricSpec.test_rouge_2_f_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_2_f_score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_l_f_score">
+<code class="descname">test_rouge_l_f_score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestRougeMetricSpec.test_rouge_l_f_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestRougeMetricSpec.test_rouge_l_f_score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.metrics_test.TestTextMetricSpec">
+<em class="property">class </em><code class="descclassname">seq2seq.test.metrics_test.</code><code class="descname">TestTextMetricSpec</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/metrics_test.html#TestTextMetricSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.metrics_test.TestTextMetricSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Abstract class for testing TextMetricSpecs
+based on hypotheses and references</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.models_test">
+<span id="seq2seq-test-models-test-module"></span><h2>seq2seq.test.models_test module<a class="headerlink" href="#module-seq2seq.test.models_test" title="Permalink to this headline">¶</a></h2>
+<p>Tests for Models</p>
+<dl class="class">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests">
+<em class="property">class </em><code class="descclassname">seq2seq.test.models_test.</code><code class="descname">EncoderDecoderTests</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Base class for EncoderDecoder tests. Tests for specific classes should
+inherit from this and tf.test.TestCase.</p>
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.create_model">
+<code class="descname">create_model</code><span class="sig-paren">(</span><em>_mode</em>, <em>_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.create_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates model class to be tested. Subclasses must implement this method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.test_infer">
+<code class="descname">test_infer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.test_infer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.test_infer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.test_infer_beam_search">
+<code class="descname">test_infer_beam_search</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.test_infer_beam_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.test_infer_beam_search" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.EncoderDecoderTests.test_train">
+<code class="descname">test_train</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#EncoderDecoderTests.test_train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.EncoderDecoderTests.test_train" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.models_test.TestAttentionSeq2Seq">
+<em class="property">class </em><code class="descclassname">seq2seq.test.models_test.</code><code class="descname">TestAttentionSeq2Seq</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestAttentionSeq2Seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestAttentionSeq2Seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests the seq2seq.models.AttentionSeq2Seq model.</p>
+<dl class="method">
+<dt id="seq2seq.test.models_test.TestAttentionSeq2Seq.create_model">
+<code class="descname">create_model</code><span class="sig-paren">(</span><em>mode</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestAttentionSeq2Seq.create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestAttentionSeq2Seq.create_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.TestAttentionSeq2Seq.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestAttentionSeq2Seq.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestAttentionSeq2Seq.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.models_test.TestBasicSeq2Seq">
+<em class="property">class </em><code class="descclassname">seq2seq.test.models_test.</code><code class="descname">TestBasicSeq2Seq</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestBasicSeq2Seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestBasicSeq2Seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#seq2seq.test.models_test.EncoderDecoderTests" title="seq2seq.test.models_test.EncoderDecoderTests"><code class="xref py py-class docutils literal"><span class="pre">seq2seq.test.models_test.EncoderDecoderTests</span></code></a></p>
+<p>Tests the seq2seq.models.BasicSeq2Seq model.</p>
+<dl class="method">
+<dt id="seq2seq.test.models_test.TestBasicSeq2Seq.create_model">
+<code class="descname">create_model</code><span class="sig-paren">(</span><em>mode</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestBasicSeq2Seq.create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestBasicSeq2Seq.create_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.models_test.TestBasicSeq2Seq.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/models_test.html#TestBasicSeq2Seq.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.models_test.TestBasicSeq2Seq.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.pipeline_test">
+<span id="seq2seq-test-pipeline-test-module"></span><h2>seq2seq.test.pipeline_test module<a class="headerlink" href="#module-seq2seq.test.pipeline_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for RNN encoders.</p>
+<dl class="class">
+<dt id="seq2seq.test.pipeline_test.PipelineTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.pipeline_test.</code><code class="descname">PipelineTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pipeline_test.html#PipelineTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pipeline_test.PipelineTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests training and inference scripts.</p>
+<dl class="method">
+<dt id="seq2seq.test.pipeline_test.PipelineTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pipeline_test.html#PipelineTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pipeline_test.PipelineTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.pipeline_test.PipelineTest.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pipeline_test.html#PipelineTest.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pipeline_test.PipelineTest.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.pipeline_test.PipelineTest.test_train_infer">
+<code class="descname">test_train_infer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pipeline_test.html#PipelineTest.test_train_infer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pipeline_test.PipelineTest.test_train_infer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests training and inference scripts.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.pooling_encoder_test">
+<span id="seq2seq-test-pooling-encoder-test-module"></span><h2>seq2seq.test.pooling_encoder_test module<a class="headerlink" href="#module-seq2seq.test.pooling_encoder_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for PoolingEncoder.</p>
+<dl class="class">
+<dt id="seq2seq.test.pooling_encoder_test.PoolingEncoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.pooling_encoder_test.</code><code class="descname">PoolingEncoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pooling_encoder_test.html#PoolingEncoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pooling_encoder_test.PoolingEncoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the PoolingEncoder class.</p>
+<dl class="method">
+<dt id="seq2seq.test.pooling_encoder_test.PoolingEncoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pooling_encoder_test.html#PoolingEncoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pooling_encoder_test.PoolingEncoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.pooling_encoder_test.PoolingEncoderTest.test_encode_with_pos">
+<code class="descname">test_encode_with_pos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pooling_encoder_test.html#PoolingEncoderTest.test_encode_with_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pooling_encoder_test.PoolingEncoderTest.test_encode_with_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.pooling_encoder_test.PoolingEncoderTest.test_encode_without_pos">
+<code class="descname">test_encode_without_pos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/pooling_encoder_test.html#PoolingEncoderTest.test_encode_without_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.pooling_encoder_test.PoolingEncoderTest.test_encode_without_pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.rnn_cell_test">
+<span id="seq2seq-test-rnn-cell-test-module"></span><h2>seq2seq.test.rnn_cell_test module<a class="headerlink" href="#module-seq2seq.test.rnn_cell_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for input-related operations.</p>
+<dl class="class">
+<dt id="seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.rnn_cell_test.</code><code class="descname">ExtendedMultiRNNCellTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_cell_test.html#ExtendedMultiRNNCellTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the ExtendedMultiRNNCell</p>
+<dl class="method">
+<dt id="seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_add">
+<code class="descname">test_residuals_add</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_cell_test.html#ExtendedMultiRNNCellTest.test_residuals_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_concat">
+<code class="descname">test_residuals_concat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_cell_test.html#ExtendedMultiRNNCellTest.test_residuals_concat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_concat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_mean">
+<code class="descname">test_residuals_mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_cell_test.html#ExtendedMultiRNNCellTest.test_residuals_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_residuals_mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_without_residuals">
+<code class="descname">test_without_residuals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_cell_test.html#ExtendedMultiRNNCellTest.test_without_residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_cell_test.ExtendedMultiRNNCellTest.test_without_residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.rnn_encoder_test">
+<span id="seq2seq-test-rnn-encoder-test-module"></span><h2>seq2seq.test.rnn_encoder_test module<a class="headerlink" href="#module-seq2seq.test.rnn_encoder_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for RNN encoders.</p>
+<dl class="class">
+<dt id="seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.rnn_encoder_test.</code><code class="descname">BidirectionalRNNEncoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#BidirectionalRNNEncoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the BidirectionalRNNEncoder class.</p>
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#BidirectionalRNNEncoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest.test_encode">
+<code class="descname">test_encode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#BidirectionalRNNEncoderTest.test_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.BidirectionalRNNEncoderTest.test_encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.rnn_encoder_test.</code><code class="descname">StackBidirectionalRNNEncoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#StackBidirectionalRNNEncoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the StackBidirectionalRNNEncoder class.</p>
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#StackBidirectionalRNNEncoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.test_encode_with_multi_cell">
+<code class="descname">test_encode_with_multi_cell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#StackBidirectionalRNNEncoderTest.test_encode_with_multi_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.test_encode_with_multi_cell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.test_encode_with_single_cell">
+<code class="descname">test_encode_with_single_cell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#StackBidirectionalRNNEncoderTest.test_encode_with_single_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.StackBidirectionalRNNEncoderTest.test_encode_with_single_cell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.rnn_encoder_test.</code><code class="descname">UnidirectionalRNNEncoderTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#UnidirectionalRNNEncoderTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the UnidirectionalRNNEncoder class.</p>
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#UnidirectionalRNNEncoderTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest.test_encode">
+<code class="descname">test_encode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/rnn_encoder_test.html#UnidirectionalRNNEncoderTest.test_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.rnn_encoder_test.UnidirectionalRNNEncoderTest.test_encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.train_utils_test">
+<span id="seq2seq-test-train-utils-test-module"></span><h2>seq2seq.test.train_utils_test module<a class="headerlink" href="#module-seq2seq.test.train_utils_test" title="Permalink to this headline">¶</a></h2>
+<p>Test Cases for Training utils.</p>
+<dl class="class">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell">
+<em class="property">class </em><code class="descclassname">seq2seq.test.train_utils_test.</code><code class="descname">TestGetRNNCell</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests the get_rnn_cell function.</p>
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell.test_dropout">
+<code class="descname">test_dropout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell.test_dropout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell.test_dropout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell.test_extra_args">
+<code class="descname">test_extra_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell.test_extra_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell.test_extra_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell.test_full_class_path">
+<code class="descname">test_full_class_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell.test_full_class_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell.test_full_class_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell.test_multi_layer">
+<code class="descname">test_multi_layer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell.test_multi_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell.test_multi_layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestGetRNNCell.test_single_layer">
+<code class="descname">test_single_layer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestGetRNNCell.test_single_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestGetRNNCell.test_single_layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.train_utils_test.TestInputFn">
+<em class="property">class </em><code class="descclassname">seq2seq.test.train_utils_test.</code><code class="descname">TestInputFn</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestInputFn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestInputFn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests create_input_fn</p>
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestInputFn.test_wit_buckets">
+<code class="descname">test_wit_buckets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestInputFn.test_wit_buckets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestInputFn.test_wit_buckets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestInputFn.test_without_buckets">
+<code class="descname">test_without_buckets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestInputFn.test_without_buckets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestInputFn.test_without_buckets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.train_utils_test.TestLRDecay">
+<em class="property">class </em><code class="descclassname">seq2seq.test.train_utils_test.</code><code class="descname">TestLRDecay</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestLRDecay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestLRDecay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests learning rate decay function.</p>
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestLRDecay.test_decay_with_min">
+<code class="descname">test_decay_with_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestLRDecay.test_decay_with_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestLRDecay.test_decay_with_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestLRDecay.test_decay_without_min">
+<code class="descname">test_decay_without_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestLRDecay.test_decay_without_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestLRDecay.test_decay_without_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestLRDecay.test_no_decay">
+<code class="descname">test_no_decay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestLRDecay.test_no_decay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestLRDecay.test_no_decay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.train_utils_test.TestTrainOptions">
+<em class="property">class </em><code class="descclassname">seq2seq.test.train_utils_test.</code><code class="descname">TestTrainOptions</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestTrainOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestTrainOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests reading and writing of training options</p>
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestTrainOptions.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestTrainOptions.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestTrainOptions.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.train_utils_test.TestTrainOptions.test_read_write">
+<code class="descname">test_read_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/train_utils_test.html#TestTrainOptions.test_read_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.train_utils_test.TestTrainOptions.test_read_write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.utils">
+<span id="seq2seq-test-utils-module"></span><h2>seq2seq.test.utils module<a class="headerlink" href="#module-seq2seq.test.utils" title="Permalink to this headline">¶</a></h2>
+<p>Various testing utilities</p>
+<dl class="function">
+<dt id="seq2seq.test.utils.create_temp_parallel_data">
+<code class="descclassname">seq2seq.test.utils.</code><code class="descname">create_temp_parallel_data</code><span class="sig-paren">(</span><em>sources</em>, <em>targets</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/utils.html#create_temp_parallel_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.utils.create_temp_parallel_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a temporary TFRecords file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> &#8211; List of source sentences</li>
+<li><strong>target</strong> &#8211; List of target sentences</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple (sources_file, targets_file).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.test.utils.create_temp_tfrecords">
+<code class="descclassname">seq2seq.test.utils.</code><code class="descname">create_temp_tfrecords</code><span class="sig-paren">(</span><em>sources</em>, <em>targets</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/utils.html#create_temp_tfrecords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.utils.create_temp_tfrecords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a temporary TFRecords file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> &#8211; List of source sentences</li>
+<li><strong>target</strong> &#8211; List of target sentences</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple (sources_file, targets_file).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="seq2seq.test.utils.create_temporary_vocab_file">
+<code class="descclassname">seq2seq.test.utils.</code><code class="descname">create_temporary_vocab_file</code><span class="sig-paren">(</span><em>words</em>, <em>counts=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/utils.html#create_temporary_vocab_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.utils.create_temporary_vocab_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a temporary vocabulary file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>words</strong> &#8211; List of words in the vocabulary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A temporary file object with one word per line</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test.vocab_test">
+<span id="seq2seq-test-vocab-test-module"></span><h2>seq2seq.test.vocab_test module<a class="headerlink" href="#module-seq2seq.test.vocab_test" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests for input-related operations.</p>
+<dl class="class">
+<dt id="seq2seq.test.vocab_test.CreateVocabularyLookupTableTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.vocab_test.</code><code class="descname">CreateVocabularyLookupTableTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#CreateVocabularyLookupTableTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.CreateVocabularyLookupTableTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests Vocabulary lookup table operations.</p>
+<dl class="method">
+<dt id="seq2seq.test.vocab_test.CreateVocabularyLookupTableTest.test_with_counts">
+<code class="descname">test_with_counts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#CreateVocabularyLookupTableTest.test_with_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.CreateVocabularyLookupTableTest.test_with_counts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.vocab_test.CreateVocabularyLookupTableTest.test_without_counts">
+<code class="descname">test_without_counts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#CreateVocabularyLookupTableTest.test_without_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.CreateVocabularyLookupTableTest.test_without_counts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="seq2seq.test.vocab_test.VocabInfoTest">
+<em class="property">class </em><code class="descclassname">seq2seq.test.vocab_test.</code><code class="descname">VocabInfoTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#VocabInfoTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.VocabInfoTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.framework.test_util.TensorFlowTestCase</span></code></p>
+<p>Tests VocabInfo class</p>
+<dl class="method">
+<dt id="seq2seq.test.vocab_test.VocabInfoTest.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#VocabInfoTest.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.VocabInfoTest.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.vocab_test.VocabInfoTest.tearDown">
+<code class="descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#VocabInfoTest.tearDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.VocabInfoTest.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="seq2seq.test.vocab_test.VocabInfoTest.test_vocab_info">
+<code class="descname">test_vocab_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seq2seq/test/vocab_test.html#VocabInfoTest.test_vocab_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#seq2seq.test.vocab_test.VocabInfoTest.test_vocab_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-seq2seq.test">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-seq2seq.test" title="Permalink to this headline">¶</a></h2>
+<p>Tests and testing utilities</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Automated Data Visualization (Data2Vis) POC v1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2019, Tessellate Imaging Pvt. Ltd..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

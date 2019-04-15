@@ -1,0 +1,62 @@
+utils package
+=============
+
+Submodules
+----------
+
+utils.data_gen module
+---------------------
+
+.. automodule:: utils.data_gen
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+utils.data_utils module
+-----------------------
+
+.. automodule:: utils.data_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+utils.hc_parser module
+----------------------
+
+.. automodule:: utils.hc_parser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+utils.model_utils module
+------------------------
+
+.. automodule:: utils.model_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+utils.test_analysis module
+--------------------------
+
+.. automodule:: utils.test_analysis
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+utils.visualize_attention module
+--------------------------------
+
+.. automodule:: utils.visualize_attention
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

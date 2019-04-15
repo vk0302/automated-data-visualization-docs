@@ -1,0 +1,37 @@
+seq2seq.contrib package
+=======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    seq2seq.contrib.seq2seq
+
+Submodules
+----------
+
+seq2seq.contrib.experiment module
+---------------------------------
+
+.. automodule:: seq2seq.contrib.experiment
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seq2seq.contrib.rnn_cell module
+-------------------------------
+
+.. automodule:: seq2seq.contrib.rnn_cell
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: seq2seq.contrib
+    :members:
+    :undoc-members:
+    :show-inheritance:
